@@ -1,0 +1,5 @@
+#!/bin/sh
+
+xrdb -merge ~/.config/x11/xresources
+
+exec dwm
