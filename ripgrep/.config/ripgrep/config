@@ -1,0 +1,5 @@
+# Show hidden files/directories (respects .gitignore)
+--hidden
+
+# Exclude .git
+--glob=!.git/

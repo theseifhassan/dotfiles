@@ -1,0 +1,12 @@
+# Load user X session profile
+# Prefer XDG-compliant path (~/.config/x11/xprofile), fallback to ~/.xprofile
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile" ]; then
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile"
+else
+    . "$HOME/.xprofile"
+fi
+
+# Load X resources (colors, fonts, DPI, etc.) into X server database
+xrdb -merge "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources"
+
+exec dwm
