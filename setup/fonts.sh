@@ -3,6 +3,18 @@
 # Installs essential fonts: Noto family and Nerd Fonts symbols
 
 set -e
+if [ "$(id -u)" -eq 0 ]; then
+    echo "Don't run this script as root. Run as your regular user."
+    exit 1
+fi
+echo "Checking fontconfig..."
+if ! pacman -Qi fontconfig >/dev/null 2>&1; then
+    echo "Installing fontconfig..."
+    sudo pa#!/bin/sh
+# Font Installation Script for Arch Linux
+# Installs essential fonts: Noto family and Nerd Fonts symbols
+
+set -e
 
 if [ "$(id -u)" -eq 0 ]; then
     echo "Don't run this script as root. Run as your regular user."
@@ -12,8 +24,10 @@ fi
 echo "Installing fonts..."
 
 # Install from official repositories
+echo "Making sure fontconfig is installed..."
+
 echo "Installing fonts from official repositories..."
-sudo pacman -S --needed --noconfirm \
+paru -S --needed --noconfirm \
     noto-fonts \
     noto-fonts-extra \
     noto-fonts-emoji \
@@ -27,6 +41,24 @@ mkdir -p ~/.local/share/fonts ~/.config/fontconfig/conf.d
 echo "Rebuilding font cache..."
 fc-cache -f
 
+printf "\nFont installation complete!\n"
+printf "Place custom fonts in: ~/.local/share/fonts\n"
+printf "Then run: fc-cache -f ~/.local/share/fonts\n"cman -S --needed --noconfirm fontconfig
+fi
+echo "Installing fonts..."
+sudo pacman -S --needed --noconfirm \
+    noto-fonts \
+    noto-fonts-extra \
+    noto-fonts-emoji \
+    ttf-nerd-fonts-symbols
+
+# Create font directories
+echo "Creating font directories..."
+mkdir -p ~/.local/share/fonts ~/.config/fontconfig/conf.d
+
+# Rebuild font cache
+echo "Rebuilding font cache..."
+fc-cache -f
 printf "\nFont installation complete!\n"
 printf "Place custom fonts in: ~/.local/share/fonts\n"
 printf "Then run: fc-cache -f ~/.local/share/fonts\n"
