@@ -2,6 +2,7 @@
 
 # XDG Base Directory
 export XDG_CONFIG_HOME="$HOME/.config"
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CACHE_HOME="$HOME/.cache"
@@ -32,6 +33,11 @@ export XDG_SESSION_TYPE=x11
 export DESKTOP_SESSION=dwm
 export XDG_CURRENT_DESKTOP=dwm
 
+# Dark Theme
+export GTK_THEME="Adwaita:dark"
+export GTK2_RC_FILES="/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc"
+export QT_STYLE_OVERRIDE="Adwaita-Dark"
+
 # PATH (zsh pattern from Arch Wiki)
 typeset -U path PATH
 path=(
@@ -42,3 +48,6 @@ path=(
     $path
 )
 export PATH
+
+# opencode
+export PATH=/home/seifhassan/.opencode/bin:$PATH

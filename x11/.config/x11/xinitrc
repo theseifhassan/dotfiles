@@ -9,4 +9,10 @@ fi
 # Load X resources (colors, fonts, DPI, etc.) into X server database
 xrdb -merge "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources"
 
+# Export SSH_AUTH_SOCK for gnome-keyring
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
+# Start gnome-keyring daemon via systemd
+systemctl --user import-environment DISPLAY XAUTHORITY
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
+
 exec dwm

@@ -6,7 +6,7 @@
             "type": "remote",
             "url": "https://mcp.context7.com/mcp",
             "headers": {
-                "CONTEXT7_API_KEY": "API_TOKEN"
+                "CONTEXT7_API_KEY": "TOKEN"
             },
             "enabled": true
         },
@@ -21,7 +21,7 @@
             "type": "remote",
             "url": "https://api.githubcopilot.com/mcp",
             "headers": {
-                "Authorization": "Bearer GITHUB_PAT"
+                "Authorization": "TOKEN"
             },
             "enabled": true
         },

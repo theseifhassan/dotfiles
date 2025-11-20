@@ -30,3 +30,6 @@ esac
 export BUN_INSTALL="${XDG_DATA_HOME:-$HOME/.local/share}/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
+
+# nvm initialization
+source /usr/share/nvm/init-nvm.sh

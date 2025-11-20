@@ -7,11 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
-  "icon_theme": {
-    "mode": "system",
-    "light": "Zed (Default)",
-    "dark": "Zed (Default)"
-  },
+  "icon_theme": "Zed (Default)",
   "preview_tabs": {
     "enabled": false
   },
@@ -99,7 +95,7 @@
     "breakpoints": false,
     "runnables": false
   },
-  "relative_line_numbers": "enabled",
+  "relative_line_numbers": true,
   "autosave": {
     "after_delay": {
       "milliseconds": 1000
@@ -109,13 +105,13 @@
   "ui_font_family": "Berkeley Mono",
   "buffer_font_family": "Berkeley Mono",
   "telemetry": {
-    "diagnostics": true,
-    "metrics": true
+    "diagnostics": false,
+    "metrics": false
   },
   "theme": {
     "mode": "system",
-    "light": "Gruvbox Light Hard",
-    "dark": "Gruvbox Dark Hard"
+    "light": "Gruvbox Light",
+    "dark": "Gruvbox Dark"
   },
   "wrap_guides": [80],
   "max_tabs": 1,
