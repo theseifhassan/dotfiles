@@ -17,7 +17,7 @@ git_branch() {
 }
 
 # Prompt
-export PS1='%{%F{229}%}%n%{%F{229}%}@%{%F{229}%}%m %{%F{229}%}%1~%{%F{208}%}$(git_branch)%{%f%} $ '
+export PS1='%n@%m %1~$(git_branch) $ '
 
 # pnpm (XDG-compliant)
 export PNPM_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
