@@ -108,9 +108,9 @@
     "metrics": false
   },
   "theme": {
-    "mode": "dark",
-    "light": "One Light",
-    "dark": "Vercel Dark"
+    "mode": "system",
+    "light": "Gruvbox Light Hard",
+    "dark": "Gruvbox Dark Hard"
   },
   "wrap_guides": [80],
   "max_tabs": 1,
