@@ -10,8 +10,13 @@ fi
 xrdb -merge "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources"
 
 # Export SSH_AUTH_SOCK for gnome-keyring
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
-# Start gnome-keyring daemon via systemd
+eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
+export SSH_AUTH_SOCK
+
+# Start Polkit Authentication Agent
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+
+# Start gnome-keyring daemon via systemd integration
 systemctl --user import-environment DISPLAY XAUTHORITY
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
 

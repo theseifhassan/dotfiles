@@ -1,0 +1,76 @@
+# Core System & X11
+base-devel
+git
+linux-headers
+xorg-server
+xorg-xinit
+xorg-xrdb
+libx11
+libxft
+libxinerama
+picom
+feh
+dunst
+xclip
+xdg-user-dirs
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+polkit-gnome
+gnome-keyring
+libsecret
+seahorse
+
+# Audio (Pipewire Stack)
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+
+# Fonts & Theme
+noto-fonts
+noto-fonts-emoji
+ttf-nerd-fonts-symbols
+gruvbox-gtk-theme-git
+
+# Shell & CLI Utilities
+zsh
+ripgrep
+fzf
+unzip
+wget
+lazygit
+yazi
+bat
+scrot
+xdotool
+brightnessctl
+openssh
+networkmanager
+
+# Development & Containers
+neovim
+zed
+tmux
+docker
+docker-compose
+lazydocker
+n
+
+# Desktop Apps
+google-chrome
+1password
+ghostty
+obs-studio
+dolphin
+obsidian
+gimp
+
+# Streaming
+usbmuxd
+v4l2loopback-dkms
+droidcam-obs-plugin
+
+# Media
+mpv
+mpd
+playerctl

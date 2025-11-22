@@ -1,5 +1,14 @@
 #!/bin/sh
-# NVIDIA Driver Installation and Xorg Configuration Script for Arch Linux
+
+# ------------------------------------------------------------------------------
+# NVIDIA Configuration Script
+# ------------------------------------------------------------------------------
+# Hardware-specific setup for NVIDIA GPUs.
+# - Detects GPU model
+# - Installs appropriate drivers (open vs proprietary)
+# - Configures Kernel Modules (mkinitcpio), Modprobe, and Xorg
+# ------------------------------------------------------------------------------
+
 # Installs appropriate NVIDIA drivers, configures kernel modules, sets up early loading, and configures Xorg
 if [ "$(id -u)" -eq 0 ]; then
     echo "Don't run this script as root. Run as your regular user."
