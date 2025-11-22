@@ -44,6 +44,16 @@
       "name": "Zed",
       "repo": "https://github.com/zed-industries/zed",
       "dir": "zed"
+    },
+    "opencode": {
+      "name": "opencode",
+      "repo": "https://github.com/sst/opencode",
+      "dir": "opencode"
+    },
+    "tmux": {
+      "name": "tmux",
+      "repo": "https://github.com/tmux/tmux",
+      "dir": "tmux"
     }
   },
   "knowledgeDir": "${XDG_DATA_HOME:-$HOME/.local/share}/opencode/knowledge"

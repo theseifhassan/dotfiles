@@ -1,1 +1,21 @@
 Xft.dpi: 192
+
+! Gruvbox theme for dwm
+
+! ====== DWM THEME: DARK (active) ======
+dwm.normbgcolor:     #282828
+dwm.normfgcolor:     #ebdbb2
+dwm.normbordercolor: #3c3836
+dwm.selbgcolor:      #458588
+dwm.selfgcolor:      #ebdbb2
+dwm.selbordercolor:  #458588
+! ====== END DARK THEME ======
+
+! ====== DWM THEME: LIGHT (inactive) ======
+!dwm.normbgcolor:     #fbf1c7
+!dwm.normfgcolor:     #3c3836
+!dwm.normbordercolor: #d5c4a1
+!dwm.selbgcolor:      #076678
+!dwm.selfgcolor:      #fbf1c7
+!dwm.selbordercolor:  #076678
+! ====== END LIGHT THEME ======
