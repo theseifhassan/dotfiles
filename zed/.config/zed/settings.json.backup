@@ -8,39 +8,49 @@
   // custom settings, run `zed: open default settings` from the
   // command palette (cmd-shift-p / ctrl-shift-p)
 
+  // Title bar
+  "title_bar": {
+    "show_branch_icon": true
+  },
+
   // Vim mode - ENHANCED
   "vim_mode": true,
-  "relative_line_numbers": "enabled",
+  "relative_line_numbers": true,
   "vim": {
     "use_system_clipboard": "always",
     "use_smartcase_find": true,
-    "toggle_relative_line_numbers": true,
+    "toggle_relative_line_numbers": true
   },
 
   // Search
   "use_smartcase_search": true,
   "seed_search_query_from_cursor": "selection",
 
-  "indent_guides": { "enabled": false },
-  "current_line_highlight": "line",
+  // Indent guides
+  "indent_guides": {
+    "background_coloring": "disabled",
+    "coloring": "fixed",
+    "enabled": true
+  },
 
   // Scrollbar
-  "scrollbar": { "show": "never" },
-
-  "cursor_shape": "block",
+  "scrollbar": {
+    "show": "never"
+  },
 
   // Autosave
   "autosave": {
     "after_delay": {
-      "milliseconds": 1000,
-    },
+      "milliseconds": 1000
+    }
   },
 
   // Fonts
+  "buffer_line_height": "comfortable",
   "buffer_font_size": 16.0,
   "buffer_font_family": "Berkeley Mono",
   "ui_font_family": "Berkeley Mono",
-  "ui_font_size": 16.0,
+  "ui_font_size": 14,
 
   // Theme
   "theme": "Gruvbox Dark",
@@ -48,39 +58,40 @@
   // Minimal UI
   "tab_bar": {
     "show": true,
-    "show_nav_history_buttons": false,
+    "show_nav_history_buttons": false
   },
   "tabs": {
-    "show_close_button": "hover",
+    "file_icons": false,
+    "git_status": false,
+    "show_close_button": "on_hover"
   },
   "toolbar": {
     "breadcrumbs": false,
-    "quick_actions": false,
+    "quick_actions": false
   },
   "gutter": {
     "line_numbers": true,
+    "code_actions": false,
     "runnables": false,
-    "folds": true,
+    "folds": true
   },
   "project_panel": {
-    "button": false,
-    "dock": "right",
+    "button": false
   },
   "outline_panel": {
-    "button": false,
+    "button": false
   },
   "collaboration_panel": {
-    "button": false,
+    "button": false
   },
-  "search": {
-    "button": false,
-  },
-  "notification_panel": { "button": false },
-  "git_panel": {
-    "button": false,
+  "git": {
+    "git_gutter": "tracked_files",
+    "inline_blame": {
+      "enabled": false
+    }
   },
   "inlay_hints": {
-    "enabled": false,
+    "enabled": false
   },
   "show_completion_documentation": false,
   "inline_code_actions": false,
@@ -91,19 +102,20 @@
     "shell": {
       "with_arguments": {
         "program": "/bin/zsh",
-        "args": ["-c", "tmux new-session -A -s \"$(basename \"$PWD\")\""],
-      },
+        "args": ["-c", "tmux new-session -A -s \"$(basename \"$PWD\")\""]
+      }
     },
     "working_directory": "current_project_directory",
     "dock": "bottom",
     "default_height": 400,
     "font_family": "Berkeley Mono",
     "font_size": 16,
-    "blinking": "off",
+    "blinking": "off"
   },
 
   // Editor behavior
   "cursor_blink": false,
+  "current_line_highlight": "gutter",
   "selection_highlight": true,
   "format_on_save": "on",
   "remove_trailing_whitespace_on_save": true,
@@ -113,17 +125,5 @@
 
   // Pane behavior
   "pane_split_direction_horizontal": "down",
-  "pane_split_direction_vertical": "right",
-
-  // Git
-  "git": {
-    "inline_blame": {
-      "enabled": true, // Show/hide inline blame
-      "delay_ms": 0, // Show after delay (ms)
-      "min_column": 0, // Minimum column to inline display blame
-      "padding": 7, // Padding between code and inline blame (em)
-      "show_commit_summary": false, // Show/hide commit summary
-    },
-    "hunk_style": "staged_hollow", // staged_hollow, unstaged_hollow
-  },
+  "pane_split_direction_vertical": "right"
 }

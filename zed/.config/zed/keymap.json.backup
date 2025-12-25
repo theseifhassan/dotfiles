@@ -1,0 +1,125 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      // === EXISTING: OpenCode integration ===
+      "ctrl-alt-o": [
+        "agent::NewExternalAgentThread",
+        {
+          "agent": {
+            "custom": {
+              "name": "OpenCode",
+              "command": {
+                "command": "opencode",
+                "args": ["acp"]
+              }
+            }
+          }
+        }
+      ],
+      "ctrl-w": null,
+
+      // === NEW: Television file finder (OVERRIDE cmd-p) ===
+      "cmd-p": ["task::Spawn", { "task_name": "Television File Finder", "reveal_target": "center" }],
+      "ctrl-p": ["task::Spawn", { "task_name": "Television File Finder", "reveal_target": "center" }],
+      
+      // === NEW: TUI integration ===
+      "cmd-shift-g": ["task::Spawn", { "task_name": "Lazygit", "reveal_target": "center" }],
+      "cmd-shift-d": ["task::Spawn", { "task_name": "Lazydocker", "reveal_target": "center" }],
+      "ctrl-`": "terminal_panel::ToggleFocus",
+
+      // === NEW: Pane quick access ===
+      "cmd-1": ["workspace::ActivatePane", 0],
+      "cmd-2": ["workspace::ActivatePane", 1],
+      "cmd-3": ["workspace::ActivatePane", 2],
+      "cmd-4": ["workspace::ActivatePane", 3],
+      "cmd-5": ["workspace::ActivatePane", 4],
+      "cmd-6": ["workspace::ActivatePane", 5],
+      "cmd-7": ["workspace::ActivatePane", 6],
+      "cmd-8": ["workspace::ActivatePane", 7],
+      "cmd-9": ["workspace::ActivatePane", 8],
+
+      // === NEW: Layout toggling ===
+      "cmd-shift-z": "workspace::ToggleCenteredLayout",
+      "cmd-k z": "workspace::ToggleZoom"
+    }
+  },
+  // {
+  //   "context": "Editor && vim_mode == insert",
+  //   "bindings": {
+  //     "j k": "vim::NormalBefore"
+  //   }
+  // },
+  {
+    "context": "Picker > Editor",
+    "bindings": {
+      "ctrl-y": "menu::Confirm"
+    }
+  },
+  {
+    "context": "showing_completions",
+    "bindings": {
+      "ctrl-y": "editor::ConfirmCompletion"
+    }
+  },
+  {
+    "context": "ProjectPanel && not_editing",
+    "bindings": {
+      "ctrl-y": "menu::Confirm"
+    }
+  },
+  {
+    "context": "OutlinePanel && not_editing",
+    "bindings": {
+      "ctrl-y": "menu::Confirm"
+    }
+  },
+  {
+    "context": "null",
+    "bindings": {
+      "ctrl-w": "workspace::CloseWindow"
+    }
+  },
+  // === NEW: Vim window navigation ===
+  {
+    "context": "VimControl && !menu",
+    "bindings": {
+      // Vim window navigation
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      "ctrl-w j": "workspace::ActivatePaneDown",
+      "ctrl-w k": "workspace::ActivatePaneUp",
+      "ctrl-w l": "workspace::ActivatePaneRight",
+      "ctrl-w v": "pane::SplitVertical",
+      "ctrl-w s": "pane::SplitHorizontal",
+      "ctrl-w q": "pane::CloseActiveItem",
+      "ctrl-w o": "workspace::CloseInactiveTabsAndPanes",
+      "ctrl-w w": "workspace::ActivateNextPane",
+      "ctrl-w p": "workspace::ActivatePreviousPane",
+      
+      // Leader-based navigation (space = leader)
+      "space space": "file_finder::Toggle",
+      "space /": "workspace::NewSearch",
+      "space ,": "tab_switcher::Toggle",
+      "space f r": "recent_projects::Toggle",
+      "space s s": "outline::Toggle",
+      "space s g": "workspace::NewSearch",
+      "space s b": "buffer_search::Deploy"
+    }
+  },
+  // === NEW: Multi-cursor workflows ===
+  {
+    "context": "Editor",
+    "bindings": {
+      "cmd-d": "editor::SelectNext",
+      "cmd-shift-l": "editor::SelectAllMatches",
+      "alt-enter": "editor::SplitSelectionIntoLines"
+    }
+  }
+]

@@ -1,37 +1,29 @@
 {
-    "$schema": "https://opencode.ai/config.json",
-    "autoupdate": true,
-    "mcp": {
-        "context7": {
-            "type": "remote",
-            "url": "https://mcp.context7.com/mcp",
-            "headers": {
-                "CONTEXT7_API_KEY": "TOKEN"
-            },
-            "enabled": true
-        },
-        "graphite": {
-            "type": "local",
-            "command": [
-                "gt",
-                "mcp"
-            ],
-        },
-        "github": {
-            "type": "remote",
-            "url": "https://api.githubcopilot.com/mcp",
-            "headers": {
-                "Authorization": "TOKEN"
-            },
-            "enabled": true
-        },
-        "next-devtools": {
-            "type": "local",
-            "command": [
-                "bunx",
-                "-y",
-                "next-devtools-mcp@latest"
-            ],
-        }
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": true,
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+    },
+    "graphite": {
+      "type": "local",
+      "command": [
+        "gt",
+        "mcp"
+      ],
+    },
+    "linear": {
+      "type": "local",
+      "command": [ "npx", "-y", "mcp-remote", "https://mcp.linear.app/mcp" ]
+    },
+    "next-devtools": {
+      "type": "local",
+      "command": [
+        "bunx",
+        "-y",
+        "next-devtools-mcp@latest"
+      ],
     }
+  }
 }

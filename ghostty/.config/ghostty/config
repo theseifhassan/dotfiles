@@ -1,7 +1,14 @@
-window-decoration = false
-theme = dark:Gruvbox Dark Hard,light:Gruvbox Light Hard
+theme = Gruvbox Dark
+
 font-family = "Berkeley Mono"
 font-family = "Noto Sans Arabic"
-font-feature = +liga, +calt, +dlig
+font-size = 16
+
+window-padding-x = 10
+window-padding-y = 10
+window-decoration = false
+
+background-opacity = 0.7
+background-blur = true
 
 mouse-hide-while-typing = true

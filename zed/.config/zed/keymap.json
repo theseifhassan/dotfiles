@@ -1,65 +1,49 @@
-// Zed keymap
-//
-// For information on binding keys, see the Zed
-// documentation: https://zed.dev/docs/key-bindings
-//
-// To see the default key bindings run `zed: open default keymap`
-// from the command palette.
 [
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-alt-o": [
-        "agent::NewExternalAgentThread",
-        {
-          "agent": {
-            "custom": {
-              "name": "OpenCode",
-              "command": {
-                "command": "opencode",
-                "args": ["acp"]
-              }
-            }
-          }
-        }
+      "ctrl-w": null,
+      "space f f": [
+        "task::Spawn",
+        { "task_name": "Television File Finder", "reveal_target": "center" },
       ],
-      "ctrl-w": null
-    }
+      "space p v": "vim::ToggleProjectPanelFocus",
+      "ctrl-shift-g": [
+        "task::Spawn",
+        { "task_name": "Lazygit", "reveal_target": "center" },
+      ],
+      "ctrl-shift-d": [
+        "task::Spawn",
+        { "task_name": "Lazydocker", "reveal_target": "center" },
+      ],
+      "ctrl-shift-o": [
+        "task::Spawn",
+        { "task_name": "Opencode", "reveal_target": "center" },
+      ],
+    },
   },
-  // {
-  //   "context": "Editor && vim_mode == insert",
-  //   "bindings": {
-  //     "j k": "vim::NormalBefore"
-  //   }
-  // },
   {
     "context": "Picker > Editor",
     "bindings": {
-      "ctrl-y": "menu::Confirm"
-    }
+      "ctrl-y": "menu::Confirm",
+    },
   },
   {
     "context": "showing_completions",
     "bindings": {
-      "ctrl-y": "editor::ConfirmCompletion"
-    }
+      "ctrl-y": "editor::ConfirmCompletion",
+    },
   },
   {
     "context": "ProjectPanel && not_editing",
     "bindings": {
-      "ctrl-y": "menu::Confirm"
-    }
+      "ctrl-y": "menu::Confirm",
+    },
   },
   {
     "context": "OutlinePanel && not_editing",
     "bindings": {
-      "ctrl-y": "menu::Confirm"
-    }
+      "ctrl-y": "menu::Confirm",
+    },
   },
-  {
-    "context": "null",
-    "bindings": {
-      "ctrl-w": "workspace::CloseWindow"
-    }
-  }
 ]
