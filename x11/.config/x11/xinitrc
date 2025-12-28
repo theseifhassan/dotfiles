@@ -3,7 +3,7 @@
 # Sources xprofile, loads Xresources, starts WM
 
 # Load X resources
-xrdb -merge "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources"
+xrdb -I"$HOME/dotfiles" -merge "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources"
 
 # Load X profile (autostart apps)
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile"

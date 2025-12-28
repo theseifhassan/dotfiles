@@ -2,7 +2,7 @@
 ! Load defaults first, then override
 
 ! Include defaults
-#include "../../../../default/x11/xresources"
+#include "default/x11/xresources"
 
 ! =============================================================================
 ! USER OVERRIDES

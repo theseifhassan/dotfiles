@@ -15,7 +15,7 @@ cmd_update() {
     for d in dwm dmenu dwmblocks; do [ -d "$DOTFILES/$d" ] && { make -C "$DOTFILES/$d" clean >/dev/null 2>&1 || true; sudo make -C "$DOTFILES/$d" install >/dev/null; }; done
     pgrep -x dwm >/dev/null && pkill -HUP dwm
     pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
-    [ -n "$DISPLAY" ] && xrdb -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
+    [ -n "$DISPLAY" ] && xrdb -I"$DOTFILES" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
     log "Done!"
 }
 
