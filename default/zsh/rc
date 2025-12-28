@@ -1,0 +1,3 @@
+source "$DOTS_DEFAULT/zsh/options.zsh"
+source "$DOTS_DEFAULT/zsh/aliases.zsh"
+source "$DOTS_DEFAULT/zsh/init.zsh"

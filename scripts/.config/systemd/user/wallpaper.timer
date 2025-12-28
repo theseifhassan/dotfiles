@@ -1,9 +1,9 @@
 [Unit]
-Description=Rotate wallpaper every 5 hours
+Description=Rotate wallpaper hourly
 
 [Timer]
-OnBootSec=5min
-OnUnitActiveSec=5h
+OnBootSec=1min
+OnUnitActiveSec=1h
 Persistent=true
 
 [Install]

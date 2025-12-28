@@ -1,0 +1,20 @@
+# Dunst notification config
+# Includes defaults, then allows overrides
+
+[global]
+    # Include defaults
+    include = ~/dotfiles/default/dunst/dunstrc
+
+# Include theme
+[urgency_low]
+[urgency_normal]
+[urgency_critical]
+# Theme colors loaded from default
+include = ~/dotfiles/default/dunst/theme.conf
+
+# =============================================================================
+# USER OVERRIDES - Add your custom config below
+# =============================================================================
+
+[global]
+    font = Berkeley Mono 10

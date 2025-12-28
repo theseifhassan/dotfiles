@@ -1,23 +1,20 @@
-# Load user X session profile
-# Prefer XDG-compliant path (~/.config/x11/xprofile), fallback to ~/.xprofile
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile" ]; then
-    . "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile"
-else
-    . "$HOME/.xprofile"
-fi
+#!/bin/sh
+# X init script
+# Sources xprofile, loads Xresources, starts WM
 
-# Load X resources (colors, fonts, DPI, etc.) into X server database
+# Load X resources
 xrdb -merge "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources"
 
-# Export SSH_AUTH_SOCK for gnome-keyring
+# Load X profile (autostart apps)
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile"
+
+# Keyring
 eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
 export SSH_AUTH_SOCK
 
-# Start Polkit Authentication Agent
-/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-
-# Start gnome-keyring daemon via systemd integration
+# DBus/systemd integration
 systemctl --user import-environment DISPLAY XAUTHORITY
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
 
+# Start window manager
 exec dwm

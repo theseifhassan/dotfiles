@@ -1,10 +1,7 @@
 [Unit]
-Description=Rotate wallpaper
+Description=Set random wallpaper
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/bin/wallpaper.sh next
+ExecStart=%h/.local/bin/wallpaper.sh
 Environment=DISPLAY=:0
-
-[Install]
-WantedBy=default.target

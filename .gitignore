@@ -1,0 +1,11 @@
+scripts/.local/bin/claude
+tmux/.config/tmux/plugins
+zsh/.config/zsh/.zcompdump
+
+# Suckless build artifacts
+dwm/*.o
+dwm/dwm
+dmenu/*.o
+dmenu/dmenu
+dmenu/stest
+dwmblocks/dwmblocks

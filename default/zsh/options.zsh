@@ -1,0 +1,17 @@
+HISTSIZE=10000
+SAVEHIST=10000
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt SHARE_HISTORY
+setopt APPEND_HISTORY
+
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+
+setopt COMPLETE_IN_WORD
+setopt ALWAYS_TO_END
+autoload -Uz compinit && compinit
+
+bindkey -v
+export KEYTIMEOUT=1

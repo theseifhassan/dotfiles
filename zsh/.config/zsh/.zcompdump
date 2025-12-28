@@ -1,4 +1,4 @@
-#files: 823	version: 5.9
+#files: 828	version: 5.9
 
 _comps=(
 '-' '_precommand'
@@ -80,6 +80,7 @@ _comps=(
 'basename' '_basename'
 'basenc' '_basenc'
 'bash' '_bash'
+'bat' '_bat'
 'batch' '_at'
 'baz' '_baz'
 'beep' '_beep'
@@ -119,7 +120,6 @@ _comps=(
 'bttrack' '_bittorrent'
 'buildhash' '_ispell'
 'builtin' '_builtin'
-'bun' '_bun'
 'bunzip2' '_bzip2'
 'burst' '_mh'
 'busctl' '_busctl'
@@ -135,7 +135,6 @@ _comps=(
 'cabal' '_cabal'
 'cal' '_cal'
 'calendar' '_calendar'
-'cargo' '_cargo'
 'cat' '_cat'
 'catchsegv' '_precommand'
 'cc' '_gcc'
@@ -275,6 +274,10 @@ _comps=(
 'dsh' '_dsh'
 'dtruss' '_dtruss'
 'du' '_du'
+'_dunst' '_dunst'
+'dunst' '_dunst'
+'_dunstctl' '_dunstctl'
+'dunstctl' '_dunstctl'
 'dvibook' '_dvi'
 'dviconcat' '_dvi'
 'dvicopy' '_dvi'
@@ -327,6 +330,7 @@ _comps=(
 'fc' '_fc'
 'fc-list' '_xft_fonts'
 'fc-match' '_xft_fonts'
+'fd' '_fd'
 'feh' '_feh'
 'fetchmail' '_fetchmail'
 'ffmpeg' '_ffmpeg'
@@ -426,6 +430,7 @@ _comps=(
 'ggetopt' '_getopt'
 'ggrep' '_grep'
 'ggv' '_gnome-gv'
+'gh' '_gh'
 'ghead' '_head'
 'ghostscript' '_ghostscript'
 'ghostty' '_ghostty'
@@ -596,6 +601,7 @@ _comps=(
 'iftop' '_iftop'
 'ifup' '_net_interfaces'
 'ijoin' '_ispell'
+'img2sixel' '_img2sixel'
 'import' '_imagemagick'
 'inc' '_mh'
 'includeres' '_psutils'
@@ -668,7 +674,6 @@ _comps=(
 'let' '_math'
 'lftp' '_ncftp'
 'lha' '_lha'
-'libinput' '_libinput'
 'light' '_webbrowser'
 'limit' '_limit'
 'links' '_links'
@@ -796,6 +801,7 @@ _comps=(
 'mpc' '_mpc'
 'mplayer' '_mplayer'
 'mpstat' '_sysstat'
+'mpv' '_mpv'
 'mr' '_myrepos'
 'mrd' '_mtools'
 'mread' '_mtools'
@@ -893,7 +899,6 @@ _comps=(
 '-parameter-' '_parameter'
 'parec' '_pulseaudio'
 'parecord' '_pulseaudio'
-'paru' '_paru'
 'passwd' '_users'
 'paste' '_paste'
 'pasuspender' '_pulseaudio'
@@ -1072,7 +1077,6 @@ _comps=(
 'rmiregistry' '_java'
 'rmm' '_mh'
 'rmmod' '_rmmod'
-'rmpc' '_rmpc'
 'route' '_route'
 'rrdtool' '_rrdtool'
 'rsh' '_rlogin'
@@ -1231,6 +1235,7 @@ _comps=(
 'tac' '_tac'
 'tacker' '_openstack'
 'tail' '_tail'
+'tailscale' '_tailscale'
 'talk' '_other_accounts'
 'tar' '_tar'
 'tardy' '_tardy'
@@ -1498,6 +1503,8 @@ _comps=(
 'xzcat' '_xz'
 'yafc' '_yafc'
 'yash' '_sh'
+'yay' '_yay'
+'yazi' '_yazi'
 'ypbind' '_yp'
 'ypcat' '_yp'
 'ypmatch' '_yp'
@@ -1670,18 +1677,19 @@ bindkey '^[,' _history-complete-newer
 bindkey '^[/' _history-complete-older
 bindkey '^[~' _bash_complete-word
 
-autoload -Uz _bluetoothctl _bootctl _bun _busctl _bwrap \
-            _cargo _coredumpctl _ctr _curl _dkms \
-            _docker _dolphin _dotnet _ghostty _hostnamectl \
-            _insmod _journalctl _kernel-install _libinput _localectl \
-            _loginctl _lsmod _machinectl _mkinitcpio _networkctl \
-            _oomctl _p11-kit _pacman _paru _playerctl \
-            _pulseaudio _resolvectl _rg _rmmod _rmpc \
-            _run0 _sd_bus_address _sd_hosts_or_user_at_host _sd_machines _sd_outputmodes \
-            _sd_unit_files _sensors _sensors-detect _systemctl _systemd \
-            _systemd-analyze _systemd-delta _systemd-inhibit _systemd-nspawn _systemd-path \
-            _systemd-run _systemd-tmpfiles _timedatectl _trust _udevadm \
-            _udisks2 _upower _varlinkctl _wpctl _cdr \
+autoload -Uz _bat _bluetoothctl _bootctl _busctl _bwrap \
+            _coredumpctl _ctr _curl _dkms _docker \
+            _dolphin _dotnet _dunst _dunstctl _fd \
+            _gh _ghostty _hostnamectl _img2sixel _insmod \
+            _journalctl _kernel-install _localectl _loginctl _lsmod \
+            _machinectl _mkinitcpio _mpv _networkctl _oomctl \
+            _p11-kit _pacman _playerctl _pulseaudio _resolvectl \
+            _rg _rmmod _run0 _sd_bus_address _sd_hosts_or_user_at_host \
+            _sd_machines _sd_outputmodes _sd_unit_files _sensors _sensors-detect \
+            _systemctl _systemd _systemd-analyze _systemd-delta _systemd-inhibit \
+            _systemd-nspawn _systemd-path _systemd-run _systemd-tmpfiles _tailscale \
+            _timedatectl _trust _udevadm _udisks2 _upower \
+            _varlinkctl _wpctl _yay _yazi _cdr \
             _all_labels _all_matches _alternative _approximate _arg_compile \
             _arguments _bash_completions _cache_invalid _call_function _combination \
             _complete _complete_debug _complete_help _complete_help_generic _complete_tag \
