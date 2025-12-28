@@ -41,6 +41,10 @@ command -v gsettings >/dev/null && {
     gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 }
 
+# Hardware
+log "Hardware"
+"$DOTFILES/install/hardware.sh" all
+
 # Suckless
 log "Suckless"
 for t in dwm dmenu dwmblocks; do [ -d "$DOTFILES/$t" ] && sudo make -C "$DOTFILES/$t" clean install; done

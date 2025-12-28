@@ -15,7 +15,7 @@ export HISTFILE="$XDG_STATE_HOME/zsh/history"
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
 
 export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
-export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
+[ -n "$XDG_RUNTIME_DIR" ] && export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
