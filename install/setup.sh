@@ -34,12 +34,18 @@ command -v docker >/dev/null && {
     sudo systemctl enable --now docker
     groups "$USER" | grep -q docker || sudo usermod -aG docker "$USER"
 }
+command -v tailscale >/dev/null && sudo systemctl enable --now tailscaled
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg" && chmod 700 "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg"
 mkdir -p ~/.local/share/fonts && fc-cache -f
 command -v gsettings >/dev/null && {
     gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
     gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 }
+
+# User directories
+log "User directories"
+xdg-user-dirs-update
+mkdir -p "$HOME/Projects"
 
 # Hardware
 log "Hardware"

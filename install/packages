@@ -52,6 +52,7 @@ playerctl
 # Network & Bluetooth
 # -----------------------------------------------------------------------------
 networkmanager
+tailscale
 bluez
 bluez-utils
 bluetui
