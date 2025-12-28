@@ -12,12 +12,29 @@ fail() { printf "\033[31m✗\033[0m %s\n" "$1"; }
 check_nvidia() {
     lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
     err=0
+    
+    # Core driver checks
     lsmod | grep -q "^nvidia " && ok "nvidia module loaded" || { fail "nvidia module not loaded"; err=1; }
     lsmod | grep -q "^nvidia_drm " && ok "nvidia_drm module loaded" || { fail "nvidia_drm not loaded"; err=1; }
     [ -f /etc/modprobe.d/nvidia.conf ] && ok "modprobe config exists" || { fail "/etc/modprobe.d/nvidia.conf missing"; err=1; }
     [ -f /etc/modprobe.d/blacklist-nouveau.conf ] && ok "nouveau blacklisted" || { fail "nouveau not blacklisted"; err=1; }
     grep -q "nvidia" /etc/mkinitcpio.conf && ok "nvidia in initramfs" || { fail "nvidia not in initramfs"; err=1; }
     command -v nvidia-smi >/dev/null && nvidia-smi >/dev/null 2>&1 && ok "nvidia-smi working" || { fail "nvidia-smi failed"; err=1; }
+    
+    # Hybrid-specific checks
+    if is_hybrid_gpu; then
+        echo "--- Hybrid GPU (PRIME) ---"
+        [ ! -f /etc/X11/xorg.conf.d/20-nvidia.conf ] && ok "no xorg nvidia config (correct for hybrid)" || { fail "xorg nvidia config exists (remove it)"; err=1; }
+        [ -f /etc/udev/rules.d/80-nvidia-pm.rules ] && ok "RTD3 power management rules" || { fail "RTD3 udev rules missing"; err=1; }
+        [ -f /etc/modprobe.d/nvidia-pm.conf ] && ok "dynamic power management config" || { fail "nvidia-pm.conf missing"; err=1; }
+        systemctl is-enabled --quiet nvidia-persistenced && ok "nvidia-persistenced enabled" || { fail "nvidia-persistenced not enabled"; err=1; }
+        command -v prime-run >/dev/null && ok "prime-run available" || { fail "prime-run missing (install nvidia-prime)"; err=1; }
+        
+        # Check GPU power state
+        gpu_state=$(cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status 2>/dev/null)
+        [ "$gpu_state" = "suspended" ] && ok "GPU powered off (RTD3 working)" || echo "  GPU state: $gpu_state (active or not idle)"
+    fi
+    
     [ $err -eq 0 ] && echo "NVIDIA: all good" || echo "NVIDIA: issues found"
 }
 
@@ -70,6 +87,7 @@ is_hybrid_gpu() {
 install_nvidia() {
     lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
 
+    # Detect GPU generation for driver selection
     if lspci | grep -i nvidia | grep -qE "RTX [2-9][0-9]|GTX 16"; then
         DRIVER="nvidia-open"
     else
@@ -80,31 +98,65 @@ install_nvidia() {
     pacman -Q linux-zen &>/dev/null && HEADERS="linux-zen-headers"
     pacman -Q linux-lts &>/dev/null && HEADERS="linux-lts-headers"
 
+    # Enable multilib for 32-bit libs
     grep -q "^\[multilib\]" /etc/pacman.conf || {
         sudo sed -i '/^#\s*\[multilib\]/,/^#\s*Include/ s/^#\s*//' /etc/pacman.conf
         sudo pacman -Sy
     }
 
-    $PKG $HEADERS $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver
+    $PKG $HEADERS $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver nvidia-prime
 
-    echo "options nvidia_drm modeset=1" | sudo tee /etc/modprobe.d/nvidia.conf >/dev/null
-    echo "options nvidia preserve_video_memory_allocations=1" | sudo tee -a /etc/modprobe.d/nvidia.conf >/dev/null
+    # Kernel module options
+    sudo mkdir -p /etc/modprobe.d
+    cat <<'EOF' | sudo tee /etc/modprobe.d/nvidia.conf >/dev/null
+options nvidia_drm modeset=1
+options nvidia NVreg_PreserveVideoMemoryAllocations=1
+EOF
 
+    # Early loading in initramfs
     MODS="nvidia nvidia_modeset nvidia_uvm nvidia_drm"
     sudo sed -i -E 's/ nvidia_drm//g; s/ nvidia_uvm//g; s/ nvidia_modeset//g; s/ nvidia//g;' /etc/mkinitcpio.conf
     sudo sed -i -E "s/^(MODULES=\()/\1${MODS} /" /etc/mkinitcpio.conf
     sudo mkinitcpio -P
 
+    # Blacklist nouveau
     echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf >/dev/null
 
-    # Only create xorg nvidia config for dedicated GPU systems (not hybrid)
+    # Hybrid GPU (PRIME render offload) setup
     if is_hybrid_gpu; then
-        echo "Hybrid GPU detected - skipping xorg nvidia config (iGPU handles display)"
-        # Remove existing config if present
+        echo "Hybrid GPU detected - configuring PRIME render offload"
+        
+        # Remove any nvidia xorg config (iGPU handles display)
         [ -f /etc/X11/xorg.conf.d/20-nvidia.conf ] && sudo rm /etc/X11/xorg.conf.d/20-nvidia.conf
+        
+        # RTD3 power management (allows GPU to power off when idle)
+        cat <<'EOF' | sudo tee /etc/udev/rules.d/80-nvidia-pm.rules >/dev/null
+# Enable runtime PM for NVIDIA VGA/3D controller devices on driver bind
+ACTION=="bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="auto"
+ACTION=="bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="auto"
+
+# Disable runtime PM for NVIDIA VGA/3D controller devices on driver unbind
+ACTION=="unbind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="on"
+ACTION=="unbind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="on"
+
+# Enable runtime PM for NVIDIA VGA/3D controller devices on adding device
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="auto"
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="auto"
+EOF
+
+        # Dynamic power management (Turing+)
+        cat <<'EOF' | sudo tee /etc/modprobe.d/nvidia-pm.conf >/dev/null
+options nvidia NVreg_DynamicPowerManagement=0x02
+EOF
+
+        # Enable nvidia-persistenced to keep device state
+        sudo systemctl enable nvidia-persistenced.service
+
+        echo "PRIME offload configured. Use 'prime-run <app>' for GPU rendering."
     else
+        # Dedicated GPU - nvidia handles display
         sudo mkdir -p /etc/X11/xorg.conf.d
-        sudo tee /etc/X11/xorg.conf.d/20-nvidia.conf >/dev/null <<'EOF'
+        cat <<'EOF' | sudo tee /etc/X11/xorg.conf.d/20-nvidia.conf >/dev/null
 Section "Device"
     Identifier "NVIDIA Card"
     Driver "nvidia"
@@ -113,8 +165,8 @@ EndSection
 EOF
     fi
 
-    sudo mkdir -p /etc/environment.d
-    echo -e "LIBVA_DRIVER_NAME=nvidia\nNVD_BACKEND=direct" | sudo tee /etc/environment.d/10-nvidia.conf >/dev/null
+    # Enable suspend/hibernate support
+    sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service
 
     echo "NVIDIA done. Reboot required."
 }
