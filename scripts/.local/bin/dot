@@ -65,7 +65,7 @@ cmd_suckless() {
     pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
 }
 
-cmd_hardware() { "$DOTFILES/install/hardware.sh" "${1:-}"; }
+cmd_hardware() { "$DOTFILES/install/hardware.sh" "$@"; }
 cmd_install() { "$DOTFILES/install/setup.sh"; }
 
 cmd_help() { cat <<EOF
