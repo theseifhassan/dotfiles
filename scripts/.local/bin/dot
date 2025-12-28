@@ -35,6 +35,7 @@ cmd_link() {
     link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
     link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
 
+
     mkdir -p "$HOME/.local/bin"
     for f in "$DOTFILES/scripts/.local/bin/"*; do link "$f" "$HOME/.local/bin/$(basename "$f")"; done
 

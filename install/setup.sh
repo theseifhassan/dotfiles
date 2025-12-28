@@ -47,6 +47,13 @@ log "User directories"
 xdg-user-dirs-update
 mkdir -p "$HOME/Projects"
 
+# Touchpad
+log "Touchpad"
+sudo mkdir -p /etc/X11/xorg.conf.d
+sudo cp "$DOTFILES/x11/30-touchpad.conf" /etc/X11/xorg.conf.d/
+
+
+
 # Hardware
 log "Hardware"
 "$DOTFILES/install/hardware.sh" all
@@ -70,6 +77,7 @@ link "$DOTFILES/dunst/.config/dunst" "$HOME/.config/dunst"
 link "$DOTFILES/git/.config/git" "$HOME/.config/git"
 link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
 link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
+
 
 mkdir -p "$HOME/.local/bin"
 for f in "$DOTFILES/scripts/.local/bin/"*; do link "$f" "$HOME/.local/bin/$(basename "$f")"; done
