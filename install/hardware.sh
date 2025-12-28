@@ -62,6 +62,11 @@ check_all() {
     check_virtualcam
 }
 
+is_hybrid_gpu() {
+    # Check if both Intel/AMD iGPU and NVIDIA dGPU exist
+    lspci | grep -qiE "VGA.*(Intel|AMD)" && lspci | grep -qi "NVIDIA"
+}
+
 install_nvidia() {
     lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
 
@@ -92,14 +97,21 @@ install_nvidia() {
 
     echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf >/dev/null
 
-    sudo mkdir -p /etc/X11/xorg.conf.d
-    sudo tee /etc/X11/xorg.conf.d/20-nvidia.conf >/dev/null <<'EOF'
+    # Only create xorg nvidia config for dedicated GPU systems (not hybrid)
+    if is_hybrid_gpu; then
+        echo "Hybrid GPU detected - skipping xorg nvidia config (iGPU handles display)"
+        # Remove existing config if present
+        [ -f /etc/X11/xorg.conf.d/20-nvidia.conf ] && sudo rm /etc/X11/xorg.conf.d/20-nvidia.conf
+    else
+        sudo mkdir -p /etc/X11/xorg.conf.d
+        sudo tee /etc/X11/xorg.conf.d/20-nvidia.conf >/dev/null <<'EOF'
 Section "Device"
     Identifier "NVIDIA Card"
     Driver "nvidia"
     Option "TripleBuffer" "on"
 EndSection
 EOF
+    fi
 
     sudo mkdir -p /etc/environment.d
     echo -e "LIBVA_DRIVER_NAME=nvidia\nNVD_BACKEND=direct" | sudo tee /etc/environment.d/10-nvidia.conf >/dev/null
