@@ -4,9 +4,4 @@
 ! Include defaults
 #include "default/x11/xresources"
 
-! =============================================================================
-! USER OVERRIDES
-! =============================================================================
-
-! HiDPI (Dell XPS 15)
-Xft.dpi: 192
+! Machine-specific: see xresources.local (loaded separately in xinitrc)

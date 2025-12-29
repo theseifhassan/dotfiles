@@ -4,6 +4,7 @@
 
 # Load X resources
 xrdb -I"$HOME/dotfiles" -merge "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources"
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources.local" ] && xrdb -merge "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xresources.local"
 
 # Load X profile (autostart apps)
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile"

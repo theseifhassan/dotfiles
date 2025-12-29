@@ -2,6 +2,9 @@ scripts/.local/bin/claude
 tmux/.config/tmux/plugins
 zsh/.config/zsh/.zcompdump
 
+# Machine-specific configs
+x11/.config/x11/xresources.local
+
 # Suckless build artifacts
 dwm/*.o
 dwm/dwm
