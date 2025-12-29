@@ -1,39 +1,34 @@
 #!/bin/sh
 set -e
 
-ICONS="$HOME/.local/share/applications/icons"
 APPS="$HOME/.local/share/applications"
 BROWSER="chromium"
 
-mkdir -p "$ICONS" "$APPS"
+mkdir -p "$APPS"
 
 get_apps() { grep -l "^Exec=.*--app=" "$APPS"/*.desktop 2>/dev/null | while read f; do grep '^Name=' "$f" | cut -d= -f2-; done | sort; }
 
 create() {
-    input=$(echo "" | dmenu -i -p "name|url|icon:")
+    input=$(echo "" | dmenu -i -p "name|url:")
     [ -z "$input" ] && exit 0
 
-    IFS='|' read -r name url icon <<EOF
+    IFS='|' read -r name url <<EOF
 $input
 EOF
-    [ -z "$name" ] || [ -z "$url" ] || [ -z "$icon" ] && { notify-send "Error" "All fields required"; exit 1; }
+    [ -z "$name" ] || [ -z "$url" ] && { notify-send "Error" "Name and URL required"; exit 1; }
     echo "$url" | grep -q "^https\?://" || url="https://$url"
 
     safe=$(echo "$name" | tr -cd '[:alnum:]._-')
     desktop="$APPS/$safe.desktop"
-    iconpath="$ICONS/$safe.${icon##*.}"
-    iconpath="${iconpath%%\?*}"
 
     [ -f "$desktop" ] && { notify-send "Error" "Already exists"; exit 1; }
-    curl -sL --max-time 30 -o "$iconpath" "$icon" || { notify-send "Error" "Icon download failed"; exit 1; }
-    [ -s "$iconpath" ] || { rm -f "$iconpath"; notify-send "Error" "Empty icon"; exit 1; }
 
     cat > "$desktop" <<EOF
 [Desktop Entry]
 Name=$name
 Exec=$BROWSER --app="$url" --class="$safe"
 Type=Application
-Icon=$iconpath
+Icon=chromium
 StartupWMClass=$safe
 EOF
     chmod 644 "$desktop"
@@ -48,8 +43,7 @@ remove() {
     [ "$(printf "No\nYes" | dmenu -i -p "Remove $sel?")" != "Yes" ] && exit 0
 
     file=$(grep -l "^Name=$sel$" "$APPS"/*.desktop 2>/dev/null | head -1)
-    icon=$(grep '^Icon=' "$file" 2>/dev/null | cut -d= -f2-)
-    rm -f "$file" "$icon"
+    rm -f "$file"
     notify-send "Removed" "$sel"
 }
 
