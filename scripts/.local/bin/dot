@@ -28,6 +28,14 @@ cmd_link() {
     rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
     cp -r "$DOTFILES/default" "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
 
+    # Install fonts if present
+    if [ -d "$DOTFILES/fonts" ] && [ "$(ls -A "$DOTFILES/fonts" 2>/dev/null | grep -v .keep)" ]; then
+        log "Installing fonts..."
+        mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
+        cp -r "$DOTFILES/fonts/"* "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" 2>/dev/null || true
+        fc-cache -f
+    fi
+
     link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
     link "$DOTFILES/zsh/.config/zsh" "$HOME/.config/zsh"
     link "$DOTFILES/x11/.config/x11" "$HOME/.config/x11"
