@@ -6,6 +6,10 @@ export DOTFILES
 
 log() { echo ">>> $1"; }
 
+# Cache sudo credentials upfront
+sudo -v
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
 # Bootstrap
 log "Bootstrap"
 command -v yay >/dev/null || {
