@@ -71,6 +71,22 @@ for t in dwm dmenu dwmblocks; do [ -d "$DOTFILES/$t" ] && sudo make -C "$DOTFILE
 log "Links"
 link() { mkdir -p "$(dirname "$2")"; [ -L "$2" ] && rm "$2"; [ -e "$2" ] && mv "$2" "$2.bak"; ln -s "$1" "$2"; }
 
+# Copy defaults to XDG_DATA_HOME
+rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
+cp -r "$DOTFILES/default" "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
+
+# Install fonts if present
+if [ -d "$DOTFILES/fonts" ] && [ "$(ls -A "$DOTFILES/fonts" 2>/dev/null | grep -v .keep)" ]; then
+    log "Installing fonts..."
+    mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
+    cp -r "$DOTFILES/fonts/"* "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" 2>/dev/null || true
+    fc-cache -f
+fi
+
+# Install TPM
+TPM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/plugins/tpm"
+[ ! -d "$TPM_DIR" ] && git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
+
 link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
 link "$DOTFILES/zsh/.config/zsh" "$HOME/.config/zsh"
 link "$DOTFILES/x11/.config/x11" "$HOME/.config/x11"
@@ -83,6 +99,11 @@ link "$DOTFILES/git/.config/git" "$HOME/.config/git"
 link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
 link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
 
+# Link wallpapers if present
+if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
+    mkdir -p "$HOME/Pictures"
+    link "$DOTFILES/wallpapers" "$HOME/Pictures/Wallpapers"
+fi
 
 mkdir -p "$HOME/.local/bin"
 for f in "$DOTFILES/scripts/.local/bin/"*; do link "$f" "$HOME/.local/bin/$(basename "$f")"; done
