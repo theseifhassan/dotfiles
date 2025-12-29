@@ -1,8 +1,8 @@
 # dotfiles
 
-Minimal Arch Linux dotfiles with dwm, following suckless philosophy.
+Minimal Arch Linux dotfiles with dwm.
 
-## Install
+## Quick Start
 
 ```sh
 git clone https://github.com/theseifhassan/dotfiles ~/dotfiles
@@ -10,66 +10,125 @@ cd ~/dotfiles && ./install.sh
 # reboot, then: startx
 ```
 
-## Structure
+## Usage
 
-```
-dotfiles/
-├── default/        # Base configs (don't edit)
-│   ├── zsh/        # Shell defaults
-│   ├── tmux/       # Tmux defaults + theme
-│   ├── dunst/      # Notification defaults
-│   └── x11/        # X11 defaults
-├── install/
-│   ├── setup.sh    # Main installer
-│   ├── hardware.sh # Driver installer
-│   └── packages    # Package list
-├── scripts/.local/bin/
-│   └── dot         # Management command
-├── dwm/            # Window manager
-├── dmenu/          # Launcher
-└── dwmblocks/      # Status bar
-```
-
-## Commands
+All management through the `dot` command:
 
 ```sh
-dot update              # Pull, recompile suckless, reload
-dot link                # Symlink configs
-dot packages            # Install packages
-dot packages -d         # Show missing packages
-dot suckless [target]   # Recompile dwm/dmenu/dwmblocks
-dot hardware <type>     # Install: nvidia|bluetooth|printer|fingerprint|virtualcam
-dot hardware check      # Verify driver setup
+dot update              # pull, recompile suckless, reload
+dot link                # symlink configs
+dot packages            # install packages
+dot packages -d         # show missing packages
+dot suckless [target]   # recompile dwm/dmenu/dwmblocks
+dot hardware <type>     # install drivers: nvidia|bluetooth|printer|fingerprint|virtualcam|all
+dot hardware check      # verify driver setup
 ```
 
 ## Keybinds
 
+### Window Management
+| Key | Action |
+|-----|--------|
+| `mod+j/k` | focus next/prev |
+| `mod+h/l` | resize master |
+| `mod+shift+h/l` | resize stack |
+| `mod+enter` | zoom to master |
+| `mod+shift+c` | kill window |
+| `mod+space` | toggle layout |
+| `mod+shift+space` | toggle floating |
+| `mod+b` | toggle bar |
+| `mod+1-9` | switch tag |
+| `mod+shift+1-9` | move to tag |
+| `mod+tab` | previous tag |
+| `mod+,/.` | focus prev/next monitor |
+| `mod+shift+,/.` | move to prev/next monitor |
+
+### Layouts
+| Key | Action |
+|-----|--------|
+| `mod+t` | tile |
+| `mod+f` | monocle |
+| `mod+m` | spiral |
+
+### Apps
 | Key | Action |
 |-----|--------|
 | `mod+p` | dmenu |
 | `mod+shift+enter` | terminal |
-| `mod+j/k` | focus next/prev |
-| `mod+h/l` | resize master |
-| `mod+enter` | zoom to master |
-| `mod+shift+c` | kill window |
-| `mod+1-9` | switch tag |
-| `mod+shift+1-9` | move to tag |
 | `mod+s` | screenshot (select) |
 | `mod+shift+s` | screenshot (full) |
 | `mod+w` | launch webapp |
+| `mod+shift+w` | manage webapps |
 | `mod+v` | clipboard history |
+| `mod+shift+a` | audio settings |
+| `mod+n` | network (impala) |
+| `mod+shift+m` | system monitor (btop) |
+| `mod+shift+p` | power profile menu |
+
+### System
+| Key | Action |
+|-----|--------|
+| `mod+`` | toggle statusbar (minimal/full) |
+| `mod+shift+b` | restart dwmblocks |
+| `mod+F5` | reload xresources |
 | `mod+shift+q` | quit dwm |
+| `mod+ctrl+shift+q` | restart dwm |
+
+### Media Keys
+Volume, brightness, and media keys work as expected.
+
+## Machine-Specific Config
+
+For per-machine settings, create local override files in `~/.config/x11/`:
+
+| File | Purpose |
+|------|---------|
+| `xresources.local` | X resources (DPI, colors) |
+| `xprofile.local` | Startup commands (xrandr, etc) |
+
+Example `xresources.local`:
+```
+Xft.dpi: 192
+```
+
+Example `xprofile.local`:
+```sh
+xrandr --dpi 192
+```
+
+These files are gitignored and loaded automatically.
+
+## Structure
+
+```
+dotfiles/
+├── default/           # base configs (source these, don't edit)
+├── install/
+│   ├── setup.sh       # main installer
+│   ├── hardware.sh    # driver installer
+│   └── packages       # package list
+├── scripts/.local/bin/
+│   └── dot            # management command
+├── dwm/               # window manager
+├── dmenu/             # launcher
+└── dwmblocks/         # status bar
+```
+
+### Layered Config
+
+User configs source defaults then override:
+```sh
+# ~/.config/zsh/.zshrc
+source "$DOTS_DEFAULT/zsh/rc"
+# your overrides here
+```
 
 ## Stack
 
-- **WM**: dwm (gaps, xrdb, statuscmd, center, pertag)
+- **WM**: dwm (gaps, pertag, xrdb, statuscmd, center)
 - **Terminal**: ghostty
 - **Shell**: zsh + starship
 - **Editor**: neovim (lazyvim)
 - **Launcher**: dmenu
 - **Notifications**: dunst
 - **Compositor**: picom
-
-## XDG
-
-Only `~/.zshenv` and `~/.fehbg` in home. Everything else in `~/.config/`.
