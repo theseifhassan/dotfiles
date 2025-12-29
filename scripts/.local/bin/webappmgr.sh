@@ -86,8 +86,9 @@ launch() {
     [ -z "$sel" ] && exit 0
 
     file=$(grep -l "^Name=$sel$" "$APPS"/*.desktop 2>/dev/null | head -1)
-    cmd=$(grep '^Exec=' "$file" | cut -d= -f2-)
-    eval "$cmd" &
+    [ -z "$file" ] && { notify-send "Error" "App not found"; exit 1; }
+    cmd=$(grep '^Exec=' "$file" | head -1 | cut -d= -f2-)
+    sh -c "$cmd" &
 }
 
 case "${1:-}" in
