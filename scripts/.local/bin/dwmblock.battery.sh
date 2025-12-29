@@ -1,5 +1,5 @@
 #!/bin/sh
-# Battery status (laptop only): [STATUS][MODE]: [PERCENTAGE]
+[ "$(cat "${XDG_RUNTIME_DIR:-/tmp}/statusbar-mode" 2>/dev/null)" = "minimal" ] && exit
 bat=/sys/class/power_supply/BAT0
 [ -d "$bat" ] || exit
 

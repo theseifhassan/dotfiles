@@ -1,5 +1,6 @@
 #!/bin/sh
-# Display screen brightness percentage
+# Skip in minimal mode
+[ "$(cat "${XDG_RUNTIME_DIR:-/tmp}/statusbar-mode" 2>/dev/null)" = "minimal" ] && exit
 
 # Skip if no backlight (desktop)
 [ -d /sys/class/backlight ] && [ "$(ls -A /sys/class/backlight 2>/dev/null)" ] || exit 0
