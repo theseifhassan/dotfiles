@@ -120,6 +120,10 @@ for f in "$DOTFILES/scripts/.config/systemd/user/"*; do link "$f" "$HOME/.config
 systemctl --user daemon-reload
 systemctl --user enable --now wallpaper.timer 2>/dev/null || true
 
+# OpenCode
+log "OpenCode"
+command -v opencode >/dev/null || curl -fsSL https://opencode.ai/install | bash
+
 # Shell
 log "Shell"
 [ "$SHELL" != "$(command -v zsh)" ] && chsh -s "$(command -v zsh)"
