@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Graphite
+Exec=chromium --app="https://app.graphite.dev" --class="Graphite"
+Type=Application
+Icon=chromium
+StartupWMClass=Graphite

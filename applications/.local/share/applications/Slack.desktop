@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Slack
+Exec=chromium --profile-directory="Default" --app="https://skydeoslack.slack.com" --class="Slack"
+Type=Application
+Icon=chromium
+StartupWMClass=Slack

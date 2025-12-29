@@ -113,6 +113,12 @@ fi
 mkdir -p "$HOME/.local/bin"
 for f in "$DOTFILES/scripts/.local/bin/"*; do link "$f" "$HOME/.local/bin/$(basename "$f")"; done
 
+# Link web apps
+mkdir -p "$HOME/.local/share/applications"
+for f in "$DOTFILES/applications/.local/share/applications/"*.desktop; do
+    [ -f "$f" ] && link "$f" "$HOME/.local/share/applications/$(basename "$f")"
+done
+
 mkdir -p "$HOME/.config/systemd/user"
 for f in "$DOTFILES/scripts/.config/systemd/user/"*; do link "$f" "$HOME/.config/systemd/user/$(basename "$f")"; done
 
