@@ -101,10 +101,14 @@ install_nvidia() {
     # Enable multilib for 32-bit libs
     grep -q "^\[multilib\]" /etc/pacman.conf || {
         sudo sed -i '/^#\s*\[multilib\]/,/^#\s*Include/ s/^#\s*//' /etc/pacman.conf
-        sudo pacman -Sy
+        sudo pacman -Syu --noconfirm
     }
 
-    $PKG $HEADERS $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver nvidia-prime
+    $PKG $HEADERS $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver nvidia-prime || {
+        echo "Retrying NVIDIA install..."
+        sudo pacman -Syu --noconfirm
+        $PKG $HEADERS $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver nvidia-prime
+    }
 
     # Kernel module options
     sudo mkdir -p /etc/modprobe.d

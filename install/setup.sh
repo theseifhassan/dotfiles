@@ -17,6 +17,7 @@ command -v yay >/dev/null || {
 
 # Packages
 log "Packages"
+sudo pacman -Syu --noconfirm
 yay -S --needed --noconfirm $(grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages" | tr '\n' ' ')
 
 # Node.js
