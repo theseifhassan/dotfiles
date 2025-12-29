@@ -36,6 +36,7 @@ xdg-desktop-portal-gtk
 polkit-gnome
 gnome-keyring
 libsecret
+dex
 
 # -----------------------------------------------------------------------------
 # Audio (Pipewire)
