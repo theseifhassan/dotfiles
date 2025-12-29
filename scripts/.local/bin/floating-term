@@ -1,0 +1,15 @@
+#!/bin/sh
+# Launch a centered floating terminal
+# Usage: floating-term [cols] [rows] [command...]
+# Defaults: 80 cols, 24 rows
+
+cols="${1:-80}"
+rows="${2:-24}"
+shift 2 2>/dev/null
+
+# Launch ghostty with floating instance name (matches dwm rule)
+exec ghostty \
+    --x11-instance-name=floating \
+    --column="$cols" \
+    --row="$rows" \
+    ${@:+-e "$@"}

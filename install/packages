@@ -130,6 +130,7 @@ usbmuxd
 # Hardware Control
 # -----------------------------------------------------------------------------
 brightnessctl
+power-profiles-daemon
 
 # -----------------------------------------------------------------------------
 # Optional: Printing (uncomment if needed)

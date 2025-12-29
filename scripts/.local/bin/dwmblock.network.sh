@@ -6,7 +6,7 @@ case $BLOCK_BUTTON in
         if pgrep -x impala >/dev/null; then
             pkill -x impala
         else
-            command -v impala >/dev/null && ghostty --x11-instance-name=floating --window-width=160 --window-height=60 -e impala &
+            command -v impala >/dev/null && floating-term 60 20 impala &
         fi
         ;;
 esac

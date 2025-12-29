@@ -35,6 +35,11 @@ command -v docker >/dev/null && {
     groups "$USER" | grep -q docker || sudo usermod -aG docker "$USER"
 }
 command -v tailscale >/dev/null && sudo systemctl enable --now tailscaled
+command -v powerprofilesctl >/dev/null && {
+    sudo systemctl enable --now power-profiles-daemon
+    # Default to performance on desktops (no battery)
+    [ ! -d /sys/class/power_supply/BAT0 ] && powerprofilesctl set performance
+}
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg" && chmod 700 "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg"
 mkdir -p ~/.local/share/fonts && fc-cache -f
 command -v gsettings >/dev/null && {

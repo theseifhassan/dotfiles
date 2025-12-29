@@ -6,7 +6,7 @@ case $BLOCK_BUTTON in
         if pgrep -x wiremix >/dev/null; then
             pkill -x wiremix
         else
-            command -v wiremix >/dev/null && ghostty --x11-instance-name=floating --window-width=160 --window-height=60 -e wiremix &
+            command -v wiremix >/dev/null && floating-term 60 20 wiremix &
         fi
         ;;
 esac

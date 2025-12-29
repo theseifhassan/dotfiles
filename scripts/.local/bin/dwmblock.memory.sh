@@ -6,7 +6,7 @@ case $BLOCK_BUTTON in
         if pgrep -x btop >/dev/null; then
             pkill -x btop
         else
-            command -v btop >/dev/null && ghostty --x11-instance-name=floating --window-width=160 --window-height=60 -e btop &
+            command -v btop >/dev/null && floating-term 100 30 btop &
         fi
         ;;
 esac
