@@ -1,18 +1,17 @@
 #!/bin/sh
-# Launch a centered floating terminal
-# Usage: floating-term [cols] [rows] [command...]
-# Defaults: 80 cols, 24 rows
-
+# floating-term [cols] [rows] [cmd...]
 cols="${1:-80}"
 rows="${2:-24}"
 shift 2 2>/dev/null
 
-# Cell size approx 10x20 at font-size 14
 w=$((cols * 10))
 h=$((rows * 20))
 
-# Launch ghostty, resize with xdotool (ghostty's window-width/height broken on GTK X11)
-ghostty --x11-instance-name=floating --gtk-single-instance=false ${@:+-e "$@"} &
+if [ $# -gt 0 ]; then
+    ghostty --x11-instance-name=floating --gtk-single-instance=false -e "$@" &
+else
+    ghostty --x11-instance-name=floating --gtk-single-instance=false &
+fi
 pid=$!
 sleep 0.1
 wid=$(xdotool search --pid "$pid" 2>/dev/null | head -1)

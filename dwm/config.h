@@ -177,7 +177,7 @@ static const Key keys[] = {
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
-    { 0,                            XF86XK_AudioPlay,         spawn,          medplaypausecmd },
+	{ 0,                            XF86XK_AudioPlay,         spawn,          medplaypausecmd },
 	{ 0,                            XF86XK_AudioPause,        spawn,          medplaypausecmd },
 	{ 0,                            XF86XK_AudioNext,         spawn,               mednextcmd },
 	{ 0,                            XF86XK_AudioPrev,         spawn,               medprevcmd },
@@ -197,7 +197,7 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_m,                     spawn,                   sysmon },
 	{ MODKEY|ShiftMask,             XK_p,                     spawn,                powermenu },
 	{ MODKEY,                       XK_grave,                 spawn,             statustoggle },
-    { MODKEY|ControlMask|ShiftMask, XK_q,                      quit,         {1} },
+	{ MODKEY|ControlMask|ShiftMask, XK_q,                     quit,           {1} },
 };
 
 /* button definitions */

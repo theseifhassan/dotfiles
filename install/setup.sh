@@ -96,6 +96,6 @@ systemctl --user enable --now wallpaper.timer 2>/dev/null || true
 
 # Shell
 log "Shell"
-[ "$SHELL" != "$(which zsh)" ] && chsh -s "$(which zsh)"
+[ "$SHELL" != "$(command -v zsh)" ] && chsh -s "$(command -v zsh)"
 
 log "Done! Reboot to apply."

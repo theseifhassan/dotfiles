@@ -27,7 +27,7 @@ validate_profile() { [ -d "$CHROME_CONFIG/$1" ] && echo "$1" || echo "Default"; 
 create() {
     profiles=$(get_profiles)
     profile="Default"
-    [ $(echo "$profiles" | wc -l) -gt 1 ] && {
+    [ "$(echo "$profiles" | wc -l)" -gt 1 ] && {
         sel=$(echo "$profiles" | cut -d: -f1 | dmenu -i -p "Profile:")
         [ -n "$sel" ] && profile=$(echo "$profiles" | grep "^$sel:" | cut -d: -f2)
     }
@@ -68,7 +68,7 @@ remove() {
     [ -z "$apps" ] && { notify-send "No apps"; exit 0; }
     sel=$(echo "$apps" | dmenu -i -p "Remove:")
     [ -z "$sel" ] && exit 0
-    [ "$(echo -e "No\nYes" | dmenu -i -p "Remove $sel?")" != "Yes" ] && exit 0
+    [ "$(printf "No\nYes" | dmenu -i -p "Remove $sel?")" != "Yes" ] && exit 0
 
     file=$(grep -l "^Name=$sel$" "$APPS"/*.desktop 2>/dev/null | head -1)
     icon=$(grep '^Icon=' "$file" 2>/dev/null | cut -d= -f2-)
@@ -93,7 +93,7 @@ case "${1:-}" in
     launch|run) launch ;;
     list|ls) get_apps ;;
     *)
-        choice=$(echo -e "Launch\nCreate\nRemove" | dmenu -i -p "Web Apps:")
+        choice=$(printf "Launch\nCreate\nRemove" | dmenu -i -p "Web Apps:")
         case "$choice" in Create) create ;; Remove) remove ;; Launch) launch ;; esac
         ;;
 esac
