@@ -7,9 +7,14 @@ cols="${1:-80}"
 rows="${2:-24}"
 shift 2 2>/dev/null
 
-# Launch ghostty with floating instance name (matches dwm rule)
-exec ghostty \
-    --x11-instance-name=floating \
-    --column="$cols" \
-    --row="$rows" \
-    ${@:+-e "$@"}
+# Cell size approx 10x20 at font-size 14
+w=$((cols * 10))
+h=$((rows * 20))
+
+# Launch ghostty, resize with xdotool (ghostty's window-width/height broken on GTK X11)
+ghostty --x11-instance-name=floating --gtk-single-instance=false ${@:+-e "$@"} &
+pid=$!
+sleep 0.1
+wid=$(xdotool search --pid "$pid" 2>/dev/null | head -1)
+[ -n "$wid" ] && xdotool windowsize "$wid" "$w" "$h"
+wait "$pid"

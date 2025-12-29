@@ -10,21 +10,20 @@ profile_icon() {
         balanced)     echo "BAL" ;;
         power-saver)  echo "ECO" ;;
         performance)  echo "PRF" ;;
-        *)            echo "" ;;
     esac
 }
 
 case $BLOCK_BUTTON in
-    1) power-menu.sh ;;
+    1) power-menu.sh & ;;
 esac
 
 icon=$(profile_icon)
-suffix="${icon:+ [$icon]}"
 
 if has_battery; then
     read -r cap < "$bat/capacity"
     read -r status < "$bat/status"
+    suffix="${icon:+ [$icon]}"
     [ "$status" = "Charging" ] && echo "CHA: $cap%$suffix" || echo "BAT: $cap%$suffix"
-else
-    [ -n "$icon" ] && echo "PWR: $icon"
+elif [ -n "$icon" ]; then
+    echo "PWR: $icon"
 fi
