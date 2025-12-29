@@ -24,8 +24,9 @@ format = "[$ssh_symbol$hostname]($style) "
 
 ["directory"]
 style = "plain"
-format = "~/[$path]($style)[$read_only]($read_only_style) "
-home_symbol = ""
+format = "[$path]($style)[$read_only]($read_only_style) "
+truncation_length = 3
+truncate_to_repo = false
 
 ["git_branch"]
 style = "#d79921"
