@@ -1,12 +1,12 @@
 #!/bin/sh
-# Web app manager with Chrome profile support
+# Web app manager with Chromium profile support
 
 set -e
 
 ICONS="$HOME/.local/share/applications/icons"
 APPS="$HOME/.local/share/applications"
-BROWSER="google-chrome-stable"
-CHROME_CONFIG="$HOME/.config/google-chrome"
+BROWSER="chromium"
+CHROME_CONFIG="$HOME/.config/chromium"
 
 mkdir -p "$ICONS" "$APPS"
 
@@ -14,11 +14,14 @@ get_apps() { grep -l "^Exec=.*--app=" "$APPS"/*.desktop 2>/dev/null | while read
 
 get_profiles() {
     [ -d "$CHROME_CONFIG" ] || return
-    echo "personal:Default"
+    # Default profile
+    [ -d "$CHROME_CONFIG/Default" ] && echo "Default:Default"
+    # Additional profiles (Profile 1, Profile 2, etc.)
     for d in "$CHROME_CONFIG"/Profile\ *; do
         [ -d "$d" ] || continue
+        dir=$(basename "$d")
         name=$(grep -o '"name":"[^"]*"' "$d/Preferences" 2>/dev/null | head -1 | cut -d'"' -f4)
-        [ -n "$name" ] && echo "${name}:$(basename "$d")"
+        [ -n "$name" ] && echo "${name}:${dir}" || echo "${dir}:${dir}"
     done
 }
 
