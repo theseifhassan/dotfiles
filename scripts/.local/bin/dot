@@ -36,6 +36,13 @@ cmd_link() {
         fc-cache -f
     fi
 
+    # Install TPM if not present
+    TPM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/plugins/tpm"
+    if [ ! -d "$TPM_DIR" ]; then
+        log "Installing TPM..."
+        git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
+    fi
+
     link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
     link "$DOTFILES/zsh/.config/zsh" "$HOME/.config/zsh"
     link "$DOTFILES/x11/.config/x11" "$HOME/.config/x11"
