@@ -116,6 +116,11 @@ static const Arg audio = SHCMD("audio.sh");
 /* Clipboard */
 static const Arg cliphistory = SHCMD("clipboard.sh");
 
+/* System monitors */
+static const Arg network = SHCMD("floating-term 60 20 impala");
+static const Arg sysmon = SHCMD("floating-term 100 30 btop");
+static const Arg powermenu = SHCMD("power-menu.sh");
+
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
@@ -187,6 +192,9 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_s,                     spawn,               screenshot },
 	{ MODKEY|ShiftMask,             XK_s,                     spawn,           screenshotfull },
 	{ MODKEY,                       XK_v,                     spawn,              cliphistory },
+	{ MODKEY,                       XK_n,                     spawn,                  network },
+	{ MODKEY|ShiftMask,             XK_m,                     spawn,                   sysmon },
+	{ MODKEY|ShiftMask,             XK_p,                     spawn,                powermenu },
     { MODKEY|ControlMask|ShiftMask, XK_q,                      quit,         {1} },
 };
 

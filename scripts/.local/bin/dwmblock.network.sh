@@ -1,16 +1,4 @@
 #!/bin/sh
-# Display active network name
-
-case $BLOCK_BUTTON in
-    1) 
-        if pgrep -x impala >/dev/null; then
-            pkill -x impala
-        else
-            command -v impala >/dev/null && floating-term 60 20 impala &
-        fi
-        ;;
-esac
-
 # Try to get WiFi SSID
 ssid=$(nmcli -t -f active,ssid dev wifi | grep -E '^yes' | cut -d: -f2)
 
