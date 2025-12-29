@@ -10,6 +10,10 @@ x11/.config/x11/xprofile.local
 fonts/*
 !fonts/.keep
 
+# Wallpapers (sync separately)
+wallpapers/*
+!wallpapers/.keep
+
 # Suckless build artifacts
 dwm/*.o
 dwm/dwm

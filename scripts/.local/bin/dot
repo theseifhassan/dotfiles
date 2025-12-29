@@ -55,6 +55,12 @@ cmd_link() {
     link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
     link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
 
+    # Link wallpapers if present
+    if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
+        mkdir -p "$HOME/Pictures"
+        link "$DOTFILES/wallpapers" "$HOME/Pictures/Wallpapers"
+    fi
+
 
     mkdir -p "$HOME/.local/bin"
     for f in "$DOTFILES/scripts/.local/bin/"*; do link "$f" "$HOME/.local/bin/$(basename "$f")"; done
