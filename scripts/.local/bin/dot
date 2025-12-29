@@ -15,13 +15,18 @@ cmd_update() {
     for d in dwm dmenu dwmblocks; do [ -d "$DOTFILES/$d" ] && { make -C "$DOTFILES/$d" clean >/dev/null 2>&1 || true; sudo make -C "$DOTFILES/$d" install >/dev/null; }; done
     pgrep -x dwm >/dev/null && pkill -HUP dwm
     pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
-    [ -n "$DISPLAY" ] && xrdb -I"$DOTFILES" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
+    [ -n "$DISPLAY" ] && xrdb -I"$HOME/.local/share" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
     log "Done!"
 }
 
 cmd_link() {
     log "Linking..."
     link() { mkdir -p "$(dirname "$2")"; [ -L "$2" ] && rm "$2"; [ -e "$2" ] && mv "$2" "$2.bak"; ln -s "$1" "$2"; }
+
+    # Copy defaults to XDG_DATA_HOME (decouples runtime from repo)
+    log "Copying defaults..."
+    rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
+    cp -r "$DOTFILES/default" "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
 
     link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
     link "$DOTFILES/zsh/.config/zsh" "$HOME/.config/zsh"

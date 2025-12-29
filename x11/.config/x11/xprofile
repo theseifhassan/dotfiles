@@ -1,7 +1,7 @@
 #!/bin/sh
 # X session profile - sources defaults, then machine-specific
 
-. ~/dotfiles/default/x11/xprofile
+. ~/.local/share/dotfiles/x11/xprofile
 
 # Machine-specific overrides (not tracked)
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile.local" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile.local"

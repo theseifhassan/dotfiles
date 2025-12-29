@@ -1,7 +1,3 @@
-! Xresources - User config
-! Load defaults first, then override
+! Xresources - sources defaults, then machine-specific (via xinitrc)
 
-! Include defaults
-#include "default/x11/xresources"
-
-! Machine-specific: see xresources.local (loaded separately in xinitrc)
+#include "dotfiles/x11/xresources"

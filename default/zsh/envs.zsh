@@ -26,4 +26,4 @@ export DESKTOP_SESSION=dwm
 export XDG_CURRENT_DESKTOP=dwm
 
 export DOTFILES="$HOME/dotfiles"
-export DOTS_DEFAULT="$DOTFILES/default"
+export DOTS_DEFAULT="$XDG_DATA_HOME/dotfiles"
