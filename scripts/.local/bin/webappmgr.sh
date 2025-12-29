@@ -1,45 +1,15 @@
 #!/bin/sh
-# Web app manager with Chromium profile support
-
 set -e
 
 ICONS="$HOME/.local/share/applications/icons"
 APPS="$HOME/.local/share/applications"
 BROWSER="chromium"
-CHROME_CONFIG="$HOME/.config/chromium"
 
 mkdir -p "$ICONS" "$APPS"
 
 get_apps() { grep -l "^Exec=.*--app=" "$APPS"/*.desktop 2>/dev/null | while read f; do grep '^Name=' "$f" | cut -d= -f2-; done | sort; }
 
-get_profiles() {
-    [ -d "$CHROME_CONFIG" ] || return
-    # Default profile
-    [ -d "$CHROME_CONFIG/Default" ] && echo "Default:Default"
-    # Additional profiles (Profile 1, Profile 2, etc.)
-    for d in "$CHROME_CONFIG"/Profile\ [0-9]*; do
-        [ -d "$d" ] || continue
-        dir=$(basename "$d")
-        name=$(grep -o '"name":"[^"]*"' "$d/Preferences" 2>/dev/null | head -1 | cut -d'"' -f4)
-        [ -n "$name" ] && echo "${name}:${dir}" || echo "${dir}:${dir}"
-    done
-}
-
-validate_profile() { [ -d "$CHROME_CONFIG/$1" ] && echo "$1" || echo "Default"; }
-
 create() {
-    profiles=$(get_profiles)
-    profile="Default"
-    profile_count=$(echo "$profiles" | grep -c . || echo 0)
-    
-    # Only prompt if multiple profiles exist
-    if [ "$profile_count" -gt 1 ]; then
-        sel=$(printf "Default (skip)\n%s" "$profiles" | cut -d: -f1 | dmenu -i -p "Profile:")
-        [ -z "$sel" ] && exit 0
-        [ "$sel" != "Default (skip)" ] && profile=$(echo "$profiles" | grep "^$sel:" | cut -d: -f2)
-    fi
-    profile=$(validate_profile "$profile")
-
     input=$(echo "" | dmenu -i -p "name|url|icon:")
     [ -z "$input" ] && exit 0
 
@@ -61,7 +31,7 @@ EOF
     cat > "$desktop" <<EOF
 [Desktop Entry]
 Name=$name
-Exec=$BROWSER --profile-directory="$profile" --app="$url" --class="$safe"
+Exec=$BROWSER --app="$url" --class="$safe"
 Type=Application
 Icon=$iconpath
 StartupWMClass=$safe
