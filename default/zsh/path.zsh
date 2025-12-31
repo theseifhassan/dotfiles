@@ -8,6 +8,7 @@ path=(
     "$XDG_DATA_HOME/n/bin"
     "$XDG_DATA_HOME/pnpm"
     "$XDG_DATA_HOME/bun/bin"
+    "$XDG_DATA_HOME/opencode/bin"
     $path
 )
 export PATH

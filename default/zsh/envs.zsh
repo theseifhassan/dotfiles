@@ -13,6 +13,8 @@ export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
 export CUDA_CACHE_PATH="$XDG_CACHE_HOME/nv"
 export HISTFILE="$XDG_STATE_HOME/zsh/history"
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
+export BUN_INSTALL="$XDG_DATA_HOME/bun"
+export PNPM_HOME="$XDG_DATA_HOME/pnpm"
 
 export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
 [ -n "$XDG_RUNTIME_DIR" ] && export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
