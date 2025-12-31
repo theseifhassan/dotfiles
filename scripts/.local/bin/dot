@@ -54,6 +54,8 @@ cmd_link() {
     link "$DOTFILES/git/.config/git" "$HOME/.config/git"
     link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
     link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
+    link "$DOTFILES/opencode/.config/opencode" "$HOME/.config/opencode"
+    link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
 
     # Link wallpapers if present
     if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
@@ -101,6 +103,36 @@ cmd_suckless() {
 cmd_hardware() { "$DOTFILES/install/hardware.sh" "$@"; }
 cmd_install() { "$DOTFILES/install/setup.sh"; }
 
+cmd_monitor() {
+    case "${1:-}" in
+        save)
+            [ -z "${2:-}" ] && { echo "Usage: dot monitor save <name>"; exit 1; }
+            autorandr --save "$2"
+            echo "Profile '$2' saved. Use 'dot monitor switch $2' to load it."
+            ;;
+        switch|load)
+            [ -z "${2:-}" ] && { echo "Usage: dot monitor switch <name>"; exit 1; }
+            autorandr --load "$2" --force
+            ;;
+        list)
+            autorandr
+            ;;
+        *)
+            cat <<EOF
+dot monitor <cmd>
+  save <name>    Save current display config as profile
+  switch <name>  Switch to a saved profile
+  list           List available profiles
+
+Setup guide:
+  1. With laptop screen only:  dot monitor save laptop
+  2. With external monitor:    dot monitor save docked
+  Profiles auto-switch when displays connect/disconnect.
+EOF
+            ;;
+    esac
+}
+
 cmd_help() { cat <<EOF
 dot <cmd> [args]
   update [--no-pull]  Pull, recompile, reload
@@ -109,6 +141,7 @@ dot <cmd> [args]
   suckless [target]   Recompile dwm/dmenu/dwmblocks
   hardware <cmd>      Install: nvidia|bluetooth|printer|fingerprint|virtualcam|all
                       Verify:  check [device]
+  monitor <cmd>       Manage display profiles (save|switch|list)
   install             Full setup
 EOF
 }
@@ -119,6 +152,7 @@ case "${1:-}" in
     packages) shift; cmd_packages "$@" ;;
     suckless) shift; cmd_suckless "$@" ;;
     hardware) shift; cmd_hardware "$@" ;;
+    monitor) shift; cmd_monitor "$@" ;;
     install) cmd_install ;;
     *) cmd_help ;;
 esac

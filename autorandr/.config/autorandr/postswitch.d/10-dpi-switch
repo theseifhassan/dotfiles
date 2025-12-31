@@ -1,0 +1,30 @@
+#!/bin/sh
+# autorandr postswitch hook - adjusts DPI based on profile
+# Runs after autorandr switches display profiles
+
+case "$AUTORANDR_CURRENT_PROFILE" in
+    docked|external|hidpi)
+        DPI=192
+        ;;
+    *)
+        DPI=96
+        ;;
+esac
+
+# Update Xft.dpi via xrdb
+echo "Xft.dpi: $DPI" | xrdb -merge
+
+# Restart dwm to pick up new DPI (uses restartsig patch)
+pgrep -x dwm >/dev/null && pkill -HUP dwm
+
+# Restart dwmblocks
+pgrep -x dwmblocks >/dev/null && { killall dwmblocks 2>/dev/null; dwmblocks & }
+
+# Restart dunst (reads Xft.dpi on startup)
+pgrep -x dunst >/dev/null && { killall dunst 2>/dev/null; dunst & }
+
+# Restore wallpaper for new resolution
+[ -f ~/.fehbg ] && . ~/.fehbg &
+
+# Notify user
+command -v notify-send >/dev/null && notify-send -i display "Display" "$AUTORANDR_CURRENT_PROFILE (DPI: $DPI)"

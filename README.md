@@ -22,6 +22,9 @@ dot packages -d         # show missing packages
 dot suckless [target]   # recompile dwm/dmenu/dwmblocks
 dot hardware <type>     # install drivers: nvidia|bluetooth|printer|fingerprint|virtualcam|all
 dot hardware check      # verify driver setup
+dot monitor save <name> # save current display profile
+dot monitor switch <name> # switch to a display profile
+dot monitor list        # list available profiles
 ```
 
 ## Keybinds
@@ -97,6 +100,30 @@ xrandr --dpi 192
 ```
 
 These files are gitignored and loaded automatically.
+
+## Multi-Monitor / Docking
+
+Uses [autorandr](https://github.com/phillipberndt/autorandr) for automatic display switching with per-profile DPI.
+
+### Initial Setup
+
+1. **Create laptop profile** (with only laptop screen):
+   ```sh
+   dot monitor save laptop
+   ```
+
+2. **Create docked profile** (connect external monitor, disable laptop):
+   ```sh
+   xrandr --output eDP-1 --off --output DP-2 --primary --auto
+   dot monitor save docked
+   ```
+
+### How It Works
+
+- Profiles auto-switch when displays connect/disconnect (via udev)
+- DPI adjusts automatically: `laptop` = 96, `docked` = 192
+- dwm, dwmblocks, and dunst restart to apply new DPI
+- Manual switch: `dot monitor switch <profile>`
 
 ## Structure
 

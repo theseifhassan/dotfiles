@@ -26,6 +26,7 @@ feh
 dunst
 xclip
 xsel
+autorandr
 
 # -----------------------------------------------------------------------------
 # XDG & Desktop Integration

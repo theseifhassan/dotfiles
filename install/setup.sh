@@ -45,6 +45,7 @@ command -v powerprofilesctl >/dev/null && {
     # Default to performance on desktops (no battery)
     [ ! -d /sys/class/power_supply/BAT0 ] && powerprofilesctl set performance
 }
+command -v autorandr >/dev/null && sudo systemctl enable autorandr.service 2>/dev/null || true
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg" && chmod 700 "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg"
 mkdir -p ~/.local/share/fonts && fc-cache -f
 command -v gsettings >/dev/null && {
@@ -103,6 +104,8 @@ link "$DOTFILES/dunst/.config/dunst" "$HOME/.config/dunst"
 link "$DOTFILES/git/.config/git" "$HOME/.config/git"
 link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
 link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
+link "$DOTFILES/opencode/.config/opencode" "$HOME/.config/opencode"
+link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
 
 # Link wallpapers if present
 if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
