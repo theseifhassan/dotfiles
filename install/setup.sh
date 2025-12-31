@@ -106,6 +106,7 @@ link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
 link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
 link "$DOTFILES/opencode/.config/opencode" "$HOME/.config/opencode"
 link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
+link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
 
 # Link wallpapers if present
 if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
