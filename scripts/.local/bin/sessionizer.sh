@@ -2,7 +2,7 @@
 # Tmux sessionizer - quick project switcher
 # Usage: sessionizer.sh [directory]
 
-SEARCH_DIRS="${SESSIONIZER_DIRS:-$HOME/projects $HOME/dotfiles $HOME}"
+SEARCH_DIRS="${SESSIONIZER_DIRS:-$HOME/Projects $HOME/dotfiles $HOME}"
 
 if [ -n "$1" ]; then
     selected="$1"

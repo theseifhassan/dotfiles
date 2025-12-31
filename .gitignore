@@ -1,6 +1,6 @@
 scripts/.local/bin/claude
 tmux/.config/tmux/plugins
-zsh/.config/zsh/.zcompdump
+zsh/.config/zsh/.zcompdump*
 
 # Machine-specific configs
 x11/.config/x11/xresources.local
