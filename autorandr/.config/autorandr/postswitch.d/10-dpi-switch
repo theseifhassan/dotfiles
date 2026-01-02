@@ -5,9 +5,11 @@
 case "$AUTORANDR_CURRENT_PROFILE" in
     docked|external|hidpi)
         DPI=192
+        DOCKED=1
         ;;
     *)
         DPI=96
+        DOCKED=0
         ;;
 esac
 
@@ -17,8 +19,25 @@ echo "Xft.dpi: $DPI" | xrdb -merge
 # Restart dwm to pick up new DPI (uses restartsig patch)
 pgrep -x dwm >/dev/null && pkill -HUP dwm
 
-# Restart dwmblocks
-pgrep -x dwmblocks >/dev/null && { killall dwmblocks 2>/dev/null; dwmblocks & }
+# Restart dwmblocks (always ensure it's running)
+killall dwmblocks 2>/dev/null; dwmblocks &
+
+# Power management: disable lid/idle sleep when docked
+# Done last because HUP to logind can affect user processes
+if [ "$DOCKED" = "1" ]; then
+    sudo mkdir -p /etc/systemd/logind.conf.d
+    sudo tee /etc/systemd/logind.conf.d/docked.conf >/dev/null << 'EOF'
+[Login]
+HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+IdleAction=ignore
+EOF
+else
+    sudo rm -f /etc/systemd/logind.conf.d/docked.conf
+fi
+# Use loginctl reload - gentler than HUP signal
+sudo loginctl reload
 
 # Restart dunst (reads Xft.dpi on startup)
 pgrep -x dunst >/dev/null && { killall dunst 2>/dev/null; dunst & }
