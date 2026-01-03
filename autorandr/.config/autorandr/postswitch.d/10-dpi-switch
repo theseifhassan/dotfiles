@@ -42,11 +42,8 @@ sudo loginctl reload
 # Restart dunst (reads Xft.dpi on startup)
 pgrep -x dunst >/dev/null && { killall dunst 2>/dev/null; dunst & }
 
-# Reload ghostty config (sends ctrl+shift+, to all ghostty windows)
-# Ghostty reads Xft.dpi on config reload
-for wid in $(xdotool search --class ghostty 2>/dev/null); do
-    xdotool key --window "$wid" ctrl+shift+comma
-done
+# Restart ghostty (doesn't respond to DPI changes even on reload)
+pgrep -x ghostty >/dev/null && { killall ghostty 2>/dev/null; ghostty & }
 
 # Restart chromium (no hot-reload for DPI)
 # Uses --restore-last-session to recover tabs
