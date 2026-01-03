@@ -42,6 +42,17 @@ sudo loginctl reload
 # Restart dunst (reads Xft.dpi on startup)
 pgrep -x dunst >/dev/null && { killall dunst 2>/dev/null; dunst & }
 
+# Restart ghostty (doesn't respond to DPI changes)
+pgrep -x ghostty >/dev/null && { killall ghostty 2>/dev/null; ghostty & }
+
+# Restart chromium (doesn't respond to DPI changes)
+# Uses --restore-last-session to recover tabs
+if pgrep -x chromium >/dev/null; then
+    killall chromium 2>/dev/null
+    sleep 0.5
+    chromium --restore-last-session &
+fi
+
 # Restore wallpaper for new resolution
 [ -f ~/.fehbg ] && . ~/.fehbg &
 
