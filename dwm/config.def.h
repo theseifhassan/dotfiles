@@ -112,10 +112,7 @@ static const Arg restartdwmblocks = SHCMD("killall dwmblocks && dwmblocks &");
 /* Audio */
 static const Arg audio = SHCMD("audio.sh");
 
-/* System monitors */
-static const Arg network = SHCMD("floating-term 60 20 impala");
-static const Arg sysmon = SHCMD("floating-term 100 30 btop");
-static const Arg powermenu = SHCMD("power-menu.sh");
+/* System */
 static const Arg statustoggle = SHCMD("statusbar-toggle.sh");
 
 static const Key keys[] = {
@@ -188,9 +185,6 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_a,                     spawn,                    audio },
 	{ MODKEY,                       XK_s,                     spawn,               screenshot },
 	{ MODKEY|ShiftMask,             XK_s,                     spawn,           screenshotfull },
-	{ MODKEY,                       XK_n,                     spawn,                  network },
-	{ MODKEY|ShiftMask,             XK_m,                     spawn,                   sysmon },
-	{ MODKEY|ShiftMask,             XK_p,                     spawn,                powermenu },
 	{ MODKEY,                       XK_grave,                 spawn,             statustoggle },
 	{ MODKEY|ControlMask|ShiftMask, XK_q,                     quit,           {1} },
 };
