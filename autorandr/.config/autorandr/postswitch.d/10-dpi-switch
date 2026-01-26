@@ -33,8 +33,17 @@ HandleLidSwitchExternalPower=ignore
 HandleLidSwitchDocked=ignore
 IdleAction=ignore
 EOF
+    # Disable DPMS and screensaver when docked
+    xset s off          # disable screensaver
+    xset s noblank      # disable screen blanking
+    xset -dpms          # disable DPMS (monitor power management)
 else
     sudo rm -f /etc/systemd/logind.conf.d/docked.conf
+    # Re-enable DPMS when undocked (10min standby, 15min suspend, 20min off)
+    xset s on
+    xset s blank
+    xset +dpms
+    xset dpms 600 900 1200
 fi
 # Use loginctl reload - gentler than HUP signal
 sudo loginctl reload
