@@ -1,7 +1,11 @@
 #!/bin/sh
+set -e
 # Take screenshots with scrot, copy to clipboard and save to disk
 # Usage: screenshot.sh [select]
 #   select - Select region to capture (omit for full screen)
+
+command -v scrot >/dev/null || { echo "scrot required"; exit 1; }
+command -v xclip >/dev/null || { echo "xclip required"; exit 1; }
 
 DIR="$HOME/Pictures/Screenshots"
 mkdir -p "$DIR"

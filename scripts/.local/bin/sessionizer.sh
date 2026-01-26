@@ -1,13 +1,19 @@
 #!/bin/sh
+set -e
 # Tmux sessionizer - quick project switcher
 # Usage: sessionizer.sh [directory]
+
+command -v fzf >/dev/null || { echo "fzf required"; exit 1; }
+command -v tmux >/dev/null || { echo "tmux required"; exit 1; }
 
 SEARCH_DIRS="${SESSIONIZER_DIRS:-$HOME/Projects $HOME/dotfiles $HOME}"
 
 if [ -n "$1" ]; then
     selected="$1"
 else
-    selected=$(find $SEARCH_DIRS -mindepth 1 -maxdepth 1 -type d 2>/dev/null | fzf)
+    # Word splitting is intentional here for multiple directories
+    # shellcheck disable=SC2086
+    selected=$(find $SEARCH_DIRS -mindepth 1 -maxdepth 1 -type d 2>/dev/null | fzf) || exit 0
 fi
 
 [ -z "$selected" ] && exit 0

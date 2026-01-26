@@ -25,8 +25,10 @@ cmd_link() {
 
     # Copy defaults to XDG_DATA_HOME (decouples runtime from repo)
     log "Copying defaults..."
-    rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
-    cp -r "$DOTFILES/default" "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
+    target="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
+    case "$target" in */dotfiles) ;; *) echo "Safety check failed: $target"; exit 1 ;; esac
+    rm -rf "$target"
+    cp -r "$DOTFILES/default" "$target"
 
     # Install fonts if present
     if [ -d "$DOTFILES/fonts" ] && [ "$(ls -A "$DOTFILES/fonts" 2>/dev/null | grep -v .keep)" ]; then
@@ -92,7 +94,7 @@ cmd_packages() {
         exit 0
     }
     log "Installing..."
-    yay -S --needed --noconfirm $(grep -vE "^\s*#|^\s*$" "$PKGFILE" | tr '\n' ' ')
+    grep -vE "^\s*#|^\s*$" "$PKGFILE" | xargs yay -S --needed --noconfirm
 }
 
 cmd_suckless() {
@@ -153,17 +155,18 @@ cmd_wallpaper() {
     
     # Get current wallpaper from feh state
     current=""
-    [ -f "$HOME/.fehbg" ] && current=$(grep -oP "(?<=')[^']+(?='[^']*$)" "$HOME/.fehbg" 2>/dev/null || true)
-    
+    [ -f "$HOME/.fehbg" ] && current=$(sed -n "s/.*'\([^']*\)'[^']*$/\1/p" "$HOME/.fehbg" 2>/dev/null || true)
+
     # Find current index
     idx=0
     if [ -n "$current" ]; then
         i=0
-        echo "$wallpapers" | while IFS= read -r w; do
-            [ "$w" = "$current" ] && { echo "$i" > "$STATE_FILE"; break; }
+        while IFS= read -r w; do
+            [ "$w" = "$current" ] && { idx=$i; break; }
             i=$((i + 1))
-        done
-        [ -f "$STATE_FILE" ] && idx=$(cat "$STATE_FILE")
+        done <<EOF
+$wallpapers
+EOF
     fi
     
     set_wallpaper() {

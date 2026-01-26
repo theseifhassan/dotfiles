@@ -23,10 +23,13 @@ EOF
 
     [ -f "$desktop" ] && { notify-send "Error" "Already exists"; exit 1; }
 
+    # Escape URL for safe use in Exec= line (prevent command injection)
+    url_escaped=$(printf '%s' "$url" | sed "s/'/'\\\\''/g; s/\"/\\\\\"/g; s/%/%%/g")
+
     cat > "$desktop" <<EOF
 [Desktop Entry]
 Name=$name
-Exec=$BROWSER --app="$url" --class="$safe"
+Exec=$BROWSER --app='$url_escaped' --class="$safe"
 Type=Application
 Icon=google-chrome
 StartupWMClass=$safe
@@ -43,8 +46,8 @@ remove() {
     [ "$(printf "No\nYes" | dmenu -i -p "Remove $sel?")" != "Yes" ] && exit 0
 
     file=$(grep -l "^Name=$sel$" "$APPS"/*.desktop 2>/dev/null | head -1)
-    rm -f "$file"
-    notify-send "Removed" "$sel"
+    [ -z "$file" ] && { notify-send "Error" "App not found"; exit 1; }
+    rm -f "$file" && notify-send "Removed" "$sel"
 }
 
 launch() {
