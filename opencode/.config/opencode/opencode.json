@@ -13,7 +13,7 @@
         "next-devtools": {
             "type": "local",
             "command": [
-                "bunx",
+                "npx",
                 "-y",
                 "next-devtools-mcp@latest"
             ],
