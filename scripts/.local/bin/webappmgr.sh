@@ -2,7 +2,7 @@
 set -e
 
 APPS="$HOME/.local/share/applications"
-BROWSER="chromium"
+BROWSER="${BROWSER:-google-chrome-stable}"
 
 mkdir -p "$APPS"
 
@@ -28,7 +28,7 @@ EOF
 Name=$name
 Exec=$BROWSER --app="$url" --class="$safe"
 Type=Application
-Icon=chromium
+Icon=google-chrome
 StartupWMClass=$safe
 EOF
     chmod 644 "$desktop"
