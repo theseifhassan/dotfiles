@@ -21,6 +21,7 @@ export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
+export BROWSER="google-chrome-stable"
 
 export QT_QPA_PLATFORMTHEME="gtk2"
 export XDG_SESSION_TYPE=x11
