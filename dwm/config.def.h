@@ -110,7 +110,14 @@ static const Arg screenshotfull = SHCMD("screenshot.sh");
 
 static const Arg restartdwmblocks = SHCMD("killall dwmblocks && dwmblocks &");
 
+/* Audio */
 static const Arg audio = SHCMD("audio.sh");
+
+/* System monitors */
+static const Arg network = SHCMD("floating-term 60 20 impala");
+static const Arg sysmon = SHCMD("floating-term 100 30 btop");
+static const Arg powermenu = SHCMD("power-menu.sh");
+static const Arg statustoggle = SHCMD("statusbar-toggle.sh");
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -167,7 +174,7 @@ static const Key keys[] = {
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
-    { 0,                            XF86XK_AudioPlay,         spawn,          medplaypausecmd },
+	{ 0,                            XF86XK_AudioPlay,         spawn,          medplaypausecmd },
 	{ 0,                            XF86XK_AudioPause,        spawn,          medplaypausecmd },
 	{ 0,                            XF86XK_AudioNext,         spawn,               mednextcmd },
 	{ 0,                            XF86XK_AudioPrev,         spawn,               medprevcmd },
@@ -182,7 +189,11 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_a,                     spawn,                    audio },
 	{ MODKEY,                       XK_s,                     spawn,               screenshot },
 	{ MODKEY|ShiftMask,             XK_s,                     spawn,           screenshotfull },
-    { MODKEY|ControlMask|ShiftMask, XK_q,                      quit,         {1} },
+	{ MODKEY,                       XK_n,                     spawn,                  network },
+	{ MODKEY|ShiftMask,             XK_m,                     spawn,                   sysmon },
+	{ MODKEY|ShiftMask,             XK_p,                     spawn,                powermenu },
+	{ MODKEY,                       XK_grave,                 spawn,             statustoggle },
+	{ MODKEY|ControlMask|ShiftMask, XK_q,                     quit,           {1} },
 };
 
 /* button definitions */
