@@ -30,33 +30,37 @@ bool status_update(status *const status) {
     (void)strncpy(status->previous, status->current, LEN(status->current));
     status->current[0] = '\0';
 
+    size_t pos = 0;
+    const size_t max_len = LEN(status->current);
+
     for (unsigned short i = 0; i < status->block_count; ++i) {
         const block *const block = &status->blocks[i];
 
         if (strlen(block->output) > 0) {
 #if LEADING_DELIMITER
-            (void)strncat(status->current, DELIMITER, LEN(DELIMITER));
+            pos += snprintf(status->current + pos, max_len - pos, "%s", DELIMITER);
 #else
-            if (status->current[0] != '\0') {
-                (void)strncat(status->current, DELIMITER, LEN(DELIMITER));
+            if (pos > 0) {
+                pos += snprintf(status->current + pos, max_len - pos, "%s", DELIMITER);
             }
 #endif
 
 #if CLICKABLE_BLOCKS
             if (block->signal > 0) {
-                const char signal[] = {(char)block->signal, '\0'};
-                (void)strncat(status->current, signal, LEN(signal));
+                if (pos < max_len - 1) {
+                    status->current[pos++] = (char)block->signal;
+                    status->current[pos] = '\0';
+                }
             }
 #endif
 
-            (void)strncat(status->current, block->icon, LEN(block->output));
-            (void)strncat(status->current, block->output, LEN(block->output));
+            pos += snprintf(status->current + pos, max_len - pos, "%s%s", block->icon, block->output);
         }
     }
 
 #if TRAILING_DELIMITER
-    if (status->current[0] != '\0') {
-        (void)strncat(status->current, DELIMITER, LEN(DELIMITER));
+    if (pos > 0) {
+        (void)snprintf(status->current + pos, max_len - pos, "%s", DELIMITER);
     }
 #endif
 
