@@ -1,6 +1,12 @@
 #!/bin/sh
 # autorandr postswitch hook - adjusts DPI based on profile
 # Runs after autorandr switches display profiles
+#
+# NOTE: Requires passwordless sudo for power management. Add to /etc/sudoers.d/autorandr:
+#   %wheel ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /etc/systemd/logind.conf.d
+#   %wheel ALL=(ALL) NOPASSWD: /usr/bin/tee /etc/systemd/logind.conf.d/docked.conf
+#   %wheel ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/systemd/logind.conf.d/docked.conf
+#   %wheel ALL=(ALL) NOPASSWD: /usr/bin/loginctl reload
 
 case "$AUTORANDR_CURRENT_PROFILE" in
     docked|external|hidpi)
