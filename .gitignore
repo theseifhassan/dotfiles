@@ -5,6 +5,7 @@ zsh/.config/zsh/.zcompdump*
 # Machine-specific configs
 x11/.config/x11/xresources.local
 x11/.config/x11/xprofile.local
+git/.config/git/config.local
 
 # Autorandr profiles (machine-specific, created via `dot monitor save`)
 autorandr/.config/autorandr/*/config
@@ -25,4 +26,3 @@ dmenu/*.o
 dmenu/dmenu
 dmenu/stest
 dwmblocks/dwmblocks
-zsh/.config/zsh/.zcompdump

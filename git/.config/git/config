@@ -1,3 +1,5 @@
 [user]
-	email = theseifhassan@gmail.com
 	name = theseifhassan
+
+[include]
+	path = ~/.config/git/config.local
