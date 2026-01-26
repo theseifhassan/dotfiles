@@ -105,6 +105,72 @@ cmd_suckless() {
 cmd_hardware() { "$DOTFILES/install/hardware.sh" "$@"; }
 cmd_install() { "$DOTFILES/install/setup.sh"; }
 
+cmd_wallpaper() {
+    WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
+    STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper_index"
+    
+    [ ! -d "$WALLPAPER_DIR" ] && { echo "Wallpaper dir not found: $WALLPAPER_DIR"; exit 1; }
+    
+    # Get sorted list of wallpapers
+    wallpapers=$(find -L "$WALLPAPER_DIR" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) | sort)
+    count=$(echo "$wallpapers" | grep -c . || echo 0)
+    [ "$count" -eq 0 ] && { echo "No wallpapers found"; exit 1; }
+    
+    # Get current wallpaper from feh state
+    current=""
+    [ -f "$HOME/.fehbg" ] && current=$(grep -oP "(?<=')[^']+(?='[^']*$)" "$HOME/.fehbg" 2>/dev/null || true)
+    
+    # Find current index
+    idx=0
+    if [ -n "$current" ]; then
+        i=0
+        echo "$wallpapers" | while IFS= read -r w; do
+            [ "$w" = "$current" ] && { echo "$i" > "$STATE_FILE"; break; }
+            i=$((i + 1))
+        done
+        [ -f "$STATE_FILE" ] && idx=$(cat "$STATE_FILE")
+    fi
+    
+    set_wallpaper() {
+        wp=$(echo "$wallpapers" | sed -n "$((${1} + 1))p")
+        [ -n "$wp" ] && { feh --bg-fill "$wp"; echo "$1" > "$STATE_FILE"; echo "Set: $(basename "$wp")"; }
+    }
+    
+    case "${1:-}" in
+        next)
+            new_idx=$(( (idx + 1) % count ))
+            set_wallpaper "$new_idx"
+            ;;
+        prev)
+            new_idx=$(( (idx - 1 + count) % count ))
+            set_wallpaper "$new_idx"
+            ;;
+        random)
+            new_idx=$(shuf -i 0-$((count - 1)) -n 1)
+            set_wallpaper "$new_idx"
+            ;;
+        current|status)
+            [ -n "$current" ] && echo "Current: $(basename "$current")" || echo "No wallpaper set"
+            echo "Total: $count wallpapers"
+            ;;
+        list)
+            echo "$wallpapers" | while IFS= read -r w; do
+                [ "$w" = "$current" ] && echo "* $(basename "$w")" || echo "  $(basename "$w")"
+            done
+            ;;
+        *)
+            cat <<EOF
+dot wallpaper <cmd>
+  next      Next wallpaper in sequence
+  prev      Previous wallpaper
+  random    Random wallpaper
+  current   Show current wallpaper
+  list      List all wallpapers (* = current)
+EOF
+            ;;
+    esac
+}
+
 cmd_monitor() {
     case "${1:-}" in
         save)
@@ -144,6 +210,7 @@ dot <cmd> [args]
   hardware <cmd>      Install: nvidia|bluetooth|printer|fingerprint|virtualcam|all
                       Verify:  check [device]
   monitor <cmd>       Manage display profiles (save|switch|list)
+  wallpaper <cmd>     Cycle wallpapers (next|prev|random|current|list)
   install             Full setup
 EOF
 }
@@ -155,6 +222,7 @@ case "${1:-}" in
     suckless) shift; cmd_suckless "$@" ;;
     hardware) shift; cmd_hardware "$@" ;;
     monitor) shift; cmd_monitor "$@" ;;
+    wallpaper|wp) shift; cmd_wallpaper "$@" ;;
     install) cmd_install ;;
     *) cmd_help ;;
 esac
