@@ -2,7 +2,6 @@
 
 #include <X11/XF86keysym.h>
 
-#define SESSION_FILE "/tmp/dwm-session"
 #define STATUSBAR "dwmblocks"
 
 /* appearance */

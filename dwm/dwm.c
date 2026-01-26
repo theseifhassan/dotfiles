@@ -1434,10 +1434,22 @@ propertynotify(XEvent *e)
 	}
 }
 
+static const char *
+getsessionfile(void)
+{
+	static char path[256];
+	const char *runtime = getenv("XDG_RUNTIME_DIR");
+	if (runtime)
+		snprintf(path, sizeof(path), "%s/dwm-session", runtime);
+	else
+		snprintf(path, sizeof(path), "%s/.local/state/dwm-session", getenv("HOME"));
+	return path;
+}
+
 void
 saveSession(void)
 {
-	FILE *fw = fopen(SESSION_FILE, "w");
+	FILE *fw = fopen(getsessionfile(), "w");
 	for (Client *c = selmon->clients; c != NULL; c = c->next) { // get all the clients with their tags and write them to the file
 		fprintf(fw, "%lu %u\n", c->win, c->tags);
 	}
@@ -1448,7 +1460,7 @@ void
 restoreSession(void)
 {
 	// restore session
-	FILE *fr = fopen(SESSION_FILE, "r");
+	FILE *fr = fopen(getsessionfile(), "r");
 	if (!fr)
 		return;
 
@@ -1480,7 +1492,7 @@ restoreSession(void)
 	fclose(fr);
 	
 	// delete a file
-	remove(SESSION_FILE);
+	remove(getsessionfile());
 }
 
 void
