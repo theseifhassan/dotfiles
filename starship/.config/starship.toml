@@ -4,17 +4,10 @@ add_newline = false
 
 
 format = """
-$username\
 $hostname\
 $directory\
 $git_branch\
 \\$ """
-
-["username"]
-style_user="plain"
-show_always = true
-format = "[$user]($style)@"
-disabled = true
 
 ["hostname"]
 style="plain"
