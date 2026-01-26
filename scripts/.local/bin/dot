@@ -58,6 +58,7 @@ cmd_link() {
     link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
     link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
     link "$DOTFILES/npm/.config/npm" "$HOME/.config/npm"
+    link "$DOTFILES/mise/.config/mise" "$HOME/.config/mise"
 
     # Link wallpapers if present
     if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
@@ -104,6 +105,40 @@ cmd_suckless() {
 
 cmd_hardware() { "$DOTFILES/install/hardware.sh" "$@"; }
 cmd_install() { "$DOTFILES/install/setup.sh"; }
+
+cmd_tools() {
+    command -v mise >/dev/null 2>&1 || {
+        log "Installing mise..."
+        curl https://mise.run | sh
+        export PATH="$HOME/.local/bin:$PATH"
+    }
+
+    case "${1:-}" in
+        install|"")
+            log "Installing tools via mise..."
+            mise install
+            ;;
+        upgrade)
+            log "Upgrading tools..."
+            mise upgrade
+            ;;
+        list)
+            mise list
+            ;;
+        outdated)
+            mise outdated
+            ;;
+        *)
+            cat <<EOF
+dot tools <cmd>
+  install     Install all tools from mise config (default)
+  upgrade     Upgrade all tools to latest
+  list        List installed tools
+  outdated    Show outdated tools
+EOF
+            ;;
+    esac
+}
 
 cmd_wallpaper() {
     WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
@@ -206,6 +241,7 @@ dot <cmd> [args]
   update [--no-pull]  Pull, recompile, reload
   link                Symlink configs
   packages [-d]       Install packages (-d: show missing)
+  tools <cmd>         Manage dev tools via mise (install|upgrade|list|outdated)
   suckless [target]   Recompile dwm/dmenu/dwmblocks
   hardware <cmd>      Install: nvidia|bluetooth|printer|fingerprint|virtualcam|all
                       Verify:  check [device]
@@ -219,6 +255,7 @@ case "${1:-}" in
     update) shift; cmd_update "$@" ;;
     link) cmd_link ;;
     packages) shift; cmd_packages "$@" ;;
+    tools) shift; cmd_tools "$@" ;;
     suckless) shift; cmd_suckless "$@" ;;
     hardware) shift; cmd_hardware "$@" ;;
     monitor) shift; cmd_monitor "$@" ;;

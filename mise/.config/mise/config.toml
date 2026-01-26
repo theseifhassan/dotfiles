@@ -1,0 +1,53 @@
+# =============================================================================
+# Mise Global Configuration
+# =============================================================================
+# Tools managed by mise instead of system packages
+# Run: mise install
+# =============================================================================
+
+[tools]
+# -----------------------------------------------------------------------------
+# Runtimes
+# -----------------------------------------------------------------------------
+node = "lts"
+go = "latest"
+python = "3.12"
+rust = "latest"
+
+# -----------------------------------------------------------------------------
+# Package Managers
+# -----------------------------------------------------------------------------
+pnpm = "latest"
+bun = "latest"
+
+# -----------------------------------------------------------------------------
+# CLI Utilities (faster updates than system packages)
+# -----------------------------------------------------------------------------
+ripgrep = "latest"
+fd = "latest"
+fzf = "latest"
+bat = "latest"
+eza = "latest"
+zoxide = "latest"
+starship = "latest"
+yazi = "latest"
+btop = "latest"
+
+# -----------------------------------------------------------------------------
+# Development Tools
+# -----------------------------------------------------------------------------
+neovim = "latest"
+lazygit = "latest"
+lazydocker = "latest"
+delta = "latest"
+
+# -----------------------------------------------------------------------------
+# Settings
+# -----------------------------------------------------------------------------
+[settings]
+# Always use latest when "latest" specified
+legacy_version_file = false
+# Show installation progress
+verbose = false
+# Auto-install missing tools when entering directory
+auto_install = true
