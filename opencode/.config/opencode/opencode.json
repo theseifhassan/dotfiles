@@ -14,8 +14,7 @@
             "type": "local",
             "command": [
                 "npx",
-                "-y",
-                "next-devtools-mcp@latest"
+                "next-devtools-mcp"
             ],
             "enabled": true
         },
@@ -23,7 +22,6 @@
             "type": "local",
             "command": [
                 "npx",
-                "-y",
                 "mcp-remote",
                 "https://mcp.linear.app/mcp"
             ],
