@@ -30,11 +30,21 @@ cmd_link() {
     rm -rf "$target"
     cp -r "$DOTFILES/default" "$target"
 
+    # Clone private fonts repo if not present
+    if [ ! -d "$DOTFILES/fonts/.git" ]; then
+        log "Cloning private fonts..."
+        rm -rf "$DOTFILES/fonts"
+        git clone git@github.com:theseifhassan/fonts.git "$DOTFILES/fonts" 2>/dev/null || {
+            log "Could not clone fonts (private repo - need SSH key)"
+            mkdir -p "$DOTFILES/fonts"
+        }
+    fi
+
     # Install fonts if present
-    if [ -d "$DOTFILES/fonts" ] && [ "$(ls -A "$DOTFILES/fonts" 2>/dev/null | grep -v .keep)" ]; then
+    if [ -d "$DOTFILES/fonts" ] && [ "$(ls -A "$DOTFILES/fonts" 2>/dev/null | grep -v .keep | grep -v .git)" ]; then
         log "Installing fonts..."
         mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
-        cp -r "$DOTFILES/fonts/"* "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" 2>/dev/null || true
+        find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" \;
         fc-cache -f
     fi
 
@@ -247,7 +257,8 @@ dot <cmd> [args]
   tools <cmd>         Manage dev tools via mise (install|upgrade|list|outdated)
   suckless [target]   Recompile dwm/dmenu/dwmblocks
   hardware <cmd>      Install: nvidia|bluetooth|printer|fingerprint|virtualcam|all
-                      Verify:  check [device]
+                      nvidia disable - Disable GPU for max battery
+                      Verify: check [device]
   monitor <cmd>       Manage display profiles (save|switch|list)
   wallpaper <cmd>     Cycle wallpapers (next|prev|random|current|list)
   install             Full setup
