@@ -99,8 +99,7 @@ static const Arg volup   = SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ -l 1
 static const Arg voldown = SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- && pkill -RTMIN+10 dwmblocks");
 static const Arg volmute = SHCMD("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && pkill -RTMIN+10 dwmblocks");
 
-/* Webapp commands */
-static const Arg webrun  = SHCMD("webappmgr.sh launch");
+/* Webapp manager */
 static const Arg webappmgr  = SHCMD("webappmgr.sh");
 
 /* Screenshot commands */
@@ -180,7 +179,6 @@ static const Key keys[] = {
 	{ 0,                            XF86XK_AudioLowerVolume,  spawn,                  voldown },
 	{ 0,                            XF86XK_AudioMute,         spawn,                  volmute },
 	{ MODKEY|ShiftMask,             XK_b,                     spawn,         restartdwmblocks },
-	{ MODKEY,                       XK_w,                     spawn,                   webrun },
 	{ MODKEY|ShiftMask,             XK_w,                     spawn,                webappmgr },
 	{ MODKEY|ShiftMask,             XK_a,                     spawn,                    audio },
 	{ MODKEY,                       XK_s,                     spawn,               screenshot },

@@ -60,12 +60,11 @@ dot wallpaper next|prev|random  # cycle wallpapers
 ### Apps
 | Key | Action |
 |-----|--------|
-| `mod+p` | dmenu |
+| `mod+p` | dmenu (includes web apps) |
 | `mod+shift+enter` | terminal |
 | `mod+s` | screenshot (select) |
 | `mod+shift+s` | screenshot (full) |
-| `mod+w` | launch webapp |
-| `mod+shift+w` | manage webapps |
+| `mod+shift+w` | manage web apps (create/remove) |
 | `mod+shift+a` | audio switcher (sinks/sources) |
 
 ### System

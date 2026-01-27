@@ -1,0 +1,39 @@
+#!/bin/sh
+# Custom dmenu_run that includes .desktop applications alongside PATH executables
+
+DESKTOP_DIRS="${XDG_DATA_HOME:-$HOME/.local/share}/applications /usr/share/applications /usr/local/share/applications"
+
+# Get .desktop app names
+get_desktop_apps() {
+    for dir in $DESKTOP_DIRS; do
+        [ -d "$dir" ] || continue
+        for f in "$dir"/*.desktop; do
+            [ -f "$f" ] || continue
+            grep -q "^NoDisplay=true" "$f" 2>/dev/null && continue
+            grep -q "^Hidden=true" "$f" 2>/dev/null && continue
+            grep "^Name=" "$f" | head -1 | cut -d= -f2-
+        done
+    done
+}
+
+# Find .desktop file by Name and run it
+run_desktop() {
+    for dir in $DESKTOP_DIRS; do
+        [ -d "$dir" ] || continue
+        for f in "$dir"/*.desktop; do
+            [ -f "$f" ] || continue
+            if grep -q "^Name=$1$" "$f" 2>/dev/null; then
+                exec dex "$f" &
+                exit 0
+            fi
+        done
+    done
+    return 1
+}
+
+# Combine PATH commands and desktop apps, let user pick
+sel=$( { dmenu_path; get_desktop_apps; } | sort -u | dmenu -i "$@")
+[ -z "$sel" ] && exit 0
+
+# Try as .desktop app first, then as command
+run_desktop "$sel" 2>/dev/null || exec ${SHELL:-/bin/sh} -c "$sel" &
