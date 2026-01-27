@@ -1,22 +1,29 @@
 #!/bin/sh
 set -e
-# Take screenshots with scrot, copy to clipboard and save to disk
-# Usage: screenshot.sh [select]
-#   select - Select region to capture (omit for full screen)
+# Screenshot tool using maim (works properly with compositors)
+# Usage: screenshot.sh [select|window]
+#   select - Select region to capture
+#   window - Capture focused window
+#   (none) - Capture full screen
 
-command -v scrot >/dev/null || { echo "scrot required"; exit 1; }
-command -v xclip >/dev/null || { echo "xclip required"; exit 1; }
+command -v maim >/dev/null || { notify-send "Error" "maim required"; exit 1; }
 
 DIR="$HOME/Pictures/Screenshots"
 mkdir -p "$DIR"
 FILE="$DIR/$(date +%Y-%m-%d_%H-%M-%S).png"
 
-if [ "$1" = "select" ]; then
-    scrot -s "$FILE"
-else
-    scrot "$FILE"
-fi
+case "${1:-}" in
+    select)
+        maim -s -u "$FILE" || exit 0
+        ;;
+    window)
+        maim -i "$(xdotool getactivewindow)" -u "$FILE"
+        ;;
+    *)
+        maim -u "$FILE"
+        ;;
+esac
 
 # Copy to clipboard and notify
 xclip -selection clipboard -target image/png -i "$FILE"
-notify-send --icon=blank "Screenshot" "Saved to $FILE"
+notify-send "Screenshot" "Saved to $FILE"
