@@ -38,6 +38,7 @@ static const Rule rules[] = {
 	 */
 	/* class      instance    title       tags mask     iscentered   isfloating   monitor */
 	{ NULL,       "floating", NULL,       0,            1,           1,           -1 },
+	{ "1Password", NULL,      NULL,       0,            1,           1,           -1 },
 };
 
 /* layout(s) */

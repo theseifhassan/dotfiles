@@ -132,6 +132,6 @@ envycontrol
 # system-config-printer
 
 # -----------------------------------------------------------------------------
-# Optional: Fingerprint (uncomment if needed)
+# Fingerprint (1Password authentication)
 # -----------------------------------------------------------------------------
-# fprintd
+fprintd

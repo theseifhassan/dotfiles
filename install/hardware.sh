@@ -67,7 +67,12 @@ check_fingerprint() {
     lsusb | grep -qi "fingerprint\|goodix\|synaptics\|elan" || { echo "No fingerprint reader"; return 0; }
     err=0
     pacman -Q fprintd >/dev/null 2>&1 && ok "fprintd installed" || { fail "fprintd not installed"; err=1; }
-    fprintd-list "$USER" >/dev/null 2>&1 && ok "fingerprint enrolled" || { fail "no fingerprint enrolled"; err=1; }
+    fprintd-list "$USER" 2>/dev/null | grep -q "right-index-finger\|left-index-finger" && ok "fingerprint enrolled" || { fail "no fingerprint enrolled (run: fprintd-enroll)"; err=1; }
+    [ -f /usr/local/bin/lid-check.sh ] && ok "lid-check.sh installed" || { fail "lid-check.sh not installed"; err=1; }
+    [ -f /etc/pam.d/polkit-1 ] && grep -q "pam_fprintd.so" /etc/pam.d/polkit-1 && ok "polkit-1 has fprintd" || { fail "polkit-1 not configured"; err=1; }
+    # Verify fingerprint is NOT in sudo or system-auth (security check)
+    ! grep -q "pam_fprintd.so" /etc/pam.d/sudo 2>/dev/null && ok "sudo does NOT have fprintd (correct)" || { fail "SECURITY: sudo has fprintd (remove it!)"; err=1; }
+    ! grep -q "pam_fprintd.so" /etc/pam.d/system-auth 2>/dev/null && ok "system-auth does NOT have fprintd (correct)" || { fail "SECURITY: system-auth has fprintd (remove it!)"; err=1; }
     [ $err -eq 0 ] && echo "Fingerprint: all good" || echo "Fingerprint: issues found"
 }
 
@@ -214,7 +219,28 @@ install_printer() {
 install_fingerprint() {
     lsusb | grep -qi "fingerprint\|goodix\|synaptics\|elan" || { echo "No fingerprint reader"; return 0; }
     $PKG fprintd
-    echo "Enroll: fprintd-enroll"
+
+    # Install lid-check script (skips fingerprint when lid closed/docked)
+    DOTFILES="${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
+    sudo install -m755 "$DOTFILES/scripts/.local/bin/lid-check.sh" /usr/local/bin/lid-check.sh
+
+    # Configure polkit-1 for fingerprint (1Password uses polkit for system auth)
+    # NOTE: We ONLY configure polkit-1, NOT sudo/login/system-auth
+    sudo tee /etc/pam.d/polkit-1 >/dev/null <<'EOF'
+# Fingerprint for polkit (1Password) - skips if lid closed
+auth    [success=ok default=1]  pam_exec.so quiet /usr/local/bin/lid-check.sh
+auth    sufficient              pam_fprintd.so
+auth    include                 system-auth
+account include                 system-auth
+password include                system-auth
+session include                 system-auth
+EOF
+
+    echo ""
+    echo "Fingerprint configured for 1Password only."
+    echo "Next steps:"
+    echo "  1. Enroll fingerprint: fprintd-enroll"
+    echo "  2. Enable in 1Password: Settings > Security > 'Unlock using system authentication'"
 }
 
 install_virtualcam() {
