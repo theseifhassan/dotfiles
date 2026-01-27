@@ -62,11 +62,7 @@ dot monitor list        # list available profiles
 | `mod+shift+s` | screenshot (full) |
 | `mod+w` | launch webapp |
 | `mod+shift+w` | manage webapps |
-| `mod+v` | clipboard history |
-| `mod+shift+a` | audio settings |
-| `mod+n` | network (impala) |
-| `mod+shift+m` | system monitor (btop) |
-| `mod+shift+p` | power profile menu |
+| `mod+shift+a` | audio switcher (sinks/sources) |
 
 ### System
 | Key | Action |
@@ -150,6 +146,44 @@ source "$DOTS_DEFAULT/zsh/rc"
 # your overrides here
 ```
 
+## SSH Keys (1Password)
+
+SSH keys are managed via **1Password SSH Agent** - no more copying keys between machines.
+
+### First-Time Setup
+
+1. **Install 1Password** and sign in
+
+2. **Enable SSH Agent** in 1Password:
+   - Settings → Developer → Turn on "SSH Agent"
+
+3. **Add your SSH key to 1Password**:
+   - Create new item → SSH Key
+   - Either import existing key or generate new one
+   - For GitHub: copy public key and add to github.com/settings/keys
+
+4. **Run `dot link`** - this creates `~/.ssh/config` pointing to 1Password agent
+
+### New Machine Setup
+
+On a new machine, just:
+1. Install 1Password and sign in
+2. Enable SSH Agent in settings
+3. Run `dot link`
+4. Done - your SSH keys are available
+
+The config at `~/.ssh/config` routes all SSH through the 1Password agent:
+```
+Host *
+    IdentityAgent "~/.1password/agent.sock"
+```
+
+## Private Fonts
+
+Paid/private fonts are stored in a separate private repo and cloned automatically during `dot link`.
+
+If you have access (SSH key configured), fonts are installed to `~/.local/share/fonts`.
+
 ## Stack
 
 - **WM**: dwm (gaps, pertag, xrdb, statuscmd, center)
@@ -159,3 +193,4 @@ source "$DOTS_DEFAULT/zsh/rc"
 - **Launcher**: dmenu
 - **Notifications**: dunst
 - **Compositor**: picom
+- **Secrets**: 1Password (SSH agent)

@@ -71,6 +71,7 @@ cmd_link() {
     link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
     link "$DOTFILES/npm/.config/npm" "$HOME/.config/npm"
     link "$DOTFILES/mise/.config/mise" "$HOME/.config/mise"
+    link "$DOTFILES/ssh/.ssh/config" "$HOME/.ssh/config"
 
     # Link wallpapers if present
     if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
