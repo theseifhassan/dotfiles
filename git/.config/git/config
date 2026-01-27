@@ -1,5 +1,7 @@
 [user]
 	name = theseifhassan
+	# email is set in config.local (not tracked)
 
 [include]
+	# Machine-specific settings (email, signing key, etc.)
 	path = ~/.config/git/config.local

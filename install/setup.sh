@@ -4,7 +4,8 @@ set -e
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 export DOTFILES
 
-log() { echo ">>> $1"; }
+# shellcheck source=lib.sh
+. "$DOTFILES/install/lib.sh"
 
 # Cache sudo credentials upfront
 sudo -v
@@ -12,26 +13,17 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 # Bootstrap
 log "Bootstrap"
-command -v yay >/dev/null || {
+command -v paru >/dev/null || {
     sudo pacman -S --needed --noconfirm base-devel git
-    git clone https://aur.archlinux.org/yay.git /tmp/yay
-    cd /tmp/yay && makepkg -si --noconfirm
-    rm -rf /tmp/yay
+    git clone https://aur.archlinux.org/paru.git /tmp/paru
+    cd /tmp/paru && makepkg -si --noconfirm
+    rm -rf /tmp/paru
 }
 
 # Packages
 log "Packages"
 sudo pacman -Syu --noconfirm
-yay -S --needed --noconfirm $(grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages" | tr '\n' ' ')
-
-# Node.js
-log "Node.js"
-export N_PREFIX="${XDG_DATA_HOME:-$HOME/.local/share}/n"
-export PATH="$N_PREFIX/bin:$PATH"
-mkdir -p "$N_PREFIX"/{bin,lib,include,share}
-if command -v n >/dev/null; then n lts
-else curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o /tmp/n && chmod +x /tmp/n && /tmp/n lts
-fi
+paru -S --needed --noconfirm $(grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages" | tr '\n' ' ')
 
 # Configure
 log "Configure"
@@ -67,7 +59,13 @@ sudo cp "$DOTFILES/x11/30-touchpad.conf" /etc/X11/xorg.conf.d/
 
 # Hardware
 log "Hardware"
-"$DOTFILES/install/hardware.sh" all
+# Disable NVIDIA GPU by default for maximum battery life
+# Use 'dot hardware nvidia' to enable when needed
+if lspci | grep -qi nvidia && command -v envycontrol >/dev/null; then
+    log "Disabling NVIDIA GPU (use 'dot hardware nvidia' to enable)"
+    sudo envycontrol -s integrated --no-confirm || true
+fi
+"$DOTFILES/install/hardware.sh" bluetooth
 
 # Suckless
 log "Suckless"
@@ -75,7 +73,6 @@ for t in dwm dmenu dwmblocks; do [ -d "$DOTFILES/$t" ] && sudo make -C "$DOTFILE
 
 # Links
 log "Links"
-link() { mkdir -p "$(dirname "$2")"; [ -L "$2" ] && rm "$2"; [ -e "$2" ] && mv "$2" "$2.bak"; ln -s "$1" "$2"; }
 
 # Copy defaults to XDG_DATA_HOME
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
@@ -108,6 +105,13 @@ link "$DOTFILES/opencode/.config/opencode" "$HOME/.config/opencode"
 link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
 link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
 link "$DOTFILES/npm/.config/npm" "$HOME/.config/npm"
+link "$DOTFILES/mise/.config/mise" "$HOME/.config/mise"
+
+# SSH and 1Password (ensure directories exist with correct permissions)
+mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+link "$DOTFILES/ssh/.ssh/config" "$HOME/.ssh/config"
+mkdir -p "$HOME/.config/1Password/ssh"
+link "$DOTFILES/1password/.config/1Password/ssh/agent.toml" "$HOME/.config/1Password/ssh/agent.toml"
 
 # Link wallpapers if present
 if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then

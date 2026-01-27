@@ -1,5 +1,5 @@
 # =============================================================================
-# System Packages (pacman/yay)
+# System Packages (pacman/paru)
 # =============================================================================
 # Only packages that MUST be installed via system package manager.
 # Dev tools and runtimes are managed by mise - see mise/.config/mise/config.toml
@@ -78,12 +78,13 @@ ghostty
 tmux
 
 # -----------------------------------------------------------------------------
-# System Utilities (not available in mise)
+# System Utilities
 # -----------------------------------------------------------------------------
 unzip
 wget
 curl
 openssh
+mise
 
 # -----------------------------------------------------------------------------
 # Containers
@@ -120,6 +121,7 @@ usbmuxd
 # -----------------------------------------------------------------------------
 brightnessctl
 power-profiles-daemon
+envycontrol
 
 # -----------------------------------------------------------------------------
 # Optional: Printing (uncomment if needed)

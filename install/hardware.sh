@@ -3,16 +3,24 @@
 
 set -e
 
-PKG="yay -S --needed --noconfirm"
-command -v yay >/dev/null || PKG="sudo pacman -S --needed --noconfirm"
+PKG="paru -S --needed --noconfirm"
+command -v paru >/dev/null || PKG="sudo pacman -S --needed --noconfirm"
 
 ok() { printf "\033[32m✓\033[0m %s\n" "$1"; }
 fail() { printf "\033[31m✗\033[0m %s\n" "$1"; }
 
 check_nvidia() {
     lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
+
+    # Check envycontrol mode first
+    if command -v envycontrol >/dev/null; then
+        mode=$(envycontrol --query 2>/dev/null || echo "unknown")
+        echo "GPU mode: $mode"
+        [ "$mode" = "integrated" ] && { ok "GPU disabled (maximum battery)"; echo "Use 'dot hardware nvidia' to enable"; return 0; }
+    fi
+
     err=0
-    
+
     # Core driver checks
     lsmod | grep -q "^nvidia " && ok "nvidia module loaded" || { fail "nvidia module not loaded"; err=1; }
     lsmod | grep -q "^nvidia_drm " && ok "nvidia_drm module loaded" || { fail "nvidia_drm not loaded"; err=1; }
@@ -20,7 +28,7 @@ check_nvidia() {
     [ -f /etc/modprobe.d/blacklist-nouveau.conf ] && ok "nouveau blacklisted" || { fail "nouveau not blacklisted"; err=1; }
     grep -q "nvidia" /etc/mkinitcpio.conf && ok "nvidia in initramfs" || { fail "nvidia not in initramfs"; err=1; }
     command -v nvidia-smi >/dev/null && nvidia-smi >/dev/null 2>&1 && ok "nvidia-smi working" || { fail "nvidia-smi failed"; err=1; }
-    
+
     # Hybrid-specific checks
     if is_hybrid_gpu; then
         echo "--- Hybrid GPU (PRIME) ---"
@@ -29,12 +37,12 @@ check_nvidia() {
         [ -f /etc/modprobe.d/nvidia-pm.conf ] && ok "dynamic power management config" || { fail "nvidia-pm.conf missing"; err=1; }
         systemctl is-enabled --quiet nvidia-persistenced && ok "nvidia-persistenced enabled" || { fail "nvidia-persistenced not enabled"; err=1; }
         command -v prime-run >/dev/null && ok "prime-run available" || { fail "prime-run missing (install nvidia-prime)"; err=1; }
-        
+
         # Check GPU power state
         gpu_state=$(cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status 2>/dev/null)
         [ "$gpu_state" = "suspended" ] && ok "GPU powered off (RTD3 working)" || echo "  GPU state: $gpu_state (active or not idle)"
     fi
-    
+
     [ $err -eq 0 ] && echo "NVIDIA: all good" || echo "NVIDIA: issues found"
 }
 
@@ -87,6 +95,9 @@ is_hybrid_gpu() {
 install_nvidia() {
     lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
 
+    # Install envycontrol for GPU switching
+    command -v envycontrol >/dev/null || $PKG envycontrol
+
     # Detect GPU generation for driver selection
     if lspci | grep -i nvidia | grep -qE "RTX [2-9][0-9]|GTX 16"; then
         DRIVER="nvidia-open"
@@ -129,10 +140,10 @@ EOF
     # Hybrid GPU (PRIME render offload) setup
     if is_hybrid_gpu; then
         echo "Hybrid GPU detected - configuring PRIME render offload"
-        
+
         # Remove any nvidia xorg config (iGPU handles display)
         [ -f /etc/X11/xorg.conf.d/20-nvidia.conf ] && sudo rm /etc/X11/xorg.conf.d/20-nvidia.conf
-        
+
         # RTD3 power management (allows GPU to power off when idle)
         cat <<'EOF' | sudo tee /etc/udev/rules.d/80-nvidia-pm.rules >/dev/null
 # Enable runtime PM for NVIDIA VGA/3D controller devices on driver bind
@@ -172,7 +183,20 @@ EOF
     # Enable suspend/hibernate support
     sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service
 
+    # Switch to hybrid mode (GPU available via prime-run)
+    echo "Enabling NVIDIA GPU (hybrid mode)..."
+    sudo envycontrol -s hybrid --no-confirm
+
     echo "NVIDIA done. Reboot required."
+}
+
+disable_nvidia() {
+    lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
+    command -v envycontrol >/dev/null || $PKG envycontrol
+
+    echo "Disabling NVIDIA GPU (integrated mode)..."
+    sudo envycontrol -s integrated --no-confirm
+    echo "GPU disabled. Reboot required for maximum battery life."
 }
 
 install_bluetooth() {
@@ -205,7 +229,11 @@ install_virtualcam() {
 }
 
 case "${1:-}" in
-    nvidia) install_nvidia ;;
+    nvidia)
+        case "${2:-}" in
+            disable) disable_nvidia ;;
+            *) install_nvidia ;;
+        esac ;;
     bluetooth) install_bluetooth ;;
     printer) install_printer ;;
     fingerprint) install_fingerprint ;;
@@ -222,9 +250,11 @@ case "${1:-}" in
         esac ;;
     *) cat <<EOF
 Usage: $0 <command> [device]
-  nvidia|bluetooth|printer|fingerprint|virtualcam  Install driver
-  all                                               Install all
-  check [device]                                    Verify setup
+  nvidia                 Install drivers and enable GPU (hybrid mode)
+  nvidia disable         Disable GPU for maximum battery
+  bluetooth|printer|fingerprint|virtualcam  Install driver
+  all                    Install all hardware drivers
+  check [device]         Verify setup
 EOF
     ;;
 esac

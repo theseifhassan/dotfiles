@@ -19,12 +19,16 @@ dot update              # pull, recompile suckless, reload
 dot link                # symlink configs
 dot packages            # install packages
 dot packages -d         # show missing packages
+dot tools               # install dev tools via mise
+dot tools upgrade       # upgrade all mise tools
+dot tools outdated      # show outdated tools
 dot suckless [target]   # recompile dwm/dmenu/dwmblocks
 dot hardware <type>     # install drivers: nvidia|bluetooth|printer|fingerprint|virtualcam|all
 dot hardware check      # verify driver setup
 dot monitor save <name> # save current display profile
 dot monitor switch <name> # switch to a display profile
 dot monitor list        # list available profiles
+dot wallpaper next|prev|random  # cycle wallpapers
 ```
 
 ## Keybinds

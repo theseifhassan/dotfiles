@@ -3,7 +3,8 @@ set -e
 
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 
-log() { echo ">>> $1"; }
+# shellcheck source=../../../install/lib.sh
+. "$DOTFILES/install/lib.sh"
 
 cmd_update() {
     cd "$DOTFILES"
@@ -21,7 +22,6 @@ cmd_update() {
 
 cmd_link() {
     log "Linking..."
-    link() { mkdir -p "$(dirname "$2")"; [ -L "$2" ] && rm "$2"; [ -e "$2" ] && mv "$2" "$2.bak"; ln -s "$1" "$2"; }
 
     # Copy defaults to XDG_DATA_HOME (decouples runtime from repo)
     log "Copying defaults..."
@@ -71,7 +71,11 @@ cmd_link() {
     link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
     link "$DOTFILES/npm/.config/npm" "$HOME/.config/npm"
     link "$DOTFILES/mise/.config/mise" "$HOME/.config/mise"
+
+    # SSH and 1Password (ensure directories exist with correct permissions)
+    mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
     link "$DOTFILES/ssh/.ssh/config" "$HOME/.ssh/config"
+    mkdir -p "$HOME/.config/1Password/ssh"
     link "$DOTFILES/1password/.config/1Password/ssh/agent.toml" "$HOME/.config/1Password/ssh/agent.toml"
 
     # Link wallpapers if present
@@ -106,7 +110,7 @@ cmd_packages() {
         exit 0
     }
     log "Installing..."
-    grep -vE "^\s*#|^\s*$" "$PKGFILE" | xargs yay -S --needed --noconfirm
+    grep -vE "^\s*#|^\s*$" "$PKGFILE" | xargs paru -S --needed --noconfirm
 }
 
 cmd_suckless() {
