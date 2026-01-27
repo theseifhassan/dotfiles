@@ -172,11 +172,33 @@ On a new machine, just:
 3. Run `dot link`
 4. Done - your SSH keys are available
 
-The config at `~/.ssh/config` routes all SSH through the 1Password agent:
+### Multiple Keys (Personal + Work)
+
+Keys are mapped to hosts via `~/.config/1Password/ssh/agent.toml`:
+
+```toml
+# Personal GitHub
+[[ssh-keys]]
+item = "GitHub Personal"    # Must match item name in 1Password
+vault = "Personal"          # Vault name (case-sensitive)
+
+# Work GitHub
+[[ssh-keys]]
+item = "GitHub Work"
+vault = "Work"              # Can be in a different vault
+host = "work.github"        # Use: git@work.github:org/repo.git
 ```
-Host *
-    IdentityAgent "~/.1password/agent.sock"
+
+**Usage:**
+```bash
+# Personal repos (default)
+git clone git@github.com:youruser/repo.git
+
+# Work repos (use work.github alias)
+git clone git@work.github:company/repo.git
 ```
+
+Update the key names in `agent.toml` to match your 1Password item titles.
 
 ## Private Fonts
 
