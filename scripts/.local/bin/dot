@@ -281,5 +281,6 @@ case "${1:-}" in
     monitor) shift; cmd_monitor "$@" ;;
     wallpaper|wp) shift; cmd_wallpaper "$@" ;;
     install) cmd_install ;;
+    -h|--help|help) cmd_help ;;
     *) cmd_help ;;
 esac
