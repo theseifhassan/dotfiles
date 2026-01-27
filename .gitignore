@@ -11,9 +11,8 @@ git/.config/git/config.local
 autorandr/.config/autorandr/*/config
 autorandr/.config/autorandr/*/setup
 
-# Private fonts (sync separately)
-fonts/*
-!fonts/.keep
+# Private fonts (separate repo, cloned during setup)
+fonts/
 
 # Wallpapers (sync separately)
 wallpapers/*
