@@ -13,7 +13,15 @@ cmd_update() {
         log "Pulling..."; git pull --rebase
     }
     log "Suckless..."
-    for d in dwm dmenu dwmblocks; do [ -d "$DOTFILES/$d" ] && { make -C "$DOTFILES/$d" clean >/dev/null 2>&1 || true; sudo make -C "$DOTFILES/$d" install >/dev/null; }; done
+    # Parallel compilation
+    pids=""
+    for d in dwm dmenu dwmblocks; do
+        [ -d "$DOTFILES/$d" ] && {
+            { make -C "$DOTFILES/$d" clean >/dev/null 2>&1 || true; sudo make -C "$DOTFILES/$d" install >/dev/null; } &
+            pids="$pids $!"
+        }
+    done
+    for pid in $pids; do wait "$pid" || true; done
     pgrep -x dwm >/dev/null && pkill -HUP dwm
     pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
     [ -n "$DISPLAY" ] && xrdb -I"$HOME/.local/share" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
@@ -48,11 +56,11 @@ cmd_link() {
         fc-cache -f
     fi
 
-    # Install TPM if not present
+    # Install TPM if not present (shallow clone)
     TPM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/plugins/tpm"
     if [ ! -d "$TPM_DIR" ]; then
         log "Installing TPM..."
-        git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
+        git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
     fi
 
     link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
@@ -115,8 +123,19 @@ cmd_packages() {
 
 cmd_suckless() {
     t="${1:-all}"; log "Building $t..."
-    if [ "$t" = "all" ]; then for d in dwm dmenu dwmblocks; do [ -d "$DOTFILES/$d" ] && sudo make -C "$DOTFILES/$d" clean install; done
-    else [ -d "$DOTFILES/$t" ] && sudo make -C "$DOTFILES/$t" clean install; fi
+    if [ "$t" = "all" ]; then
+        # Parallel compilation
+        pids=""
+        for d in dwm dmenu dwmblocks; do
+            [ -d "$DOTFILES/$d" ] && {
+                sudo make -C "$DOTFILES/$d" clean install &
+                pids="$pids $!"
+            }
+        done
+        for pid in $pids; do wait "$pid" || true; done
+    else
+        [ -d "$DOTFILES/$t" ] && sudo make -C "$DOTFILES/$t" clean install
+    fi
     pgrep -x dwm >/dev/null && pkill -HUP dwm
     pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
 }

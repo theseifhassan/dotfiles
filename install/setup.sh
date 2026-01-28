@@ -20,6 +20,17 @@ command -v paru >/dev/null || {
     rm -rf /tmp/paru
 }
 
+# Enable parallel downloads
+sudo sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 10/' /etc/pacman.conf 2>/dev/null || true
+
+# Configure makepkg for parallel builds
+MAKEPKG_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/pacman/makepkg.conf"
+mkdir -p "$(dirname "$MAKEPKG_CONF")"
+[ ! -f "$MAKEPKG_CONF" ] && cat > "$MAKEPKG_CONF" << 'EOF'
+MAKEFLAGS="-j$(nproc)"
+BUILDDIR=/tmp/makepkg
+EOF
+
 # Packages
 log "Packages"
 sudo pacman -Syu --noconfirm
@@ -27,19 +38,23 @@ paru -S --needed --noconfirm $(grep -vE "^\s*#|^\s*$" "$DOTFILES/install/package
 
 # Configure
 log "Configure"
+# Services in parallel
 command -v docker >/dev/null && {
     sudo systemctl enable --now docker
     groups "$USER" | grep -q docker || sudo usermod -aG docker "$USER"
-}
-command -v tailscale >/dev/null && sudo systemctl enable --now tailscaled
+} &
+command -v tailscale >/dev/null && sudo systemctl enable --now tailscaled &
 command -v powerprofilesctl >/dev/null && {
     sudo systemctl enable --now power-profiles-daemon
     # Default to performance on desktops (no battery)
     [ ! -d /sys/class/power_supply/BAT0 ] && powerprofilesctl set performance
-}
-command -v autorandr >/dev/null && sudo systemctl enable autorandr.service 2>/dev/null || true
+} &
+command -v autorandr >/dev/null && sudo systemctl enable autorandr.service 2>/dev/null &
+wait
+
+# Non-parallel fast operations
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg" && chmod 700 "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg"
-mkdir -p ~/.local/share/fonts && fc-cache -f
+mkdir -p ~/.local/share/fonts
 command -v gsettings >/dev/null && {
     gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
     gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
@@ -67,9 +82,16 @@ if lspci | grep -qi nvidia && command -v envycontrol >/dev/null; then
 fi
 "$DOTFILES/install/hardware.sh" bluetooth
 
-# Suckless
+# Suckless - compile in parallel
 log "Suckless"
-for t in dwm dmenu dwmblocks; do [ -d "$DOTFILES/$t" ] && sudo make -C "$DOTFILES/$t" clean install; done
+pids=""
+for t in dwm dmenu dwmblocks; do
+    [ -d "$DOTFILES/$t" ] && {
+        sudo make -C "$DOTFILES/$t" clean install &
+        pids="$pids $!"
+    }
+done
+for pid in $pids; do wait "$pid" || true; done
 
 # Links
 log "Links"
@@ -86,9 +108,10 @@ if [ -d "$DOTFILES/fonts" ] && [ "$(ls -A "$DOTFILES/fonts" 2>/dev/null | grep -
     fc-cache -f
 fi
 
-# Install TPM
+# Install TPM (shallow clone, background)
 TPM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/plugins/tpm"
-[ ! -d "$TPM_DIR" ] && git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
+[ ! -d "$TPM_DIR" ] && git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR" &
+tpm_pid=$!
 
 link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
 link "$DOTFILES/zsh/.config/zsh" "$HOME/.config/zsh"
@@ -142,5 +165,8 @@ command -v opencode >/dev/null || curl -fsSL https://opencode.ai/install | bash
 # Shell
 log "Shell"
 [ "$SHELL" != "$(command -v zsh)" ] && chsh -s "$(command -v zsh)"
+
+# Wait for background TPM clone
+wait "$tpm_pid" 2>/dev/null || true
 
 log "Done! Reboot to apply."
