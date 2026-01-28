@@ -23,7 +23,7 @@ dot tools               # install dev tools via mise
 dot tools upgrade       # upgrade all mise tools
 dot tools outdated      # show outdated tools
 dot suckless [target]   # recompile dwm/dmenu/dwmblocks
-dot hardware <type>     # install drivers: nvidia|bluetooth|printer|fingerprint|virtualcam|all
+dot hardware <type>     # install drivers (nvidia|bluetooth|...)
 dot hardware check      # verify driver setup
 dot monitor save <name> # save current display profile
 dot monitor switch <name> # switch to a display profile
@@ -34,8 +34,9 @@ dot wallpaper next|prev|random  # cycle wallpapers
 ## Keybinds
 
 ### Window Management
+
 | Key | Action |
-|-----|--------|
+| --- | ------ |
 | `mod+j/k` | focus next/prev |
 | `mod+h/l` | resize master |
 | `mod+shift+h/l` | resize stack |
@@ -51,15 +52,17 @@ dot wallpaper next|prev|random  # cycle wallpapers
 | `mod+shift+,/.` | move to prev/next monitor |
 
 ### Layouts
+
 | Key | Action |
-|-----|--------|
+| --- | ------ |
 | `mod+t` | tile |
 | `mod+f` | monocle |
 | `mod+m` | spiral |
 
 ### Apps
+
 | Key | Action |
-|-----|--------|
+| --- | ------ |
 | `mod+p` | dmenu (includes web apps) |
 | `mod+shift+enter` | terminal |
 | `mod+s` | screenshot (select) |
@@ -68,15 +71,17 @@ dot wallpaper next|prev|random  # cycle wallpapers
 | `mod+shift+a` | audio switcher (sinks/sources) |
 
 ### System
+
 | Key | Action |
-|-----|--------|
-| `mod+`` | toggle statusbar (minimal/full) |
+| --- | ------ |
+| `` mod+` `` | toggle statusbar (minimal/full) |
 | `mod+shift+b` | restart dwmblocks |
 | `mod+F5` | reload xresources |
 | `mod+shift+q` | quit dwm |
 | `mod+ctrl+shift+q` | restart dwm |
 
 ### Media Keys
+
 Volume, brightness, and media keys work as expected.
 
 ## Machine-Specific Config
@@ -84,16 +89,18 @@ Volume, brightness, and media keys work as expected.
 For per-machine settings, create local override files in `~/.config/x11/`:
 
 | File | Purpose |
-|------|---------|
+| ---- | ------- |
 | `xresources.local` | X resources (DPI, colors) |
 | `xprofile.local` | Startup commands (xrandr, etc) |
 
 Example `xresources.local`:
-```
+
+```txt
 Xft.dpi: 192
 ```
 
 Example `xprofile.local`:
+
 ```sh
 xrandr --dpi 192
 ```
@@ -102,16 +109,19 @@ These files are gitignored and loaded automatically.
 
 ## Multi-Monitor / Docking
 
-Uses [autorandr](https://github.com/phillipberndt/autorandr) for automatic display switching with per-profile DPI.
+Uses [autorandr](https://github.com/phillipberndt/autorandr) for automatic
+display switching with per-profile DPI.
 
 ### Initial Setup
 
 1. **Create laptop profile** (with only laptop screen):
+
    ```sh
    dot monitor save laptop
    ```
 
 2. **Create docked profile** (connect external monitor, disable laptop):
+
    ```sh
    xrandr --output eDP-1 --off --output DP-2 --primary --auto
    dot monitor save docked
@@ -126,7 +136,7 @@ Uses [autorandr](https://github.com/phillipberndt/autorandr) for automatic displ
 
 ## Structure
 
-```
+```txt
 dotfiles/
 ├── default/           # base configs (source these, don't edit)
 ├── install/
@@ -143,6 +153,7 @@ dotfiles/
 ### Layered Config
 
 User configs source defaults then override:
+
 ```sh
 # ~/.config/zsh/.zshrc
 source "$DOTS_DEFAULT/zsh/rc"
@@ -151,7 +162,8 @@ source "$DOTS_DEFAULT/zsh/rc"
 
 ## SSH Keys (1Password)
 
-SSH keys are managed via **1Password SSH Agent** - no more copying keys between machines.
+SSH keys are managed via **1Password SSH Agent** - no more copying keys
+between machines.
 
 ### First-Time Setup
 
@@ -170,6 +182,7 @@ SSH keys are managed via **1Password SSH Agent** - no more copying keys between 
 ### New Machine Setup
 
 On a new machine, just:
+
 1. Install 1Password and sign in
 2. Enable SSH Agent in settings
 3. Run `dot link`
@@ -193,6 +206,7 @@ host = "work.github"        # Use: git@work.github:org/repo.git
 ```
 
 **Usage:**
+
 ```bash
 # Personal repos (default)
 git clone git@github.com:youruser/repo.git
@@ -205,9 +219,11 @@ Update the key names in `agent.toml` to match your 1Password item titles.
 
 ## Private Fonts
 
-Paid/private fonts are stored in a separate private repo and cloned automatically during `dot link`.
+Paid/private fonts are stored in a separate private repo and cloned
+automatically during `dot link`.
 
-If you have access (SSH key configured), fonts are installed to `~/.local/share/fonts`.
+If you have access (SSH key configured), fonts are installed to
+`~/.local/share/fonts`.
 
 ## Stack
 
