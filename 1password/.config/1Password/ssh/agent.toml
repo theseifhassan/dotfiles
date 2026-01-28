@@ -1,15 +1,11 @@
 # 1Password SSH Agent Configuration
-# Maps SSH hosts to specific keys in your 1Password vault
-# Key names must match the item title in 1Password exactly
-# Vault names must match exactly (case-sensitive)
 
 # Personal GitHub
 [[ssh-keys]]
-item = "GitHub Personal"
+item = "GitHub SSH Key"
 vault = "Personal"
 
-# Work GitHub (use: git@work.github:org/repo.git)
+# Work GitHub
 [[ssh-keys]]
-item = "GitHub Work"
+item = "GitHub SSH Key"
 vault = "Work"
-host = "work.github"
