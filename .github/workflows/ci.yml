@@ -13,11 +13,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@2.0.0
-        with:
-          additional_files: 'scripts/.local/bin/dot scripts/.local/bin/dmenu_run'
-          severity: warning
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on sh scripts
+        run: |
+          # Check scripts with #!/bin/sh shebang (POSIX)
+          shellcheck \
+            install/setup.sh \
+            install/lib.sh \
+            install/hardware.sh \
+            scripts/.local/bin/dot \
+            scripts/.local/bin/dmenu_run \
+            scripts/.local/bin/sessionizer.sh \
+            scripts/.local/bin/audio.sh \
+            scripts/.local/bin/lid-check.sh \
+            scripts/.local/bin/webappmgr.sh
+
+      - name: Run ShellCheck on bash scripts
+        run: |
+          # Check bash test helpers
+          shellcheck --shell=bash \
+            tests/helpers/common.bash \
+            tests/helpers/mocks.bash
 
   test:
     name: BATS Tests
@@ -28,7 +46,7 @@ jobs:
 
       - name: Run BATS tests
         run: |
-          if [ -d tests ] && [ -n "$(find tests -name '*.bats' 2>/dev/null)" ]; then
+          if [ -d tests/unit ] || [ -d tests/integration ]; then
             ./tests/bats/bats-core/bin/bats tests/unit/ tests/integration/
           else
             echo "No tests found, skipping"

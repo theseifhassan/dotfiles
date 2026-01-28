@@ -111,8 +111,8 @@ install_nvidia() {
     fi
 
     HEADERS="linux-headers"
-    pacman -Q linux-zen &>/dev/null && HEADERS="linux-zen-headers"
-    pacman -Q linux-lts &>/dev/null && HEADERS="linux-lts-headers"
+    pacman -Q linux-zen >/dev/null 2>&1 && HEADERS="linux-zen-headers"
+    pacman -Q linux-lts >/dev/null 2>&1 && HEADERS="linux-lts-headers"
 
     # Enable multilib for 32-bit libs
     grep -q "^\[multilib\]" /etc/pacman.conf || {
@@ -245,8 +245,8 @@ EOF
 
 install_virtualcam() {
     HEADERS="linux-headers"
-    pacman -Q linux-zen &>/dev/null && HEADERS="linux-zen-headers"
-    pacman -Q linux-lts &>/dev/null && HEADERS="linux-lts-headers"
+    pacman -Q linux-zen >/dev/null 2>&1 && HEADERS="linux-zen-headers"
+    pacman -Q linux-lts >/dev/null 2>&1 && HEADERS="linux-lts-headers"
 
     $PKG $HEADERS v4l2loopback-dkms v4l-utils
     sudo modprobe v4l2loopback devices=1 video_nr=10 card_label="OBS Virtual Camera" exclusive_caps=1 2>/dev/null || true

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
 # Common test setup and utilities
 
 # Load BATS libraries
@@ -9,8 +10,9 @@ load "${TESTS_DIR}/bats/bats-file/load"
 
 # Set up isolated test environment
 setup_test_environment() {
-    export TEST_HOME="$(mktemp -d)"
-    export TEST_DOTFILES="$(mktemp -d)"
+    TEST_HOME="$(mktemp -d)"
+    TEST_DOTFILES="$(mktemp -d)"
+    export TEST_HOME TEST_DOTFILES
     export HOME="$TEST_HOME"
     export DOTFILES="$TEST_DOTFILES"
     export XDG_CONFIG_HOME="$TEST_HOME/.config"

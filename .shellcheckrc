@@ -1,3 +1,10 @@
+# Default to sh for scripts without shebang
 shell=sh
+
+# Source paths
 source-path=install
 source-path=scripts/.local/bin
+
+# Exclude non-constant source warnings (we know what we're sourcing)
+disable=SC1090
+disable=SC1091

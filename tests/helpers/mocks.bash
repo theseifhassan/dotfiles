@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
 # Mock functions for system commands
 
 # Create mock command that records calls and returns success

@@ -34,6 +34,7 @@ EOF
 # Packages
 log "Packages"
 sudo pacman -Syu --noconfirm
+# shellcheck disable=SC2046
 paru -S --needed --noconfirm $(grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages" | tr '\n' ' ')
 
 # Configure
@@ -101,7 +102,7 @@ rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
 cp -r "$DOTFILES/default" "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
 
 # Install fonts if present
-if [ -d "$DOTFILES/fonts" ] && [ "$(ls -A "$DOTFILES/fonts" 2>/dev/null | grep -v .keep)" ]; then
+if [ -d "$DOTFILES/fonts" ] && find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
     log "Installing fonts..."
     mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
     cp -r "$DOTFILES/fonts/"* "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" 2>/dev/null || true
@@ -137,7 +138,7 @@ mkdir -p "$HOME/.config/1Password/ssh"
 link "$DOTFILES/1password/.config/1Password/ssh/agent.toml" "$HOME/.config/1Password/ssh/agent.toml"
 
 # Link wallpapers if present
-if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
+if [ -d "$DOTFILES/wallpapers" ] && find "$DOTFILES/wallpapers" -maxdepth 1 -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) 2>/dev/null | grep -q .; then
     mkdir -p "$HOME/Pictures"
     link "$DOTFILES/wallpapers" "$HOME/Pictures/Wallpapers"
 fi

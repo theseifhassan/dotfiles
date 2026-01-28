@@ -1,15 +1,24 @@
 SHELL := /bin/bash
 BATS := ./tests/bats/bats-core/bin/bats
-SCRIPTS := $(shell find . -name "*.sh" -not -path "./tests/*" -not -path "./.git/*")
-DOT_SCRIPTS := scripts/.local/bin/dot scripts/.local/bin/dmenu_run
+
+# Scripts to check (sh)
+SH_SCRIPTS := install/setup.sh install/lib.sh install/hardware.sh \
+	scripts/.local/bin/dot scripts/.local/bin/dmenu_run \
+	scripts/.local/bin/sessionizer.sh scripts/.local/bin/audio.sh \
+	scripts/.local/bin/lid-check.sh scripts/.local/bin/webappmgr.sh
+
+# Test helpers (bash)
+BASH_SCRIPTS := tests/helpers/common.bash tests/helpers/mocks.bash
 
 .PHONY: all lint test test-unit test-integration clean help
 
 all: lint test
 
 lint:
-	@echo "==> Running ShellCheck..."
-	@shellcheck $(SCRIPTS) $(DOT_SCRIPTS)
+	@echo "==> Running ShellCheck on sh scripts..."
+	@shellcheck $(SH_SCRIPTS)
+	@echo "==> Running ShellCheck on bash scripts..."
+	@shellcheck --shell=bash $(BASH_SCRIPTS)
 	@echo "==> ShellCheck passed!"
 
 test: test-unit test-integration
