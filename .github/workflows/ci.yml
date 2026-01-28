@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          additional_files: 'scripts/.local/bin/dot scripts/.local/bin/dmenu_run'
+          severity: warning
+
+  test:
+    name: BATS Tests
+    runs-on: ubuntu-latest
+    needs: shellcheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run BATS tests
+        run: |
+          if [ -d tests ] && [ -n "$(find tests -name '*.bats' 2>/dev/null)" ]; then
+            ./tests/bats/bats-core/bin/bats tests/unit/ tests/integration/
+          else
+            echo "No tests found, skipping"
+          fi

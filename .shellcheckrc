@@ -1,0 +1,3 @@
+shell=sh
+source-path=install
+source-path=scripts/.local/bin
