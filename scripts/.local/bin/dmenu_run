@@ -32,7 +32,7 @@ run_desktop() {
 }
 
 # Combine PATH commands and desktop apps, let user pick
-sel=$( { dmenu_path; get_desktop_apps; } | sort -u | dmenu -i "$@")
+sel=$( { get_desktop_apps; dmenu_path; } | sort -uf | dmenu -i "$@")
 [ -z "$sel" ] && exit 0
 
 # Try as .desktop app first, then as command
