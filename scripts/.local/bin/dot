@@ -24,7 +24,9 @@ cmd_update() {
     for pid in $pids; do wait "$pid" || true; done
     pgrep -x dwm >/dev/null && pkill -HUP dwm
     pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
-    [ -n "$DISPLAY" ] && xrdb -I"$HOME/.local/share" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
+    if [ -n "$DISPLAY" ]; then
+        xrdb -I"$HOME/.local/share" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
+    fi
     log "Done!"
 }
 
@@ -49,7 +51,7 @@ cmd_link() {
     fi
 
     # Install fonts if present
-    if [ -d "$DOTFILES/fonts" ] && [ "$(ls -A "$DOTFILES/fonts" 2>/dev/null | grep -v .keep | grep -v .git)" ]; then
+    if [ -d "$DOTFILES/fonts" ] && find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
         log "Installing fonts..."
         mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
         find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" \;
@@ -87,7 +89,7 @@ cmd_link() {
     link "$DOTFILES/1password/.config/1Password/ssh/agent.toml" "$HOME/.config/1Password/ssh/agent.toml"
 
     # Link wallpapers if present
-    if [ -d "$DOTFILES/wallpapers" ] && [ "$(ls -A "$DOTFILES/wallpapers" 2>/dev/null | grep -v .keep)" ]; then
+    if [ -d "$DOTFILES/wallpapers" ] && find "$DOTFILES/wallpapers" -maxdepth 1 -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) 2>/dev/null | grep -q .; then
         mkdir -p "$HOME/Pictures"
         link "$DOTFILES/wallpapers" "$HOME/Pictures/Wallpapers"
     fi

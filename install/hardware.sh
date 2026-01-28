@@ -1,5 +1,6 @@
 #!/bin/sh
 # Hardware drivers
+# shellcheck disable=SC2015  # A && B || C pattern is safe here (ok/fail never fail)
 
 set -e
 
