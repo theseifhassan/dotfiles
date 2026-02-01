@@ -10,6 +10,12 @@ command -v paru >/dev/null || PKG="sudo pacman -S --needed --noconfirm"
 ok() { printf "\033[32m✓\033[0m %s\n" "$1"; }
 fail() { printf "\033[31m✗\033[0m %s\n" "$1"; }
 
+detect_kernel_headers() {
+    pacman -Q linux-zen >/dev/null 2>&1 && echo "linux-zen-headers" && return
+    pacman -Q linux-lts >/dev/null 2>&1 && echo "linux-lts-headers" && return
+    echo "linux-headers"
+}
+
 check_nvidia() {
     lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
 
@@ -111,9 +117,7 @@ install_nvidia() {
         DRIVER="nvidia"
     fi
 
-    HEADERS="linux-headers"
-    pacman -Q linux-zen >/dev/null 2>&1 && HEADERS="linux-zen-headers"
-    pacman -Q linux-lts >/dev/null 2>&1 && HEADERS="linux-lts-headers"
+    HEADERS=$(detect_kernel_headers)
 
     # Enable multilib for 32-bit libs
     grep -q "^\[multilib\]" /etc/pacman.conf || {
@@ -245,15 +249,15 @@ EOF
 }
 
 install_virtualcam() {
-    HEADERS="linux-headers"
-    pacman -Q linux-zen >/dev/null 2>&1 && HEADERS="linux-zen-headers"
-    pacman -Q linux-lts >/dev/null 2>&1 && HEADERS="linux-lts-headers"
+    HEADERS=$(detect_kernel_headers)
 
     $PKG $HEADERS v4l2loopback-dkms v4l-utils
     sudo modprobe v4l2loopback devices=1 video_nr=10 card_label="OBS Virtual Camera" exclusive_caps=1 2>/dev/null || true
     echo "v4l2loopback" | sudo tee /etc/modules-load.d/v4l2loopback.conf >/dev/null
     echo 'options v4l2loopback devices=1 video_nr=10 card_label="OBS Virtual Camera" exclusive_caps=1' | sudo tee /etc/modprobe.d/v4l2loopback.conf >/dev/null
 }
+
+[ "${SOURCED:-}" = "1" ] && return 0 2>/dev/null || true
 
 case "${1:-}" in
     nvidia)

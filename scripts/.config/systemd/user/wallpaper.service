@@ -3,5 +3,5 @@ Description=Set random wallpaper
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/bin/wallpaper.sh
+ExecStart=%h/.local/bin/dot wallpaper random
 Environment=DISPLAY=:0

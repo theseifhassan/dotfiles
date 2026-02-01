@@ -6,8 +6,6 @@ set -e
 APPS="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 BROWSER="${BROWSER:-google-chrome-stable}"
 
-mkdir -p "$APPS"
-
 list_apps() {
     grep -l "^Exec=.*--app=" "$APPS"/*.desktop 2>/dev/null | while read -r f; do
         grep '^Name=' "$f" | cut -d= -f2-
@@ -57,6 +55,10 @@ remove() {
 
     rm -f "$file" && notify-send "Web App" "Removed: $sel"
 }
+
+[ "${SOURCED:-}" = "1" ] && return 0 2>/dev/null || true
+
+mkdir -p "$APPS"
 
 case "${1:-}" in
     create|add) create ;;

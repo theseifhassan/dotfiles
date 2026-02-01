@@ -3,9 +3,6 @@ set -e
 # dmenu-based audio device switcher
 # Quickly switch between sinks (outputs) and sources (inputs)
 
-command -v wpctl >/dev/null || { echo "wpctl required (wireplumber)"; exit 1; }
-command -v dmenu >/dev/null || { echo "dmenu required"; exit 1; }
-
 # Get sinks (outputs) - format: "ID. Name [vol]" where * marks default
 get_sinks() {
     wpctl status | awk '
@@ -79,6 +76,11 @@ select_source() {
     name=$(echo "$sel" | sed 's/^\* //; s/^[0-9]*\. //')
     notify-send "Audio Input" "$name"
 }
+
+[ "${SOURCED:-}" = "1" ] && return 0 2>/dev/null || true
+
+command -v wpctl >/dev/null || { echo "wpctl required (wireplumber)"; exit 1; }
+command -v dmenu >/dev/null || { echo "dmenu required"; exit 1; }
 
 # Allow direct sink/source selection via argument
 case "${1:-}" in

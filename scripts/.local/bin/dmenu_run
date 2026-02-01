@@ -31,6 +31,8 @@ run_desktop() {
     return 1
 }
 
+[ "${SOURCED:-}" = "1" ] && return 0 2>/dev/null || true
+
 # Combine PATH commands and desktop apps, let user pick
 sel=$( { get_desktop_apps; dmenu_path; } | sort -uf | dmenu -i "$@")
 [ -z "$sel" ] && exit 0
