@@ -1,3 +1,4 @@
+-- Quick file navigation with harpoon
 return {
     "ThePrimeagen/harpoon",
     branch = "harpoon2",

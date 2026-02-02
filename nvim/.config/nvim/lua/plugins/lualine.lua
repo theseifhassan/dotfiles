@@ -1,3 +1,4 @@
+-- Statusline configuration
 return {
   "nvim-lualine/lualine.nvim",
   config = function()

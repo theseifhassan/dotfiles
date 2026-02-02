@@ -1,4 +1,5 @@
 #!/bin/sh
+# Dotfiles management CLI
 set -e
 
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"

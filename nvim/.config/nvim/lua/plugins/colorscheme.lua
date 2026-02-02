@@ -1,3 +1,4 @@
+-- Colorscheme plugin (gruvbox)
 return {
   "ellisonleao/gruvbox.nvim",
   priority = 1000,

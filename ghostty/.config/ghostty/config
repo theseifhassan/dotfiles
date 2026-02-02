@@ -1,3 +1,4 @@
+# Ghostty terminal configuration
 theme = Gruvbox Dark
 
 font-family = "Berkeley Mono"

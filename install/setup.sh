@@ -1,4 +1,5 @@
 #!/bin/sh
+# System setup — installs packages and links dotfiles
 set -e
 command -v pacman >/dev/null || { echo "Arch Linux required"; exit 1; }
 

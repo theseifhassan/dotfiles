@@ -1,3 +1,4 @@
+# Shell aliases
 alias ..='cd ..'
 alias ...='cd ../..'
 

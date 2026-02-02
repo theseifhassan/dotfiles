@@ -1,3 +1,4 @@
+# Interactive shell config — plugins, prompt, keybinds
 source "$DOTS_DEFAULT/zsh/rc"
 
 # bun completions

@@ -1,3 +1,4 @@
+-- Visual undo history
 return {
     "https://github.com/mbbill/undotree",
     config = function()

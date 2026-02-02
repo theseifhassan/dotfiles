@@ -1,3 +1,4 @@
+-- Snacks.nvim utilities
 return {
   "folke/snacks.nvim",
   ---@type snacks.Config

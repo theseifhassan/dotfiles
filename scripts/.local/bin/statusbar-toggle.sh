@@ -1,4 +1,5 @@
 #!/bin/sh
+# Toggle dwmblocks statusbar visibility
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/statusbar-mode"
 
 [ "$(cat "$STATE_FILE" 2>/dev/null)" = "full" ] && echo "minimal" > "$STATE_FILE" || echo "full" > "$STATE_FILE"

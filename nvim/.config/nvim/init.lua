@@ -1,2 +1,2 @@
--- bootstrap lazy.nvim, LazyVim and your plugins
+-- Neovim entry point — bootstraps LazyVim
 require("config.lazy")

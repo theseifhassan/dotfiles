@@ -1,4 +1,5 @@
 #!/bin/sh
+# Display screen brightness for dwmblocks
 # Skip in minimal mode
 [ "$(cat "${XDG_RUNTIME_DIR:-/tmp}/statusbar-mode" 2>/dev/null)" = "minimal" ] && exit
 

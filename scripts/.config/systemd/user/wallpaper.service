@@ -1,3 +1,4 @@
+# Systemd service to rotate wallpaper
 [Unit]
 Description=Set random wallpaper
 

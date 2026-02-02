@@ -1,3 +1,4 @@
+/* dwmblocks status bar block definitions */
 #ifndef CONFIG_H
 #define CONFIG_H
 
