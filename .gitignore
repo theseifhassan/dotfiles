@@ -1,6 +1,7 @@
 scripts/.local/bin/claude
 tmux/.config/tmux/plugins
 zsh/.config/zsh/.zcompdump*
+nvim/.config/nvim/lazy-lock.json
 
 # Machine-specific configs
 x11/.config/x11/xresources.local
