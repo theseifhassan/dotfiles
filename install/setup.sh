@@ -41,18 +41,20 @@ paru -S --needed --noconfirm $(grep -vE "^\s*#|^\s*$" "$DOTFILES/install/package
 # Configure
 log "Configure"
 # Services in parallel
+_svc_pids=""
 command -v docker >/dev/null && {
     sudo systemctl enable --now docker
     groups "$USER" | grep -q docker || sudo usermod -aG docker "$USER"
-} &
-command -v tailscale >/dev/null && sudo systemctl enable --now tailscaled &
+} & _svc_pids="$_svc_pids $!"
+command -v tailscale >/dev/null && sudo systemctl enable --now tailscaled & _svc_pids="$_svc_pids $!"
 command -v powerprofilesctl >/dev/null && {
     sudo systemctl enable --now power-profiles-daemon
     # Default to performance on desktops (no battery)
     [ ! -d /sys/class/power_supply/BAT0 ] && powerprofilesctl set performance
-} &
-command -v autorandr >/dev/null && sudo systemctl enable autorandr.service 2>/dev/null &
-wait
+} & _svc_pids="$_svc_pids $!"
+command -v autorandr >/dev/null && sudo systemctl enable autorandr.service 2>/dev/null & _svc_pids="$_svc_pids $!"
+# shellcheck disable=SC2086
+wait $_svc_pids
 
 # Non-parallel fast operations
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg" && chmod 700 "${XDG_DATA_HOME:-$HOME/.local/share}/gnupg"
@@ -127,7 +129,7 @@ command -v opencode >/dev/null || curl -fsSL https://opencode.ai/install | bash
 
 # Shell
 log "Shell"
-[ "$SHELL" != "$(command -v zsh)" ] && chsh -s "$(command -v zsh)"
+[ "$SHELL" != "$(command -v zsh)" ] && sudo chsh -s "$(command -v zsh)" "$USER"
 
 # Wait for background TPM clone
 wait "$tpm_pid" 2>/dev/null || true

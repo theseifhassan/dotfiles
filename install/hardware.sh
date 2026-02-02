@@ -125,10 +125,10 @@ install_nvidia() {
         sudo pacman -Syu --noconfirm
     }
 
-    $PKG $HEADERS $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver nvidia-prime || {
+    $PKG "$HEADERS" $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver nvidia-prime || {
         echo "Retrying NVIDIA install..."
         sudo pacman -Syu --noconfirm
-        $PKG $HEADERS $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver nvidia-prime
+        $PKG "$HEADERS" $DRIVER nvidia-utils nvidia-settings lib32-nvidia-utils libva-nvidia-driver nvidia-prime
     }
 
     # Kernel module options
@@ -251,7 +251,7 @@ EOF
 install_virtualcam() {
     HEADERS=$(detect_kernel_headers)
 
-    $PKG $HEADERS v4l2loopback-dkms v4l-utils
+    $PKG "$HEADERS" v4l2loopback-dkms v4l-utils
     sudo modprobe v4l2loopback devices=1 video_nr=10 card_label="OBS Virtual Camera" exclusive_caps=1 2>/dev/null || true
     echo "v4l2loopback" | sudo tee /etc/modules-load.d/v4l2loopback.conf >/dev/null
     echo 'options v4l2loopback devices=1 video_nr=10 card_label="OBS Virtual Camera" exclusive_caps=1' | sudo tee /etc/modprobe.d/v4l2loopback.conf >/dev/null
