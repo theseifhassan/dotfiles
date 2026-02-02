@@ -154,6 +154,10 @@ fi
 log "OpenCode"
 command -v opencode >/dev/null || curl -fsSL https://opencode.ai/install | bash
 
+# Claude Code
+log "Claude Code"
+command -v claude >/dev/null || curl -fsSL https://claude.ai/install.sh | sh
+
 # Shell
 log "Shell"
 [ "$SHELL" != "$(command -v zsh)" ] && sudo chsh -s "$(command -v zsh)" "$USER"

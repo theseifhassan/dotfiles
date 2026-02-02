@@ -16,18 +16,22 @@ export HISTFILE="$XDG_STATE_HOME/zsh/history"
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
 export BUN_INSTALL="$XDG_DATA_HOME/bun"
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
-
-export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
-[ -n "$XDG_RUNTIME_DIR" ] && export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
+export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
+export CLAUDE_CACHE_DIR="$XDG_CACHE_HOME/claude"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
-export BROWSER="google-chrome-stable"
 
-export QT_QPA_PLATFORMTHEME="gtk2"
-export XDG_SESSION_TYPE=x11
-export DESKTOP_SESSION=dwm
-export XDG_CURRENT_DESKTOP=dwm
+# Desktop-only env vars
+if [ "$DOTFILES_MINIMAL" != "1" ]; then
+    export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
+    [ -n "$XDG_RUNTIME_DIR" ] && export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
+    export BROWSER="google-chrome-stable"
+    export QT_QPA_PLATFORMTHEME="gtk2"
+    export XDG_SESSION_TYPE=x11
+    export DESKTOP_SESSION=dwm
+    export XDG_CURRENT_DESKTOP=dwm
+fi
 
 export DOTFILES="$HOME/dotfiles"
 export DOTS_DEFAULT="$XDG_DATA_HOME/dotfiles"
