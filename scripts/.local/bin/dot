@@ -13,20 +13,24 @@ cmd_update() {
         git diff-index --quiet HEAD -- 2>/dev/null || { echo "Uncommitted changes. Continue? [y/N]"; read -r a; [ "$a" != "y" ] && exit 1; }
         log "Pulling..."; git pull --rebase
     }
-    log "Suckless..."
-    # Parallel compilation
-    pids=""
-    for d in dwm dmenu dwmblocks; do
-        [ -d "$DOTFILES/$d" ] && {
-            { make -C "$DOTFILES/$d" clean >/dev/null 2>&1 || true; sudo make -C "$DOTFILES/$d" install >/dev/null; } &
-            pids="$pids $!"
-        }
-    done
-    for pid in $pids; do wait "$pid" || true; done
-    pgrep -x dwm >/dev/null && pkill -HUP dwm
-    pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
-    if [ -n "$DISPLAY" ]; then
-        xrdb -I"$HOME/.local/share" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
+    if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
+        log "Suckless..."
+        # Parallel compilation
+        pids=""
+        for d in dwm dmenu dwmblocks; do
+            [ -d "$DOTFILES/$d" ] && {
+                { make -C "$DOTFILES/$d" clean >/dev/null 2>&1 || true; sudo make -C "$DOTFILES/$d" install >/dev/null; } &
+                pids="$pids $!"
+            }
+        done
+        for pid in $pids; do wait "$pid" || true; done
+        pgrep -x dwm >/dev/null && pkill -HUP dwm
+        pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
+        if [ -n "$DISPLAY" ]; then
+            xrdb -I"$HOME/.local/share" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
+        fi
+    else
+        log "Minimal mode — skipping suckless compilation"
     fi
     log "Done!"
 }
@@ -41,23 +45,25 @@ cmd_link() {
     rm -rf "$target"
     cp -r "$DOTFILES/default" "$target"
 
-    # Clone private fonts repo if not present
-    if [ ! -d "$DOTFILES/fonts/.git" ]; then
-        log "Cloning private fonts..."
-        rm -rf "$DOTFILES/fonts"
-        FONTS_REPO="${FONTS_REPO:-git@github.com:theseifhassan/fonts.git}"
-        git clone "$FONTS_REPO" "$DOTFILES/fonts" 2>/dev/null || {
-            log "Could not clone fonts (private repo - need SSH key)"
-            mkdir -p "$DOTFILES/fonts"
-        }
-    fi
+    if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
+        # Clone private fonts repo if not present
+        if [ ! -d "$DOTFILES/fonts/.git" ]; then
+            log "Cloning private fonts..."
+            rm -rf "$DOTFILES/fonts"
+            FONTS_REPO="${FONTS_REPO:-git@github.com:theseifhassan/fonts.git}"
+            git clone "$FONTS_REPO" "$DOTFILES/fonts" 2>/dev/null || {
+                log "Could not clone fonts (private repo - need SSH key)"
+                mkdir -p "$DOTFILES/fonts"
+            }
+        fi
 
-    # Install fonts if present
-    if [ -d "$DOTFILES/fonts" ] && find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
-        log "Installing fonts..."
-        mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
-        find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" \;
-        fc-cache -f
+        # Install fonts if present
+        if [ -d "$DOTFILES/fonts" ] && find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
+            log "Installing fonts..."
+            mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
+            find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" \;
+            fc-cache -f
+        fi
     fi
 
     # Install TPM if not present (shallow clone)
@@ -69,7 +75,9 @@ cmd_link() {
 
     link_configs
 
-    systemctl --user daemon-reload
+    if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
+        systemctl --user daemon-reload
+    fi
     log "Done!"
 }
 
@@ -79,13 +87,22 @@ cmd_packages() {
     [ "$1" = "-d" ] || [ "$1" = "--diff" ] && {
         log "Missing:"
         while IFS= read -r p || [ -n "$p" ]; do case "$p" in \#*|"") continue;; esac; pacman -Qi "$p" >/dev/null 2>&1 || echo "  $p"; done < "$PKGFILE"
+        if [ "$DOTFILES_MINIMAL" -eq 0 ] && [ -f "$DOTFILES/install/packages.desktop" ]; then
+            while IFS= read -r p || [ -n "$p" ]; do case "$p" in \#*|"") continue;; esac; pacman -Qi "$p" >/dev/null 2>&1 || echo "  $p"; done < "$DOTFILES/install/packages.desktop"
+        fi
         exit 0
     }
     log "Installing..."
     grep -vE "^\s*#|^\s*$" "$PKGFILE" | xargs paru -S --needed --noconfirm
+    if [ "$DOTFILES_MINIMAL" -eq 0 ] && [ -f "$DOTFILES/install/packages.desktop" ]; then
+        grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages.desktop" | xargs paru -S --needed --noconfirm
+    fi
 }
 
 cmd_suckless() {
+    if [ "$DOTFILES_MINIMAL" -eq 1 ]; then
+        echo "Suckless tools not available in minimal mode"; exit 1
+    fi
     t="${1:-all}"; log "Building $t..."
     if [ "$t" = "all" ]; then
         # Parallel compilation
@@ -105,7 +122,7 @@ cmd_suckless() {
 }
 
 cmd_hardware() { "$DOTFILES/install/hardware.sh" "$@"; }
-cmd_install() { "$DOTFILES/install/setup.sh"; }
+cmd_install() { "$DOTFILES/install/setup.sh" "$@"; }
 
 cmd_tools() {
     command -v mise >/dev/null 2>&1 || {
@@ -144,14 +161,14 @@ EOF
 cmd_wallpaper() {
     WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
     STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper_index"
-    
+
     [ ! -d "$WALLPAPER_DIR" ] && { echo "Wallpaper dir not found: $WALLPAPER_DIR"; exit 1; }
-    
+
     # Get sorted list of wallpapers
     wallpapers=$(find -L "$WALLPAPER_DIR" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) | sort)
     count=$(echo "$wallpapers" | grep -c . || echo 0)
     [ "$count" -eq 0 ] && { echo "No wallpapers found"; exit 1; }
-    
+
     # Get current wallpaper from feh state
     current=""
     [ -f "$HOME/.fehbg" ] && current=$(sed -n "s/.*'\([^']*\)'[^']*$/\1/p" "$HOME/.fehbg" 2>/dev/null || true)
@@ -167,12 +184,12 @@ cmd_wallpaper() {
 $wallpapers
 EOF
     fi
-    
+
     set_wallpaper() {
         wp=$(echo "$wallpapers" | sed -n "$((${1} + 1))p")
         [ -n "$wp" ] && { feh --bg-fill "$wp"; echo "$1" > "$STATE_FILE"; echo "Set: $(basename "$wp")"; }
     }
-    
+
     case "${1:-}" in
         next)
             new_idx=$(( (idx + 1) % count ))
@@ -250,7 +267,7 @@ dot <cmd> [args]
                       Verify: check [device]
   monitor <cmd>       Manage display profiles (save|switch|list)
   wallpaper <cmd>     Cycle wallpapers (next|prev|random|current|list)
-  install             Full setup
+  install [--minimal] Full setup (--minimal: skip desktop/WM components)
 EOF
 }
 
@@ -265,7 +282,7 @@ case "${1:-}" in
     hardware) shift; cmd_hardware "$@" ;;
     monitor) shift; cmd_monitor "$@" ;;
     wallpaper|wp) shift; cmd_wallpaper "$@" ;;
-    install) cmd_install ;;
+    install) shift; cmd_install "$@" ;;
     -h|--help|help) cmd_help ;;
     *) cmd_help ;;
 esac
