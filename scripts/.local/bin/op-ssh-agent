@@ -20,6 +20,8 @@ if [ ! -f "$AGENT_TOML" ]; then
     exit 1
 fi
 
+mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+
 # Parse item names and vaults from agent.toml
 while IFS= read -r line; do
     case "$line" in
@@ -30,9 +32,18 @@ while IFS= read -r line; do
             vault=$(echo "$line" | sed 's/.*vault = "\([^"]*\)".*/\1/')
             # We now have both item and vault — fetch and add the key
             echo "Loading: $item ($vault)"
+
+            # Export public key (lowercase vault name as filename prefix)
+            prefix=$(echo "$vault" | tr '[:upper:]' '[:lower:]')
+            pubkey_file="$HOME/.ssh/${prefix}.github.pub"
+            op read "op://$vault/$item/public key" > "$pubkey_file"
+            chmod 644 "$pubkey_file"
+
+            # Load private key into agent
             tmpkey=$(mktemp)
             trap 'rm -f "$tmpkey"' EXIT
-            op item get "$item" --vault "$vault" --fields "private key" > "$tmpkey"
+            op read "op://$vault/$item/private key?ssh-format=openssh" | tr -d '\r' > "$tmpkey"
+            printf '\n' >> "$tmpkey"
             chmod 600 "$tmpkey"
             ssh-add "$tmpkey"
             rm -f "$tmpkey"
