@@ -1,17 +1,11 @@
 #!/bin/sh
-# Load 1Password SSH keys into ssh-agent (for headless/server machines)
-# On desktop, the 1Password GUI provides the agent — this script is not needed.
+# Fetch SSH keys from 1Password and save to ~/.ssh/
+# Reads key definitions from agent.toml (item + vault pairs)
 set -e
 
 # Ensure op is available and signed in
 command -v op >/dev/null 2>&1 || { echo "1password-cli (op) not installed"; exit 1; }
 op account list >/dev/null 2>&1 || { echo "Sign in first: eval \$(op signin)"; exit 1; }
-
-# Start ssh-agent if not running
-if [ -z "$SSH_AUTH_SOCK" ]; then
-    eval "$(ssh-agent -s)"
-    echo "Started ssh-agent (PID: $SSH_AGENT_PID)"
-fi
 
 # Load keys defined in agent.toml
 AGENT_TOML="${XDG_CONFIG_HOME:-$HOME/.config}/1Password/ssh/agent.toml"
@@ -30,25 +24,22 @@ while IFS= read -r line; do
             ;;
         *'vault = "'*)
             vault=$(echo "$line" | sed 's/.*vault = "\([^"]*\)".*/\1/')
-            # We now have both item and vault — fetch and add the key
-            echo "Loading: $item ($vault)"
-
-            # Export public key (lowercase vault name as filename prefix)
+            # We now have both item and vault — fetch the keys
             prefix=$(echo "$vault" | tr '[:upper:]' '[:lower:]')
+            echo "Fetching: $item ($vault) → ~/.ssh/${prefix}.github"
+
+            # Public key
             pubkey_file="$HOME/.ssh/${prefix}.github.pub"
             op read "op://$vault/$item/public key" > "$pubkey_file"
             chmod 644 "$pubkey_file"
 
-            # Load private key into agent
-            tmpkey=$(mktemp)
-            trap 'rm -f "$tmpkey"' EXIT
-            op read "op://$vault/$item/private key?ssh-format=openssh" | tr -d '\r' > "$tmpkey"
-            printf '\n' >> "$tmpkey"
-            chmod 600 "$tmpkey"
-            ssh-add "$tmpkey"
-            rm -f "$tmpkey"
+            # Private key
+            privkey_file="$HOME/.ssh/${prefix}.github"
+            op read "op://$vault/$item/private key?ssh-format=openssh" | tr -d '\r' > "$privkey_file"
+            printf '\n' >> "$privkey_file"
+            chmod 600 "$privkey_file"
             ;;
     esac
 done < "$AGENT_TOML"
 
-echo "Keys loaded into ssh-agent"
+echo "SSH keys saved to ~/.ssh/"

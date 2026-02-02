@@ -60,11 +60,9 @@ link_configs() {
     link "$DOTFILES/npm/.config/npm" "$HOME/.config/npm"
     link "$DOTFILES/mise/.config/mise" "$HOME/.config/mise"
 
-    # SSH and 1Password (ensure directories exist with correct permissions)
+    # SSH config
     mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
     link "$DOTFILES/ssh/.ssh/config" "$HOME/.ssh/config"
-    mkdir -p "$HOME/.config/1Password/ssh"
-    link "$DOTFILES/1password/.config/1Password/ssh/agent.toml" "$HOME/.config/1Password/ssh/agent.toml"
 
     # Scripts
     mkdir -p "$HOME/.local/bin"
