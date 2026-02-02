@@ -10,9 +10,6 @@
 # Runtimes
 # -----------------------------------------------------------------------------
 node = "lts"
-go = "latest"
-python = "3.12"
-rust = "latest"
 
 # -----------------------------------------------------------------------------
 # Package Managers
@@ -27,10 +24,7 @@ ripgrep = "latest"
 fd = "latest"
 fzf = "latest"
 bat = "latest"
-eza = "latest"
-zoxide = "latest"
 starship = "latest"
-yazi = "latest"
 btop = "latest"
 shellcheck = "latest"
 
@@ -40,7 +34,6 @@ shellcheck = "latest"
 neovim = "latest"
 lazygit = "latest"
 lazydocker = "latest"
-delta = "latest"
 gh = "latest"
 "npm:@withgraphite/graphite-cli" = "latest"
 
