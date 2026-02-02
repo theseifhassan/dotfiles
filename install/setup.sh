@@ -171,9 +171,9 @@ export CLAUDE_CACHE_DIR="$XDG_CACHE_HOME/claude"
 
 # OpenCode
 log "OpenCode"
-command -v opencode >/dev/null || curl -fsSL https://opencode.ai/install | bash
+command -v opencode >/dev/null || OPENCODE_INSTALL_DIR="$HOME/.local/bin" curl -fsSL https://opencode.ai/install | bash
 
-# Claude Code
+# Claude Code (installs to ~/.local/bin by default)
 log "Claude Code"
 command -v claude >/dev/null || curl -fsSL https://claude.ai/install.sh | sh
 
