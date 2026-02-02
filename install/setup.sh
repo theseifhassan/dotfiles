@@ -172,6 +172,7 @@ command -v claude >/dev/null || curl -fsSL https://claude.ai/install.sh | sh
 # Shell
 log "Shell"
 [ "$SHELL" != "$(command -v zsh)" ] && sudo chsh -s "$(command -v zsh)" "$USER"
+rm -f "$HOME/.bash_profile" "$HOME/.bash_login" "$HOME/.bash_logout" "$HOME/.bashrc" "$HOME/.bash_history"
 
 # Wait for background TPM clone
 wait "$tpm_pid" 2>/dev/null || true
