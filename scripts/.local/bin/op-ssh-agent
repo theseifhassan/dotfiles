@@ -1,0 +1,43 @@
+#!/bin/sh
+# Load 1Password SSH keys into ssh-agent (for headless/server machines)
+# On desktop, the 1Password GUI provides the agent — this script is not needed.
+set -e
+
+# Ensure op is available and signed in
+command -v op >/dev/null 2>&1 || { echo "1password-cli (op) not installed"; exit 1; }
+op account list >/dev/null 2>&1 || { echo "Sign in first: eval \$(op signin)"; exit 1; }
+
+# Start ssh-agent if not running
+if [ -z "$SSH_AUTH_SOCK" ]; then
+    eval "$(ssh-agent -s)"
+    echo "Started ssh-agent (PID: $SSH_AGENT_PID)"
+fi
+
+# Load keys defined in agent.toml
+AGENT_TOML="${XDG_CONFIG_HOME:-$HOME/.config}/1Password/ssh/agent.toml"
+if [ ! -f "$AGENT_TOML" ]; then
+    echo "No agent.toml found at $AGENT_TOML"
+    exit 1
+fi
+
+# Parse item names and vaults from agent.toml
+while IFS= read -r line; do
+    case "$line" in
+        *'item = "'*)
+            item=$(echo "$line" | sed 's/.*item = "\([^"]*\)".*/\1/')
+            ;;
+        *'vault = "'*)
+            vault=$(echo "$line" | sed 's/.*vault = "\([^"]*\)".*/\1/')
+            # We now have both item and vault — fetch and add the key
+            echo "Loading: $item ($vault)"
+            tmpkey=$(mktemp)
+            trap 'rm -f "$tmpkey"' EXIT
+            op item get "$item" --vault "$vault" --fields "private key" > "$tmpkey"
+            chmod 600 "$tmpkey"
+            ssh-add "$tmpkey"
+            rm -f "$tmpkey"
+            ;;
+    esac
+done < "$AGENT_TOML"
+
+echo "Keys loaded into ssh-agent"
