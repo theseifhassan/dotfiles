@@ -41,6 +41,8 @@ neovim = "latest"
 lazygit = "latest"
 lazydocker = "latest"
 delta = "latest"
+gh = "latest"
+"npm:@withgraphite/graphite-cli" = "latest"
 
 # -----------------------------------------------------------------------------
 # Settings
