@@ -161,6 +161,14 @@ if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
     systemctl --user enable --now wallpaper.timer 2>/dev/null || true
 fi
 
+# Export XDG vars so installers respect them
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
+export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
+export CLAUDE_CACHE_DIR="$XDG_CACHE_HOME/claude"
+
 # OpenCode
 log "OpenCode"
 command -v opencode >/dev/null || curl -fsSL https://opencode.ai/install | bash
@@ -173,6 +181,9 @@ command -v claude >/dev/null || curl -fsSL https://claude.ai/install.sh | sh
 log "Shell"
 [ "$SHELL" != "$(command -v zsh)" ] && sudo chsh -s "$(command -v zsh)" "$USER"
 rm -f "$HOME/.bash_profile" "$HOME/.bash_login" "$HOME/.bash_logout" "$HOME/.bashrc" "$HOME/.bash_history"
+
+# Clean up non-XDG dotfiles left by installers
+rm -rf "$HOME/.cargo" "$HOME/.opencode" "$HOME/.claude" "$HOME/.claude.json" "$HOME"/.claude.json.backup*
 
 # Wait for background TPM clone
 wait "$tpm_pid" 2>/dev/null || true
