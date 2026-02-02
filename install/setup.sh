@@ -169,6 +169,10 @@ export CARGO_HOME="$XDG_DATA_HOME/cargo"
 export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
 export CLAUDE_CACHE_DIR="$XDG_CACHE_HOME/claude"
 
+# Dev tools via mise
+log "Dev tools"
+mise install
+
 # OpenCode
 log "OpenCode"
 command -v opencode >/dev/null || OPENCODE_INSTALL_DIR="$HOME/.local/bin" curl -fsSL https://opencode.ai/install | bash
