@@ -175,7 +175,14 @@ mise install
 
 # OpenCode
 log "OpenCode"
-command -v opencode >/dev/null || OPENCODE_INSTALL_DIR="$HOME/.local/bin" curl -fsSL https://opencode.ai/install | bash
+command -v opencode >/dev/null || {
+    curl -fsSL https://opencode.ai/install | bash
+    # Installer hardcodes ~/.opencode/bin — move to ~/.local/bin
+    if [ -f "$HOME/.opencode/bin/opencode" ]; then
+        mv "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
+        rm -rf "$HOME/.opencode"
+    fi
+}
 
 # Claude Code (installs to ~/.local/bin by default)
 log "Claude Code"
