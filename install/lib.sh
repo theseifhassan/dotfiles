@@ -27,6 +27,26 @@ log() { echo ">>> $1"; }
 
 # Link all config files — single source of truth for symlink operations
 # Requires: $DOTFILES set, link() available
+# Get packages from a list file (skip comments and blanks)
+pkg_list() {
+    grep -vE "^\s*#|^\s*$" "$1"
+}
+
+# Expected systemd services based on mode
+expected_services() {
+    echo "docker tailscaled sshd"
+    [ "$DOTFILES_MINIMAL" -eq 0 ] && echo "autorandr bluetooth"
+}
+
+# Take a btrfs auto-snapshot if on btrfs
+auto_snapshot() {
+    if findmnt -n -o FSTYPE / | grep -q btrfs; then
+        sudo mkdir -p /.snapshots
+        sudo btrfs subvolume snapshot -r / "/.snapshots/$(date +%Y-%m-%d_%H%M%S)__${1:-auto}" >/dev/null
+        log "Auto-snapshot taken"
+    fi
+}
+
 link_configs() {
     # Base configs (always linked)
     link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"

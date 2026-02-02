@@ -9,10 +9,11 @@ DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 
 cmd_update() {
     cd "$DOTFILES"
-    [ "$1" != "--no-pull" ] && {
+    [ "${1:-}" != "--no-pull" ] && {
         git diff-index --quiet HEAD -- 2>/dev/null || { echo "Uncommitted changes. Continue? [y/N]"; read -r a; [ "$a" != "y" ] && exit 1; }
         log "Pulling..."; git pull --rebase
     }
+    auto_snapshot "pre-update"
     if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
         log "Suckless..."
         # Parallel compilation
@@ -82,21 +83,376 @@ cmd_link() {
 }
 
 cmd_packages() {
-    PKGFILE="$DOTFILES/install/packages"
-    [ ! -f "$PKGFILE" ] && { echo "install/packages not found"; exit 1; }
-    [ "$1" = "-d" ] || [ "$1" = "--diff" ] && {
-        log "Missing:"
-        while IFS= read -r p || [ -n "$p" ]; do case "$p" in \#*|"") continue;; esac; pacman -Qi "$p" >/dev/null 2>&1 || echo "  $p"; done < "$PKGFILE"
-        if [ "$DOTFILES_MINIMAL" -eq 0 ] && [ -f "$DOTFILES/install/packages.desktop" ]; then
-            while IFS= read -r p || [ -n "$p" ]; do case "$p" in \#*|"") continue;; esac; pacman -Qi "$p" >/dev/null 2>&1 || echo "  $p"; done < "$DOTFILES/install/packages.desktop"
-        fi
-        exit 0
-    }
-    log "Installing..."
-    grep -vE "^\s*#|^\s*$" "$PKGFILE" | xargs paru -S --needed --noconfirm
-    if [ "$DOTFILES_MINIMAL" -eq 0 ] && [ -f "$DOTFILES/install/packages.desktop" ]; then
-        grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages.desktop" | xargs paru -S --needed --noconfirm
+    case "${1:-}" in
+        add)
+            [ -z "${2:-}" ] && { echo "Usage: dot packages add <pkg> [--base|--desktop]"; exit 1; }
+            pkg="$2"
+            # Install first
+            paru -S --needed "$pkg" || exit 1
+            # Determine target file
+            target_file=""
+            case "${3:-}" in
+                --base) target_file="$DOTFILES/install/packages" ;;
+                --desktop) target_file="$DOTFILES/install/packages.desktop" ;;
+                *)
+                    if [ "$DOTFILES_MINIMAL" -eq 1 ]; then
+                        target_file="$DOTFILES/install/packages"
+                    else
+                        target_file="$DOTFILES/install/packages.desktop"
+                    fi
+                    ;;
+            esac
+            # Check if already listed
+            if grep -qxF "$pkg" "$target_file"; then
+                echo "$pkg already in $(basename "$target_file")"
+                exit 0
+            fi
+            # Append
+            echo "$pkg" >> "$target_file"
+            fname=$(basename "$target_file")
+            echo "Added $pkg to $fname. Commit with: git -C ~/dotfiles commit -am \"pkg: add $pkg\""
+            ;;
+        remove)
+            [ -z "${2:-}" ] && { echo "Usage: dot packages remove <pkg>"; exit 1; }
+            pkg="$2"
+            # Find which file contains it
+            found_file=""
+            for f in "$DOTFILES/install/packages" "$DOTFILES/install/packages.desktop"; do
+                if [ -f "$f" ] && grep -qxF "$pkg" "$f"; then
+                    found_file="$f"
+                    break
+                fi
+            done
+            [ -z "$found_file" ] && echo "Warning: $pkg not found in package lists"
+            # Uninstall
+            paru -Rns "$pkg" || exit 1
+            # Remove from file
+            if [ -n "$found_file" ]; then
+                sed -i "/^${pkg}$/d" "$found_file"
+                fname=$(basename "$found_file")
+                echo "Removed $pkg from $fname. Commit with: git -C ~/dotfiles commit -am \"pkg: remove $pkg\""
+            fi
+            ;;
+        -d|--diff)
+            log "Missing:"
+            while IFS= read -r p || [ -n "$p" ]; do case "$p" in \#*|"") continue;; esac; pacman -Qi "$p" >/dev/null 2>&1 || echo "  $p"; done < "$DOTFILES/install/packages"
+            if [ "$DOTFILES_MINIMAL" -eq 0 ] && [ -f "$DOTFILES/install/packages.desktop" ]; then
+                while IFS= read -r p || [ -n "$p" ]; do case "$p" in \#*|"") continue;; esac; pacman -Qi "$p" >/dev/null 2>&1 || echo "  $p"; done < "$DOTFILES/install/packages.desktop"
+            fi
+            ;;
+        "")
+            log "Installing..."
+            grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages" | xargs paru -S --needed --noconfirm
+            if [ "$DOTFILES_MINIMAL" -eq 0 ] && [ -f "$DOTFILES/install/packages.desktop" ]; then
+                grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages.desktop" | xargs paru -S --needed --noconfirm
+            fi
+            ;;
+        *)
+            echo "Usage: dot packages [-d|add <pkg>|remove <pkg>]"
+            ;;
+    esac
+}
+
+cmd_snapshot() {
+    # Verify btrfs
+    if ! findmnt -n -o FSTYPE / | grep -q btrfs; then
+        echo "btrfs required for snapshots"; exit 1
     fi
+
+    case "${1:-}" in
+        list)
+            if [ ! -d /.snapshots ] || [ -z "$(ls -A /.snapshots 2>/dev/null)" ]; then
+                echo "No snapshots found"; exit 0
+            fi
+            printf "%-25s %s\n" "DATE" "DESCRIPTION"
+            for d in /.snapshots/*; do
+                name=$(basename "$d")
+                # Parse date part (YYYY-MM-DD_HHMMSS)
+                date_part=$(echo "$name" | cut -c1-17)
+                # Parse description (after __)
+                desc=""
+                case "$name" in *__*) desc=$(echo "$name" | sed 's/^[^_]*_[^_]*__//') ;; esac
+                printf "%-25s %s\n" "$date_part" "$desc"
+            done
+            ;;
+        restore)
+            if [ ! -d /.snapshots ] || [ -z "$(ls -A /.snapshots 2>/dev/null)" ]; then
+                echo "No snapshots found"; exit 1
+            fi
+            # List with numbers
+            i=1
+            for d in /.snapshots/*; do
+                echo "$i) $(basename "$d")"
+                i=$((i + 1))
+            done
+            printf "Select snapshot to restore [1-%d]: " "$((i - 1))"
+            read -r choice
+            # Validate
+            [ -z "$choice" ] && exit 1
+            selected=$(ls -1d /.snapshots/* | sed -n "${choice}p")
+            [ -z "$selected" ] && { echo "Invalid selection"; exit 1; }
+            echo "WARNING: This will replace the root subvolume on next reboot."
+            printf "Continue? [y/N] "
+            read -r confirm
+            [ "$confirm" != "y" ] && exit 1
+            # Get root subvolume name
+            subvol=$(btrfs subvolume show / | head -1 | xargs)
+            # Mount top-level (subvolid=5)
+            tmpdir=$(mktemp -d)
+            sudo mount -o subvolid=5 "$(findmnt -n -o SOURCE /)" "$tmpdir"
+            timestamp=$(date +%Y%m%d_%H%M%S)
+            sudo mv "$tmpdir/$subvol" "$tmpdir/${subvol}.broken_${timestamp}"
+            sudo btrfs subvolume snapshot "$selected" "$tmpdir/$subvol"
+            sudo umount "$tmpdir"
+            rmdir "$tmpdir"
+            echo "Restore staged. Reboot to apply."
+            ;;
+        delete)
+            [ -z "${2:-}" ] && { echo "Usage: dot snapshot delete <name>"; exit 1; }
+            target="/.snapshots/$2"
+            [ ! -d "$target" ] && { echo "Snapshot not found: $2"; exit 1; }
+            sudo btrfs subvolume delete "$target"
+            echo "Deleted $2"
+            ;;
+        *)
+            # Take a snapshot (default action)
+            desc="${1:-}"
+            name="$(date +%Y-%m-%d_%H%M%S)"
+            [ -n "$desc" ] && name="${name}__${desc}"
+            sudo mkdir -p /.snapshots
+
+            # Auto-delete snapshots older than 7 days
+            if [ -d /.snapshots ]; then
+                cutoff=$(date -d '7 days ago' +%Y-%m-%d_%H%M%S 2>/dev/null || date -v-7d +%Y-%m-%d_%H%M%S 2>/dev/null || echo "")
+                if [ -n "$cutoff" ]; then
+                    for d in /.snapshots/*; do
+                        [ ! -d "$d" ] && continue
+                        snap_date=$(basename "$d" | cut -c1-17)
+                        [ "$snap_date" \< "$cutoff" ] && sudo btrfs subvolume delete "$d" >/dev/null 2>&1 || true
+                    done
+                fi
+            fi
+
+            sudo btrfs subvolume snapshot -r / "/.snapshots/$name"
+            echo "Snapshot: $name"
+            ;;
+    esac
+}
+
+cmd_status() {
+    # Mode
+    if [ "$DOTFILES_MINIMAL" -eq 1 ]; then
+        mode="minimal"
+    else
+        mode="full"
+    fi
+    printf "mode:      %s\n" "$mode"
+
+    # Git
+    cd "$DOTFILES"
+    if git diff-index --quiet HEAD -- 2>/dev/null; then
+        git_status="clean"
+    else
+        git_status="dirty"
+    fi
+    ahead_behind=$(git rev-list --count --left-right '@{u}...HEAD' 2>/dev/null || echo "0	0")
+    behind=$(echo "$ahead_behind" | cut -f1)
+    ahead=$(echo "$ahead_behind" | cut -f2)
+    if [ "$behind" -gt 0 ] && [ "$ahead" -gt 0 ]; then
+        git_status="$git_status, ${ahead} ahead / ${behind} behind"
+    elif [ "$behind" -gt 0 ]; then
+        git_status="$git_status, ${behind} behind"
+    elif [ "$ahead" -gt 0 ]; then
+        git_status="$git_status, ${ahead} ahead"
+    else
+        git_status="$git_status, up to date"
+    fi
+    printf "git:       %s\n" "$git_status"
+
+    # Packages
+    missing=0
+    base_count=0
+    while IFS= read -r p || [ -n "$p" ]; do
+        case "$p" in \#*|""|" "*) continue;; esac
+        base_count=$((base_count + 1))
+        pacman -Qi "$p" >/dev/null 2>&1 || missing=$((missing + 1))
+    done < "$DOTFILES/install/packages"
+    desktop_count=0
+    if [ "$DOTFILES_MINIMAL" -eq 0 ] && [ -f "$DOTFILES/install/packages.desktop" ]; then
+        while IFS= read -r p || [ -n "$p" ]; do
+            case "$p" in \#*|""|" "*) continue;; esac
+            desktop_count=$((desktop_count + 1))
+            pacman -Qi "$p" >/dev/null 2>&1 || missing=$((missing + 1))
+        done < "$DOTFILES/install/packages.desktop"
+    fi
+    if [ "$missing" -eq 0 ]; then
+        if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
+            printf "packages:  all installed (%d base + %d desktop)\n" "$base_count" "$desktop_count"
+        else
+            printf "packages:  all installed (%d base)\n" "$base_count"
+        fi
+    else
+        printf "packages:  %d missing\n" "$missing"
+    fi
+
+    # Links
+    link_count=0
+    broken_count=0
+    check_link() {
+        link_count=$((link_count + 1))
+        if [ -L "$2" ] && [ "$(readlink "$2")" = "$1" ]; then
+            return 0
+        else
+            broken_count=$((broken_count + 1))
+        fi
+    }
+    # Base links
+    check_link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
+    check_link "$DOTFILES/zsh/.config/zsh" "$HOME/.config/zsh"
+    check_link "$DOTFILES/nvim/.config/nvim" "$HOME/.config/nvim"
+    check_link "$DOTFILES/tmux/.config/tmux" "$HOME/.config/tmux"
+    check_link "$DOTFILES/git/.config/git" "$HOME/.config/git"
+    check_link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
+    check_link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
+    check_link "$DOTFILES/opencode/.config/opencode" "$HOME/.config/opencode"
+    check_link "$DOTFILES/npm/.config/npm" "$HOME/.config/npm"
+    check_link "$DOTFILES/mise/.config/mise" "$HOME/.config/mise"
+    check_link "$DOTFILES/ssh/.ssh/config" "$HOME/.ssh/config"
+    check_link "$DOTFILES/1password/.config/1Password/ssh/agent.toml" "$HOME/.config/1Password/ssh/agent.toml"
+    for f in "$DOTFILES/scripts/.local/bin/"*; do
+        check_link "$f" "$HOME/.local/bin/$(basename "$f")"
+    done
+    if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
+        check_link "$DOTFILES/x11/.config/x11" "$HOME/.config/x11"
+        check_link "$DOTFILES/ghostty/.config/ghostty" "$HOME/.config/ghostty"
+        check_link "$DOTFILES/picom/.config/picom" "$HOME/.config/picom"
+        check_link "$DOTFILES/dunst/.config/dunst" "$HOME/.config/dunst"
+        check_link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
+        check_link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
+    fi
+    if [ "$broken_count" -eq 0 ]; then
+        printf "links:     all correct (%d symlinks)\n" "$link_count"
+    else
+        printf "links:     %d broken (%d total)\n" "$broken_count" "$link_count"
+    fi
+
+    # Services
+    svc_ok=""
+    svc_bad=""
+    for svc in docker tailscaled sshd; do
+        if systemctl is-active "$svc" >/dev/null 2>&1; then
+            svc_ok="${svc_ok:+$svc_ok, }$svc"
+        else
+            svc_bad="${svc_bad:+$svc_bad, }$svc"
+        fi
+    done
+    if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
+        for svc in autorandr bluetooth; do
+            if systemctl is-active "$svc" >/dev/null 2>&1 || systemctl is-enabled "$svc" >/dev/null 2>&1; then
+                svc_ok="${svc_ok:+$svc_ok, }$svc"
+            else
+                svc_bad="${svc_bad:+$svc_bad, }$svc"
+            fi
+        done
+    fi
+    if [ -z "$svc_bad" ]; then
+        printf "services:  all running (%s)\n" "$svc_ok"
+    else
+        printf "services:  not active: %s (ok: %s)\n" "$svc_bad" "$svc_ok"
+    fi
+
+    # Snapshots
+    if findmnt -n -o FSTYPE / | grep -q btrfs; then
+        snap_count=0
+        last_snap=""
+        if [ -d /.snapshots ]; then
+            for d in /.snapshots/*; do
+                [ -d "$d" ] || continue
+                snap_count=$((snap_count + 1))
+                last_snap=$(basename "$d" | cut -c1-17)
+            done
+        fi
+        if [ "$snap_count" -gt 0 ]; then
+            # Calculate relative time
+            last_epoch=$(date -d "$(echo "$last_snap" | sed 's/_/ /;s/\([0-9]\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1:\2:\3/')" +%s 2>/dev/null || echo "")
+            now_epoch=$(date +%s)
+            if [ -n "$last_epoch" ]; then
+                diff_s=$((now_epoch - last_epoch))
+                if [ "$diff_s" -lt 3600 ]; then
+                    age="$((diff_s / 60))m ago"
+                elif [ "$diff_s" -lt 86400 ]; then
+                    age="$((diff_s / 3600))h ago"
+                else
+                    age="$((diff_s / 86400))d ago"
+                fi
+                printf "snapshots: last %s (%d total)\n" "$age" "$snap_count"
+            else
+                printf "snapshots: %d total\n" "$snap_count"
+            fi
+        else
+            printf "snapshots: none\n"
+        fi
+    fi
+}
+
+cmd_mode() {
+    MODE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/mode"
+
+    case "${1:-}" in
+        "")
+            if [ "$DOTFILES_MINIMAL" -eq 1 ]; then
+                echo "minimal"
+            else
+                echo "full"
+            fi
+            ;;
+        minimal)
+            auto_snapshot "pre-mode-switch"
+            log "Switching to minimal mode..."
+            # Remove desktop packages that are installed
+            if [ -f "$DOTFILES/install/packages.desktop" ]; then
+                to_remove=""
+                while IFS= read -r p || [ -n "$p" ]; do
+                    case "$p" in \#*|""|" "*) continue;; esac
+                    pacman -Qi "$p" >/dev/null 2>&1 && to_remove="$to_remove $p"
+                done < "$DOTFILES/install/packages.desktop"
+                if [ -n "$to_remove" ]; then
+                    # shellcheck disable=SC2086
+                    paru -Rns --noconfirm $to_remove || true
+                fi
+            fi
+            # Disable desktop services
+            sudo systemctl disable autorandr.service 2>/dev/null || true
+            sudo systemctl disable bluetooth.service 2>/dev/null || true
+            # Update mode
+            DOTFILES_MINIMAL=1
+            mkdir -p "$(dirname "$MODE_FILE")"
+            echo "DOTFILES_MINIMAL=1" > "$MODE_FILE"
+            log "Switched to minimal mode"
+            ;;
+        full)
+            auto_snapshot "pre-mode-switch"
+            log "Switching to full mode..."
+            # Update mode first so link_configs includes desktop
+            DOTFILES_MINIMAL=0
+            mkdir -p "$(dirname "$MODE_FILE")"
+            echo "DOTFILES_MINIMAL=0" > "$MODE_FILE"
+            # Install desktop packages
+            if [ -f "$DOTFILES/install/packages.desktop" ]; then
+                grep -vE "^\s*#|^\s*$" "$DOTFILES/install/packages.desktop" | xargs paru -S --needed --noconfirm
+            fi
+            # Link configs (now includes desktop)
+            link_configs
+            # Enable desktop services
+            sudo systemctl enable autorandr.service 2>/dev/null || true
+            sudo systemctl enable bluetooth.service 2>/dev/null || true
+            systemctl --user daemon-reload
+            log "Switched to full mode"
+            ;;
+        *)
+            echo "Usage: dot mode [minimal|full]"
+            ;;
+    esac
 }
 
 cmd_suckless() {
@@ -257,26 +613,35 @@ EOF
 
 cmd_help() { cat <<EOF
 dot <cmd> [args]
-  update [--no-pull]  Pull, recompile, reload
-  link                Symlink configs
-  packages [-d]       Install packages (-d: show missing)
-  tools <cmd>         Manage dev tools via mise (install|upgrade|list|outdated)
-  suckless [target]   Recompile dwm/dmenu/dwmblocks
-  hardware <cmd>      Install: nvidia|bluetooth|printer|fingerprint|virtualcam|all
-                      nvidia disable - Disable GPU for max battery
-                      Verify: check [device]
-  monitor <cmd>       Manage display profiles (save|switch|list)
-  wallpaper <cmd>     Cycle wallpapers (next|prev|random|current|list)
-  install [--minimal] Full setup (--minimal: skip desktop/WM components)
+  status                System health check
+  update [--no-pull]    Pull, recompile, reload
+  link                  Symlink configs
+  packages [-d]         Install packages (-d: show missing)
+  packages add <pkg>    Install package and add to list
+  packages remove <pkg> Uninstall package and remove from list
+  mode [minimal|full]   Show or switch system mode
+  snapshot [desc]       Take a btrfs snapshot
+  snapshot list         List snapshots
+  snapshot restore      Restore a snapshot
+  snapshot delete <id>  Delete a snapshot
+  tools <cmd>           Manage dev tools via mise
+  suckless [target]     Recompile dwm/dmenu/dwmblocks
+  hardware <cmd>        Hardware drivers
+  monitor <cmd>         Display profiles
+  wallpaper <cmd>       Cycle wallpapers
+  install [--minimal]   Full setup
 EOF
 }
 
 [ "${SOURCED:-}" = "1" ] && return 0 2>/dev/null || true
 
 case "${1:-}" in
+    status) cmd_status ;;
     update) shift; cmd_update "$@" ;;
     link) cmd_link ;;
     packages) shift; cmd_packages "$@" ;;
+    mode) shift; cmd_mode "$@" ;;
+    snapshot) shift; cmd_snapshot "$@" ;;
     tools) shift; cmd_tools "$@" ;;
     suckless) shift; cmd_suckless "$@" ;;
     hardware) shift; cmd_hardware "$@" ;;

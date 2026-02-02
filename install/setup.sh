@@ -27,6 +27,9 @@ echo "DOTFILES_MINIMAL=$DOTFILES_MINIMAL" > "$STATE_DIR/mode"
 sudo -v
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
+# Auto-snapshot before making changes (btrfs only)
+auto_snapshot "pre-install"
+
 # Bootstrap
 log "Bootstrap"
 command -v paru >/dev/null || {
