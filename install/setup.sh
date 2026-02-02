@@ -183,7 +183,8 @@ log "Shell"
 rm -f "$HOME/.bash_profile" "$HOME/.bash_login" "$HOME/.bash_logout" "$HOME/.bashrc" "$HOME/.bash_history"
 
 # Clean up non-XDG dotfiles left by installers
-rm -rf "$HOME/.cargo" "$HOME/.opencode" "$HOME/.claude" "$HOME/.claude.json" "$HOME"/.claude.json.backup*
+# Note: don't remove ~/.claude or ~/.opencode — they may contain binaries
+rm -rf "$HOME/.cargo" "$HOME/.claude.json" "$HOME"/.claude.json.backup*
 
 # Wait for background TPM clone
 wait "$tpm_pid" 2>/dev/null || true
