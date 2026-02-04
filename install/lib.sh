@@ -76,6 +76,7 @@ link_configs() {
         link "$DOTFILES/dunst/.config/dunst" "$HOME/.config/dunst"
         link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
         link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
+        link "$DOTFILES/chrome/.config/chrome-flags.conf" "$HOME/.config/chrome-flags.conf"
 
         # Link wallpapers if present
         if [ -d "$DOTFILES/wallpapers" ] && find "$DOTFILES/wallpapers" -maxdepth 1 -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) 2>/dev/null | grep -q .; then

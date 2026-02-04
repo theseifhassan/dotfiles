@@ -329,6 +329,7 @@ cmd_status() {
         check_link "$DOTFILES/dunst/.config/dunst" "$HOME/.config/dunst"
         check_link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
         check_link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
+        check_link "$DOTFILES/chrome/.config/chrome-flags.conf" "$HOME/.config/chrome-flags.conf"
     fi
     if [ "$broken_count" -eq 0 ]; then
         printf "links:     all correct (%d symlinks)\n" "$link_count"
