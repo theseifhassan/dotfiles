@@ -36,6 +36,7 @@ lazygit = "latest"
 lazydocker = "latest"
 gh = "latest"
 "npm:@withgraphite/graphite-cli" = "latest"
+# Note: 1password-cli must be installed via system package (paru) for desktop app integration
 
 # -----------------------------------------------------------------------------
 # Settings

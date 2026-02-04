@@ -64,6 +64,9 @@ link_configs() {
     mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
     link "$DOTFILES/ssh/.ssh/config" "$HOME/.ssh/config"
 
+    # 1Password SSH agent config (for key extraction)
+    link "$DOTFILES/1password/.config/1Password/ssh/agent.toml" "$HOME/.config/1Password/ssh/agent.toml"
+
     # Scripts
     mkdir -p "$HOME/.local/bin"
     for f in "$DOTFILES/scripts/.local/bin/"*; do link "$f" "$HOME/.local/bin/$(basename "$f")"; done
