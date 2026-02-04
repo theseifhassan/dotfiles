@@ -18,6 +18,7 @@ export BUN_INSTALL="$XDG_DATA_HOME/bun"
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
 export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
 export CLAUDE_CACHE_DIR="$XDG_CACHE_HOME/claude"
+export WGETRC="$XDG_CONFIG_HOME/wgetrc"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
