@@ -105,7 +105,12 @@ is_hybrid_gpu() {
 }
 
 install_nvidia() {
-    lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
+    # Check envycontrol first - in integrated mode GPU won't appear in lspci
+    if command -v envycontrol >/dev/null && [ "$(envycontrol --query 2>/dev/null)" = "integrated" ]; then
+        echo "GPU currently disabled (integrated mode). Re-enabling..."
+    elif ! lspci | grep -qi nvidia; then
+        echo "No NVIDIA GPU"; return 0
+    fi
 
     # Install envycontrol for GPU switching
     command -v envycontrol >/dev/null || $PKG envycontrol
@@ -201,6 +206,10 @@ EOF
 }
 
 disable_nvidia() {
+    # In integrated mode GPU is already disabled; in hybrid mode it shows in lspci
+    if command -v envycontrol >/dev/null && [ "$(envycontrol --query 2>/dev/null)" = "integrated" ]; then
+        echo "GPU already disabled (integrated mode)"; return 0
+    fi
     lspci | grep -qi nvidia || { echo "No NVIDIA GPU"; return 0; }
     command -v envycontrol >/dev/null || $PKG envycontrol
 
