@@ -16,30 +16,45 @@ fi
 
 mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
 
-# Parse item names and vaults from agent.toml
+# Pass 1: collect all entries (item|vault|base) from agent.toml
+tmpfile=$(mktemp)
+trap 'rm -f "$tmpfile"' EXIT
+
+item="" vault=""
+flush_entry() {
+    [ -z "$item" ] || [ -z "$vault" ] && return 0
+    base=$(printf '%s' "$item" | tr '[:upper:]' '[:lower:]' | sed 's/ ssh key$//;s/ /-/g')
+    printf '%s|%s|%s\n' "$item" "$vault" "$base" >> "$tmpfile"
+    item="" vault=""
+}
+
 while IFS= read -r line; do
     case "$line" in
-        *'item = "'*)
-            item=$(echo "$line" | sed 's/.*item = "\([^"]*\)".*/\1/')
-            ;;
-        *'vault = "'*)
-            vault=$(echo "$line" | sed 's/.*vault = "\([^"]*\)".*/\1/')
-            # We now have both item and vault — fetch the keys
-            prefix=$(echo "$vault" | tr '[:upper:]' '[:lower:]')
-            echo "Fetching: $item ($vault) → ~/.ssh/${prefix}.github"
-
-            # Public key
-            pubkey_file="$HOME/.ssh/${prefix}.github.pub"
-            op read "op://$vault/$item/public key" > "$pubkey_file"
-            chmod 644 "$pubkey_file"
-
-            # Private key
-            privkey_file="$HOME/.ssh/${prefix}.github"
-            op read "op://$vault/$item/private key?ssh-format=openssh" | tr -d '\r' > "$privkey_file"
-            printf '\n' >> "$privkey_file"
-            chmod 600 "$privkey_file"
-            ;;
+        '[[ssh-keys]]'*) flush_entry ;;
+        *'item = "'*) item=$(echo "$line" | sed 's/.*item = "\([^"]*\)".*/\1/') ;;
+        *'vault = "'*) vault=$(echo "$line" | sed 's/.*vault = "\([^"]*\)".*/\1/') ;;
     esac
 done < "$AGENT_TOML"
+flush_entry
+
+# Pass 2: fetch keys, disambiguating duplicate base names with vault prefix
+while IFS='|' read -r item vault base; do
+    [ -z "$item" ] && continue
+    count=$(cut -d'|' -f3 "$tmpfile" | grep -cx "$base")
+    if [ "$count" -gt 1 ]; then
+        name="$(printf '%s' "$vault" | tr '[:upper:]' '[:lower:]').${base}"
+    else
+        name="$base"
+    fi
+
+    echo "Fetching: $item ($vault) -> ~/.ssh/$name"
+
+    op read "op://$vault/$item/public key" > "$HOME/.ssh/${name}.pub"
+    chmod 644 "$HOME/.ssh/${name}.pub"
+
+    op read "op://$vault/$item/private key?ssh-format=openssh" | tr -d '\r' > "$HOME/.ssh/${name}"
+    printf '\n' >> "$HOME/.ssh/${name}"
+    chmod 600 "$HOME/.ssh/${name}"
+done < "$tmpfile"
 
 echo "SSH keys saved to ~/.ssh/"
