@@ -32,6 +32,7 @@ tmux
 unzip
 wget
 curl
+rsync
 openssh
 mise
 
