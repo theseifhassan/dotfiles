@@ -97,3 +97,5 @@ envycontrol
 # Fingerprint (1Password authentication)
 # -----------------------------------------------------------------------------
 fprintd
+mosh
+rsync
