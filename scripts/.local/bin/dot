@@ -47,18 +47,7 @@ cmd_link() {
     cp -r "$DOTFILES/default" "$target"
 
     if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
-        # Clone private fonts repo if not present
-        if [ ! -d "$DOTFILES/fonts/.git" ]; then
-            log "Cloning private fonts..."
-            rm -rf "$DOTFILES/fonts"
-            FONTS_REPO="${FONTS_REPO:-git@github.com:theseifhassan/fonts.git}"
-            git clone "$FONTS_REPO" "$DOTFILES/fonts" 2>/dev/null || {
-                log "Could not clone fonts (private repo - need SSH key)"
-                mkdir -p "$DOTFILES/fonts"
-            }
-        fi
-
-        # Install fonts if present
+        # Install fonts (skip silently if not cloned yet — use `dot fonts` to set up)
         if [ -d "$DOTFILES/fonts" ] && find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
             log "Installing fonts..."
             mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
@@ -625,6 +614,31 @@ EOF
     esac
 }
 
+cmd_fonts() {
+    FONTS_REPO="${FONTS_REPO:-git@github.com:theseifhassan/fonts.git}"
+
+    # Clone or update
+    if [ -d "$DOTFILES/fonts/.git" ]; then
+        log "Updating fonts..."
+        git -C "$DOTFILES/fonts" pull --rebase
+    else
+        log "Cloning private fonts..."
+        rm -rf "$DOTFILES/fonts"
+        git clone "$FONTS_REPO" "$DOTFILES/fonts"
+    fi
+
+    # Install
+    if find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
+        log "Installing fonts..."
+        mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
+        find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" \;
+        fc-cache -f
+        log "Done!"
+    else
+        log "No font files found in repo"
+    fi
+}
+
 cmd_help() { cat <<EOF
 dot <cmd> [args]
   status                System health check
@@ -643,6 +657,7 @@ dot <cmd> [args]
   hardware <cmd>        Hardware drivers
   monitor <cmd>         Display profiles
   wallpaper <cmd>       Cycle wallpapers
+  fonts                 Clone and install private fonts
   ssh                   Extract SSH keys from 1Password
   install [--minimal]   Full setup
 EOF
@@ -662,6 +677,7 @@ case "${1:-}" in
     hardware) shift; cmd_hardware "$@" ;;
     monitor) shift; cmd_monitor "$@" ;;
     wallpaper|wp) shift; cmd_wallpaper "$@" ;;
+    fonts) cmd_fonts ;;
     ssh) cmd_ssh ;;
     install) shift; cmd_install "$@" ;;
     -h|--help|help) cmd_help ;;
