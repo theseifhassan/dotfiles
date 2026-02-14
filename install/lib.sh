@@ -22,8 +22,8 @@ link() {
     ln -s "$1" "$2"
 }
 
-# Log with prefix
-log() { echo ">>> $1"; }
+# Log with prefix and timestamp
+log() { echo ">>> [$(date +%H:%M:%S)] $1"; }
 
 # Link all config files — single source of truth for symlink operations
 # Requires: $DOTFILES set, link() available

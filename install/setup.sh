@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # System setup — installs packages and links dotfiles
 set -e
 command -v pacman >/dev/null || { echo "Arch Linux required"; exit 1; }
@@ -6,14 +6,40 @@ command -v pacman >/dev/null || { echo "Arch Linux required"; exit 1; }
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 export DOTFILES
 
-# Parse --minimal flag
+# Parse flags
 DOTFILES_MINIMAL=0
+DOTFILES_LOG=""
 for arg in "$@"; do
     case "$arg" in
         --minimal) DOTFILES_MINIMAL=1 ;;
+        --log) DOTFILES_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/install-$(date +%Y%m%d-%H%M%S).log" ;;
+        --log=*) DOTFILES_LOG="${arg#--log=}" ;;
     esac
 done
 export DOTFILES_MINIMAL
+
+# Set up logging: terminal stays clean, log file gets everything
+if [ -n "$DOTFILES_LOG" ]; then
+    mkdir -p "$(dirname "$DOTFILES_LOG")"
+    # fd 3 = log file only (verbose details that don't clutter the terminal)
+    exec 3>"$DOTFILES_LOG"
+    # stdout/stderr go to both terminal and log
+    exec > >(tee -a "$DOTFILES_LOG") 2>&1
+    # System info header (log file only)
+    {
+        echo "=== Dotfiles install: $(date) ==="
+        echo "Kernel: $(uname -r)"
+        echo "User:   $USER"
+        echo "Shell:  $SHELL"
+        echo "Mode:   $([ "$DOTFILES_MINIMAL" -eq 1 ] && echo minimal || echo full)"
+        echo "==="
+    } >&3
+    # Trace all commands to log file only
+    BASH_XTRACEFD=3
+    set -x
+else
+    exec 3>/dev/null
+fi
 
 # Persist mode for future dot commands
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
@@ -171,7 +197,11 @@ export CLAUDE_CACHE_DIR="$XDG_CACHE_HOME/claude"
 
 # Dev tools via mise
 log "Dev tools"
-mise install
+if [ -n "$DOTFILES_LOG" ]; then
+    mise install --verbose 2>&1 || log "Warning: some mise tools failed to install (run 'mise install' to retry)"
+else
+    mise install || log "Warning: some mise tools failed to install (run 'mise install' to retry)"
+fi
 
 # OpenCode
 log "OpenCode"
