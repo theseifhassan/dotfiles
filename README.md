@@ -19,16 +19,9 @@ dot update              # pull, recompile suckless, reload
 dot link                # symlink configs
 dot packages            # install packages
 dot packages -d         # show missing packages
-dot tools               # install dev tools via mise
-dot tools upgrade       # upgrade all mise tools
-dot tools outdated      # show outdated tools
 dot suckless [target]   # recompile dwm/dmenu/dwmblocks
 dot hardware <type>     # install drivers (nvidia|bluetooth|...)
 dot hardware check      # verify driver setup
-dot monitor save <name> # save current display profile
-dot monitor switch <name> # switch to a display profile
-dot monitor list        # list available profiles
-dot wallpaper next|prev|random  # cycle wallpapers
 ```
 
 ## Keybinds
@@ -82,7 +75,7 @@ dot wallpaper next|prev|random  # cycle wallpapers
 
 ### Media Keys
 
-Volume, brightness, and media keys work as expected.
+Volume and media keys work as expected.
 
 ## Machine-Specific Config
 
@@ -107,38 +100,10 @@ xrandr --dpi 192
 
 These files are gitignored and loaded automatically.
 
-## Multi-Monitor / Docking
-
-Uses [autorandr](https://github.com/phillipberndt/autorandr) for automatic
-display switching with per-profile DPI.
-
-### Initial Setup
-
-1. **Create laptop profile** (with only laptop screen):
-
-   ```sh
-   dot monitor save laptop
-   ```
-
-2. **Create docked profile** (connect external monitor, disable laptop):
-
-   ```sh
-   xrandr --output eDP-1 --off --output DP-2 --primary --auto
-   dot monitor save docked
-   ```
-
-### How It Works
-
-- Profiles auto-switch when displays connect/disconnect (via udev)
-- DPI adjusts automatically: `laptop` = 96, `docked` = 192
-- dwm, dwmblocks, and dunst restart to apply new DPI
-- Manual switch: `dot monitor switch <profile>`
-
 ## Structure
 
 ```txt
 dotfiles/
-├── default/           # base configs (source these, don't edit)
 ├── install/
 │   ├── setup.sh       # main installer
 │   ├── hardware.sh    # driver installer
@@ -148,16 +113,6 @@ dotfiles/
 ├── dwm/               # window manager
 ├── dmenu/             # launcher
 └── dwmblocks/         # status bar
-```
-
-### Layered Config
-
-User configs source defaults then override:
-
-```sh
-# ~/.config/zsh/.zshrc
-source "$DOTS_DEFAULT/zsh/rc"
-# your overrides here
 ```
 
 ## SSH Keys (1Password)

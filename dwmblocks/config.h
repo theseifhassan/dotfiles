@@ -19,11 +19,9 @@
 
 // Define blocks for the status feed as X(icon, cmd, interval, signal).
 #define BLOCKS(X)             \
-    X("", "dwmblock.brightness.sh",  0, 11)   \
     X("", "dwmblock.volume.sh",      0, 10)   \
     X("", "dwmblock.network.sh",    30, 13)   \
     X("", "dwmblock.memory.sh",     30, 14)   \
-    X("", "dwmblock.battery.sh",    60, 15)   \
     X("", "dwmblock.date.sh",        5,  0)   \
 
 #endif  // CONFIG_H

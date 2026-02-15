@@ -1,3 +1,21 @@
-! Xresources - sources defaults, then machine-specific (via xinitrc)
+! Xresources
 
-#include "dotfiles/x11/xresources"
+! DPI (adjust for your display)
+Xft.dpi: 96
+Xft.antialias: true
+Xft.hinting: true
+Xft.hintstyle: hintslight
+Xft.rgba: rgb
+Xft.lcdfilter: lcddefault
+
+! Gruvbox colors for dwm (via xrdb patch)
+dwm.normbgcolor: #282828
+dwm.normfgcolor: #ebdbb2
+dwm.normbordercolor: #3c3836
+dwm.selbgcolor: #458588
+dwm.selfgcolor: #ebdbb2
+dwm.selbordercolor: #458588
+
+! Cursor
+Xcursor.theme: Adwaita
+Xcursor.size: 24

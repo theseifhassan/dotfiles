@@ -90,10 +90,6 @@ static const Arg medplaypausecmd = SHCMD("playerctl play-pause");
 static const Arg mednextcmd      = SHCMD("playerctl next");
 static const Arg medprevcmd      = SHCMD("playerctl previous");
 
-/* Brightness commands */
-static const Arg brightup   = SHCMD("brightnessctl s +10% && pkill -RTMIN+11 dwmblocks");
-static const Arg brightdown = SHCMD("brightnessctl s 10%- && pkill -RTMIN+11 dwmblocks");
-
 /* Volume commands */
 static const Arg volup   = SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ -l 1.0 && pkill -RTMIN+10 dwmblocks");
 static const Arg voldown = SHCMD("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- && pkill -RTMIN+10 dwmblocks");
@@ -174,8 +170,6 @@ static const Key keys[] = {
 	{ 0,                            XF86XK_AudioPause,        spawn,          medplaypausecmd },
 	{ 0,                            XF86XK_AudioNext,         spawn,               mednextcmd },
 	{ 0,                            XF86XK_AudioPrev,         spawn,               medprevcmd },
-	{ 0,                            XF86XK_MonBrightnessUp,   spawn,                 brightup },
-	{ 0,                            XF86XK_MonBrightnessDown, spawn,               brightdown },
 	{ 0,                            XF86XK_AudioRaiseVolume,  spawn,                    volup },
 	{ 0,                            XF86XK_AudioLowerVolume,  spawn,                  voldown },
 	{ 0,                            XF86XK_AudioMute,         spawn,                  volmute },

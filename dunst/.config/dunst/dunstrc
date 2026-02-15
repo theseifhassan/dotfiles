@@ -1,6 +1,4 @@
 # Dunst config
-# dunst doesn't support includes, so this is a full config
-# Based on defaults from ~/.local/share/dotfiles/dunst/dunstrc
 
 [global]
     monitor = 0

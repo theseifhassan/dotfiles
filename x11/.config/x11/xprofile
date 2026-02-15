@@ -1,7 +1,17 @@
 #!/bin/sh
-# X session profile - sources defaults, then machine-specific
+# X session profile
 
-. ~/.local/share/dotfiles/x11/xprofile
+# Polkit agent
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+
+# Autostart programs (only if not already running)
+autostart="dunst dwmblocks picom"
+for program in $autostart; do
+    pidof -sx "$program" || "$program" &
+done >/dev/null 2>&1
+
+# Restore wallpaper (set by wallpaper.sh, saved by feh)
+[ -f ~/.fehbg ] && . ~/.fehbg &
 
 # Machine-specific overrides (not tracked)
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile.local" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile.local"

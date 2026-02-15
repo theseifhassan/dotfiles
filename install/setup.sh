@@ -73,18 +73,6 @@ _svc_pids=""
 {
     command -v tailscale >/dev/null && sudo systemctl enable --now tailscaled || true
 } & _svc_pids="$_svc_pids $!"
-{
-    command -v powerprofilesctl >/dev/null && {
-        sudo systemctl enable --now power-profiles-daemon
-        # Default to performance on desktops (no battery)
-        [ ! -d /sys/class/power_supply/BAT0 ] && powerprofilesctl set performance || true
-    } || true
-} & _svc_pids="$_svc_pids $!"
-if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
-    {
-        command -v autorandr >/dev/null && sudo systemctl enable autorandr.service 2>/dev/null || true
-    } & _svc_pids="$_svc_pids $!"
-fi
 # shellcheck disable=SC2086
 wait $_svc_pids 2>/dev/null || true
 
@@ -105,18 +93,8 @@ fi
 mkdir -p "$HOME/Projects"
 
 if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
-    # Touchpad
-    log "Touchpad"
-    sudo mkdir -p /etc/X11/xorg.conf.d
-    sudo cp "$DOTFILES/x11/30-touchpad.conf" /etc/X11/xorg.conf.d/
-
     # Hardware
     log "Hardware"
-    # Disable NVIDIA GPU by default for maximum battery life
-    if lspci | grep -qi nvidia && command -v envycontrol >/dev/null; then
-        log "Disabling NVIDIA GPU (use 'dot hardware nvidia' to enable)"
-        sudo envycontrol -s integrated --no-confirm || true
-    fi
     "$DOTFILES/install/hardware.sh" bluetooth
 
     # Suckless - compile in parallel
@@ -134,9 +112,8 @@ fi
 # Links
 log "Links"
 
-# Copy defaults to XDG_DATA_HOME
+# Clean up legacy layered config directory
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
-cp -r "$DOTFILES/default" "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
 
 if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
     # Install fonts if present
@@ -156,9 +133,7 @@ tpm_pid=$!
 link_configs
 
 if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
-    # Enable wallpaper timer
     systemctl --user daemon-reload
-    systemctl --user enable --now wallpaper.timer 2>/dev/null || true
 fi
 
 # Export XDG vars so installers respect them

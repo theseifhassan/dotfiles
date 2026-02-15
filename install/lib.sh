@@ -35,7 +35,7 @@ pkg_list() {
 # Expected systemd services based on mode
 expected_services() {
     echo "docker tailscaled sshd"
-    [ "$DOTFILES_MINIMAL" -eq 0 ] && echo "autorandr bluetooth"
+    [ "$DOTFILES_MINIMAL" -eq 0 ] && echo "bluetooth"
 }
 
 # Take a btrfs auto-snapshot if on btrfs
@@ -77,7 +77,6 @@ link_configs() {
         link "$DOTFILES/ghostty/.config/ghostty" "$HOME/.config/ghostty"
         link "$DOTFILES/picom/.config/picom" "$HOME/.config/picom"
         link "$DOTFILES/dunst/.config/dunst" "$HOME/.config/dunst"
-        link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
         link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
         link "$DOTFILES/chrome/.config/chrome-flags.conf" "$HOME/.config/chrome-flags.conf"
 

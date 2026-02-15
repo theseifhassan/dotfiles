@@ -1,8 +1,0 @@
-# Systemd service to rotate wallpaper
-[Unit]
-Description=Set random wallpaper
-
-[Service]
-Type=oneshot
-ExecStart=%h/.local/bin/dot wallpaper random
-Environment=DISPLAY=:0

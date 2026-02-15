@@ -28,7 +28,7 @@ cmd_update() {
         pgrep -x dwm >/dev/null && pkill -HUP dwm
         pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
         if [ -n "$DISPLAY" ]; then
-            xrdb -I"$HOME/.local/share" -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
+            xrdb -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
         fi
     else
         log "Minimal mode — skipping suckless compilation"
@@ -39,12 +39,8 @@ cmd_update() {
 cmd_link() {
     log "Linking..."
 
-    # Copy defaults to XDG_DATA_HOME (decouples runtime from repo)
-    log "Copying defaults..."
-    target="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
-    case "$target" in */dotfiles) ;; *) echo "Safety check failed: $target"; exit 1 ;; esac
-    rm -rf "$target"
-    cp -r "$DOTFILES/default" "$target"
+    # Clean up legacy layered config directory
+    rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
 
     if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
         # Install fonts (skip silently if not cloned yet — use `dot fonts` to set up)
@@ -316,7 +312,6 @@ cmd_status() {
         check_link "$DOTFILES/ghostty/.config/ghostty" "$HOME/.config/ghostty"
         check_link "$DOTFILES/picom/.config/picom" "$HOME/.config/picom"
         check_link "$DOTFILES/dunst/.config/dunst" "$HOME/.config/dunst"
-        check_link "$DOTFILES/autorandr/.config/autorandr" "$HOME/.config/autorandr"
         check_link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
         check_link "$DOTFILES/chrome/.config/chrome-flags.conf" "$HOME/.config/chrome-flags.conf"
     fi
@@ -337,7 +332,7 @@ cmd_status() {
         fi
     done
     if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
-        for svc in autorandr bluetooth; do
+        for svc in bluetooth; do
             if systemctl is-active "$svc" >/dev/null 2>&1 || systemctl is-enabled "$svc" >/dev/null 2>&1; then
                 svc_ok="${svc_ok:+$svc_ok, }$svc"
             else
@@ -412,7 +407,6 @@ cmd_mode() {
                 fi
             fi
             # Disable desktop services
-            sudo systemctl disable autorandr.service 2>/dev/null || true
             sudo systemctl disable bluetooth.service 2>/dev/null || true
             # Update mode
             DOTFILES_MINIMAL=1
@@ -434,7 +428,6 @@ cmd_mode() {
             # Link configs (now includes desktop)
             link_configs
             # Enable desktop services
-            sudo systemctl enable autorandr.service 2>/dev/null || true
             sudo systemctl enable bluetooth.service 2>/dev/null || true
             systemctl --user daemon-reload
             log "Switched to full mode"
@@ -483,137 +476,6 @@ cmd_ssh() {
     "$DOTFILES/scripts/.local/bin/op-ssh-keys"
 }
 
-cmd_tools() {
-    command -v mise >/dev/null 2>&1 || {
-        log "Installing mise..."
-        curl https://mise.run | sh
-        export PATH="$HOME/.local/bin:$PATH"
-    }
-
-    case "${1:-}" in
-        install|"")
-            log "Installing tools via mise..."
-            mise install
-            ;;
-        upgrade)
-            log "Upgrading tools..."
-            mise upgrade
-            ;;
-        list)
-            mise list
-            ;;
-        outdated)
-            mise outdated
-            ;;
-        *)
-            cat <<EOF
-dot tools <cmd>
-  install     Install all tools from mise config (default)
-  upgrade     Upgrade all tools to latest
-  list        List installed tools
-  outdated    Show outdated tools
-EOF
-            ;;
-    esac
-}
-
-cmd_wallpaper() {
-    WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
-    STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper_index"
-
-    [ ! -d "$WALLPAPER_DIR" ] && { echo "Wallpaper dir not found: $WALLPAPER_DIR"; exit 1; }
-
-    # Get sorted list of wallpapers
-    wallpapers=$(find -L "$WALLPAPER_DIR" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) | sort)
-    count=$(echo "$wallpapers" | grep -c . || echo 0)
-    [ "$count" -eq 0 ] && { echo "No wallpapers found"; exit 1; }
-
-    # Get current wallpaper from feh state
-    current=""
-    [ -f "$HOME/.fehbg" ] && current=$(sed -n "s/.*'\([^']*\)'[^']*$/\1/p" "$HOME/.fehbg" 2>/dev/null || true)
-
-    # Find current index
-    idx=0
-    if [ -n "$current" ]; then
-        i=0
-        while IFS= read -r w; do
-            [ "$w" = "$current" ] && { idx=$i; break; }
-            i=$((i + 1))
-        done <<EOF
-$wallpapers
-EOF
-    fi
-
-    set_wallpaper() {
-        wp=$(echo "$wallpapers" | sed -n "$((${1} + 1))p")
-        [ -n "$wp" ] && { feh --bg-fill "$wp"; echo "$1" > "$STATE_FILE"; echo "Set: $(basename "$wp")"; }
-    }
-
-    case "${1:-}" in
-        next)
-            new_idx=$(( (idx + 1) % count ))
-            set_wallpaper "$new_idx"
-            ;;
-        prev)
-            new_idx=$(( (idx - 1 + count) % count ))
-            set_wallpaper "$new_idx"
-            ;;
-        random)
-            new_idx=$(shuf -i 0-$((count - 1)) -n 1)
-            set_wallpaper "$new_idx"
-            ;;
-        current|status)
-            [ -n "$current" ] && echo "Current: $(basename "$current")" || echo "No wallpaper set"
-            echo "Total: $count wallpapers"
-            ;;
-        list)
-            echo "$wallpapers" | while IFS= read -r w; do
-                [ "$w" = "$current" ] && echo "* $(basename "$w")" || echo "  $(basename "$w")"
-            done
-            ;;
-        *)
-            cat <<EOF
-dot wallpaper <cmd>
-  next      Next wallpaper in sequence
-  prev      Previous wallpaper
-  random    Random wallpaper
-  current   Show current wallpaper
-  list      List all wallpapers (* = current)
-EOF
-            ;;
-    esac
-}
-
-cmd_monitor() {
-    case "${1:-}" in
-        save)
-            [ -z "${2:-}" ] && { echo "Usage: dot monitor save <name>"; exit 1; }
-            autorandr --save "$2"
-            echo "Profile '$2' saved. Use 'dot monitor switch $2' to load it."
-            ;;
-        switch|load)
-            [ -z "${2:-}" ] && { echo "Usage: dot monitor switch <name>"; exit 1; }
-            autorandr --load "$2" --force
-            ;;
-        list)
-            autorandr
-            ;;
-        *)
-            cat <<EOF
-dot monitor <cmd>
-  save <name>    Save current display config as profile
-  switch <name>  Switch to a saved profile
-  list           List available profiles
-
-Setup guide:
-  1. With laptop screen only:  dot monitor save laptop
-  2. With external monitor:    dot monitor save docked
-  Profiles auto-switch when displays connect/disconnect.
-EOF
-            ;;
-    esac
-}
-
 cmd_fonts() {
     FONTS_REPO="${FONTS_REPO:-git@github.com:theseifhassan/fonts.git}"
 
@@ -652,11 +514,8 @@ dot <cmd> [args]
   snapshot list         List snapshots
   snapshot restore      Restore a snapshot
   snapshot delete <id>  Delete a snapshot
-  tools <cmd>           Manage dev tools via mise
   suckless [target]     Recompile dwm/dmenu/dwmblocks
   hardware <cmd>        Hardware drivers
-  monitor <cmd>         Display profiles
-  wallpaper <cmd>       Cycle wallpapers
   fonts                 Clone and install private fonts
   ssh                   Extract SSH keys from 1Password
   install [--minimal]   Full setup
@@ -672,11 +531,8 @@ case "${1:-}" in
     packages) shift; cmd_packages "$@" ;;
     mode) shift; cmd_mode "$@" ;;
     snapshot) shift; cmd_snapshot "$@" ;;
-    tools) shift; cmd_tools "$@" ;;
     suckless) shift; cmd_suckless "$@" ;;
     hardware) shift; cmd_hardware "$@" ;;
-    monitor) shift; cmd_monitor "$@" ;;
-    wallpaper|wp) shift; cmd_wallpaper "$@" ;;
     fonts) cmd_fonts ;;
     ssh) cmd_ssh ;;
     install) shift; cmd_install "$@" ;;
