@@ -1,12 +1,19 @@
 # Ghostty terminal configuration
-theme = Gruvbox Dark
+theme = Gruvbox Dark Hard
 
 font-family = "Berkeley Mono"
 font-size = 14
 
 window-decoration = false
+window-padding-x = 0
+window-padding-y = 0
+window-padding-balance = true
+resize-overlay = never
 
+background = #000000
 background-opacity = 0.7
 background-blur = true
 
 mouse-hide-while-typing = true
+
+
