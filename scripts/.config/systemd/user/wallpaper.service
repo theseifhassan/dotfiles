@@ -5,3 +5,5 @@ Description=Rotate wallpaper
 Type=oneshot
 Environment=DISPLAY=:0
 ExecStart=%h/.local/bin/wallpaper.sh
+StandardOutput=journal
+StandardError=journal

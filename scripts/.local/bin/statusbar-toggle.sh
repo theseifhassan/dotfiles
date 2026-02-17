@@ -2,10 +2,12 @@
 # Toggle dwmblocks statusbar visibility
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/statusbar-mode"
 
-[ "$(cat "$STATE_FILE" 2>/dev/null)" = "full" ] && echo "minimal" > "$STATE_FILE" || echo "full" > "$STATE_FILE"
+if [ "$(cat "$STATE_FILE" 2>/dev/null)" = "full" ]; then
+    printf "minimal" > "$STATE_FILE"
+else
+    printf "full" > "$STATE_FILE"
+fi
 
-pkill -RTMIN+10 dwmblocks
-pkill -RTMIN+11 dwmblocks
-pkill -RTMIN+13 dwmblocks
-pkill -RTMIN+14 dwmblocks
-pkill -RTMIN+15 dwmblocks
+for sig in 10 11 13 14 15; do
+    pkill -RTMIN+"$sig" dwmblocks
+done

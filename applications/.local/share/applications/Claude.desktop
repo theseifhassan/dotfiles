@@ -1,6 +1,0 @@
-[Desktop Entry]
-Name=Claude
-Exec=chromium --profile-directory="Profile 1" --app="https://claude.ai" --class="Claude"
-Type=Application
-Icon=chromium
-StartupWMClass=Claude

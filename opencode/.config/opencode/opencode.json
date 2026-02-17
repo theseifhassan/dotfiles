@@ -3,12 +3,8 @@
   "autoupdate": true,
   "share": "manual",
   "provider": {
-    "opencode-zen": {
+    "opencode": {
       "options": { "apiKey": "{env:OPENCODE_API_KEY}" }
     }
-  },
-  "instructions": [
-    "rules/biome.md",
-    "rules/workflow.md"
-  ]
+  }
 }

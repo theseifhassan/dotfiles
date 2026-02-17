@@ -1,6 +1,0 @@
-[Desktop Entry]
-Name=Linear
-Exec=chromium --app="https://linear.app" --class="Linear"
-Type=Application
-Icon=chromium
-StartupWMClass=Linear

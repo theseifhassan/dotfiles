@@ -18,7 +18,7 @@ setopt ALWAYS_TO_END
 # compinit with 24-hour cache
 autoload -Uz compinit
 _zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-${ZSH_VERSION}"
-mkdir -p "${_zcompdump%/*}"
+[[ -d "${_zcompdump%/*}" ]] || mkdir -p "${_zcompdump%/*}"
 if [[ -n ${_zcompdump}(#qN.mh+24) ]]; then
     compinit -d "$_zcompdump"
 else
@@ -35,7 +35,7 @@ alias vim='nvim'
 
 # Shell integrations - cached, regenerate on version change
 _cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
-mkdir -p "$_cache_dir"
+[[ -d "$_cache_dir" ]] || { mkdir -p "$_cache_dir" && chmod 700 "$_cache_dir"; }
 
 _cached_init() {
     local cmd="$1" cache="$_cache_dir/${1}-init.zsh" ver_file="$cache.ver"
@@ -46,10 +46,10 @@ _cached_init() {
         source "$cache"
     else
         case "$cmd" in
-            mise)     mise activate zsh > "$cache" ;;
-            starship) starship init zsh > "$cache" ;;
-            fzf)      fzf --zsh > "$cache" 2>/dev/null ;;
-            zoxide)   zoxide init zsh > "$cache" ;;
+            mise)     mise activate zsh > "$cache" 2>/dev/null || { rm -f "$cache"; return 1; } ;;
+            starship) starship init zsh > "$cache" 2>/dev/null || { rm -f "$cache"; return 1; } ;;
+            fzf)      fzf --zsh > "$cache" 2>/dev/null || { rm -f "$cache"; return 1; } ;;
+            zoxide)   zoxide init zsh > "$cache" 2>/dev/null || { rm -f "$cache"; return 1; } ;;
         esac
         echo "$ver" > "$ver_file"
         source "$cache"
@@ -68,6 +68,3 @@ bindkey -s "^f" "sessionizer.sh\n"
 
 # bun completions
 [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
-
-# opencode
-export PATH=/home/seifhassan/.opencode/bin:$PATH

@@ -1,8 +1,17 @@
 # Git configuration
 [user]
 	name = theseifhassan
-	# email is set in config.local (not tracked)
+	email = theseifhassan@gmail.com
 
+[gpg]
+	format = ssh
+
+[commit]
+	gpgSign = true
+
+[tag]
+	gpgSign = true
+
+# user.signingKey goes in config.local (machine-specific, differs per machine)
 [include]
-	# Machine-specific settings (email, signing key, etc.)
-	path = ~/.config/git/config.local
+	path = config.local

@@ -34,9 +34,9 @@ if [ "$DOTFILES_MINIMAL" != "1" ]; then
     [ -n "$XDG_RUNTIME_DIR" ] && export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
     export BROWSER="google-chrome-stable"
     export QT_QPA_PLATFORMTHEME="gtk2"
-    export XDG_SESSION_TYPE=x11
-    export DESKTOP_SESSION=dwm
-    export XDG_CURRENT_DESKTOP=dwm
+    export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-x11}"
+    export DESKTOP_SESSION="${DESKTOP_SESSION:-dwm}"
+    export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-dwm}"
 fi
 
 export DOTFILES="$HOME/dotfiles"

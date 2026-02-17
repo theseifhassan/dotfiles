@@ -1,6 +1,0 @@
-[Desktop Entry]
-Name=Gather
-Exec=chromium --profile-directory="Default" --app="https://app.v2.gather.town" --class="Gather"
-Type=Application
-Icon=chromium
-StartupWMClass=Gather

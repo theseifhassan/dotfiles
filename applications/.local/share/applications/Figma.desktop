@@ -1,6 +1,0 @@
-[Desktop Entry]
-Name=Figma
-Exec=chromium --app="https://figma.com" --class="Figma"
-Type=Application
-Icon=chromium
-StartupWMClass=Figma
