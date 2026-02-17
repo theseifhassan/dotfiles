@@ -3,6 +3,9 @@
 set -e
 command -v pacman >/dev/null || { echo "Arch Linux required"; exit 1; }
 
+# Pre-flight checks
+ping -c 1 archlinux.org >/dev/null 2>&1 || { echo "No network connectivity"; exit 1; }
+
 DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 export DOTFILES
 
@@ -26,6 +29,8 @@ echo "DOTFILES_MINIMAL=$DOTFILES_MINIMAL" > "$STATE_DIR/mode"
 # Cache sudo credentials upfront
 sudo -v
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+_sudo_pid=$!
+trap 'kill $_sudo_pid 2>/dev/null' EXIT
 
 # Auto-snapshot before making changes (btrfs only)
 auto_snapshot "pre-install"
@@ -97,16 +102,9 @@ if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
     log "Hardware"
     "$DOTFILES/install/hardware.sh" bluetooth
 
-    # Suckless - compile in parallel
+    # Suckless
     log "Suckless"
-    pids=""
-    for t in dwm dmenu dwmblocks; do
-        [ -d "$DOTFILES/$t" ] && {
-            sudo make -C "$DOTFILES/$t" clean install &
-            pids="$pids $!"
-        }
-    done
-    for pid in $pids; do wait "$pid" || true; done
+    build_suckless
 fi
 
 # Links
@@ -116,13 +114,7 @@ log "Links"
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
 
 if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
-    # Install fonts if present
-    if [ -d "$DOTFILES/fonts" ] && find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
-        log "Installing fonts..."
-        mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
-        cp -r "$DOTFILES/fonts/"* "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" 2>/dev/null || true
-        fc-cache -f
-    fi
+    install_fonts || true
 fi
 
 # Install TPM (shallow clone, background)
@@ -151,7 +143,11 @@ mise install
 # OpenCode
 log "OpenCode"
 command -v opencode >/dev/null || {
-    curl -fsSL https://opencode.ai/install | bash
+    tmpfile=$(mktemp)
+    curl -fsSL https://opencode.ai/install -o "$tmpfile"
+    chmod +x "$tmpfile"
+    bash "$tmpfile"
+    rm -f "$tmpfile"
     # Installer hardcodes ~/.opencode/bin — move to ~/.local/bin
     if [ -f "$HOME/.opencode/bin/opencode" ]; then
         mv "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
@@ -161,7 +157,13 @@ command -v opencode >/dev/null || {
 
 # Claude Code (installs to ~/.local/bin by default)
 log "Claude Code"
-command -v claude >/dev/null || curl -fsSL https://claude.ai/install.sh | sh
+command -v claude >/dev/null || {
+    tmpfile=$(mktemp)
+    curl -fsSL https://claude.ai/install.sh -o "$tmpfile"
+    chmod +x "$tmpfile"
+    sh "$tmpfile"
+    rm -f "$tmpfile"
+}
 
 # Shell
 log "Shell"

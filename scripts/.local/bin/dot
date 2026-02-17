@@ -16,22 +16,18 @@ cmd_update() {
     auto_snapshot "pre-update"
     if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
         log "Suckless..."
-        # Parallel compilation
-        pids=""
-        for d in dwm dmenu dwmblocks; do
-            [ -d "$DOTFILES/$d" ] && {
-                { make -C "$DOTFILES/$d" clean >/dev/null 2>&1 || true; sudo make -C "$DOTFILES/$d" install >/dev/null; } &
-                pids="$pids $!"
-            }
-        done
-        for pid in $pids; do wait "$pid" || true; done
-        pgrep -x dwm >/dev/null && pkill -HUP dwm
-        pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
+        build_suckless
+        reload_suckless
         if [ -n "$DISPLAY" ]; then
             xrdb -merge "$HOME/.config/x11/xresources" 2>/dev/null || true
         fi
     else
         log "Minimal mode — skipping suckless compilation"
+    fi
+    log "Linking..."
+    link_configs
+    if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
+        systemctl --user daemon-reload
     fi
     log "Done!"
 }
@@ -43,13 +39,7 @@ cmd_link() {
     rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles"
 
     if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
-        # Install fonts (skip silently if not cloned yet — use `dot fonts` to set up)
-        if [ -d "$DOTFILES/fonts" ] && find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
-            log "Installing fonts..."
-            mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
-            find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" \;
-            fc-cache -f
-        fi
+        install_fonts || true
     fi
 
     # Install TPM if not present (shallow clone)
@@ -213,7 +203,7 @@ cmd_snapshot() {
                     for d in /.snapshots/*; do
                         [ ! -d "$d" ] && continue
                         snap_date=$(basename "$d" | cut -c1-17)
-                        [ "$snap_date" \< "$cutoff" ] && sudo btrfs subvolume delete "$d" >/dev/null 2>&1 || true
+                        [ "$snap_date" \< "$cutoff" ] && { sudo btrfs subvolume delete "$d" >/dev/null 2>&1 || true; }
                     done
                 fi
             fi
@@ -285,36 +275,10 @@ cmd_status() {
     broken_count=0
     check_link() {
         link_count=$((link_count + 1))
-        if [ -L "$2" ] && [ "$(readlink "$2")" = "$1" ]; then
-            return 0
-        else
-            broken_count=$((broken_count + 1))
-        fi
+        [ -L "$2" ] && [ "$(readlink "$2")" = "$1" ] && return 0
+        broken_count=$((broken_count + 1))
     }
-    # Base links
-    check_link "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
-    check_link "$DOTFILES/zsh/.config/zsh" "$HOME/.config/zsh"
-    check_link "$DOTFILES/nvim/.config/nvim" "$HOME/.config/nvim"
-    check_link "$DOTFILES/tmux/.config/tmux" "$HOME/.config/tmux"
-    check_link "$DOTFILES/git/.config/git" "$HOME/.config/git"
-    check_link "$DOTFILES/ripgrep/.config/ripgrep" "$HOME/.config/ripgrep"
-    check_link "$DOTFILES/starship/.config/starship.toml" "$HOME/.config/starship.toml"
-    check_link "$DOTFILES/opencode/.config/opencode" "$HOME/.config/opencode"
-    check_link "$DOTFILES/npm/.config/npm" "$HOME/.config/npm"
-    check_link "$DOTFILES/mise/.config/mise" "$HOME/.config/mise"
-    check_link "$DOTFILES/ssh/.ssh/config" "$HOME/.ssh/config"
-    check_link "$DOTFILES/1password/.config/1Password/ssh/agent.toml" "$HOME/.config/1Password/ssh/agent.toml"
-    for f in "$DOTFILES/scripts/.local/bin/"*; do
-        check_link "$f" "$HOME/.local/bin/$(basename "$f")"
-    done
-    if [ "$DOTFILES_MINIMAL" -eq 0 ]; then
-        check_link "$DOTFILES/x11/.config/x11" "$HOME/.config/x11"
-        check_link "$DOTFILES/ghostty/.config/ghostty" "$HOME/.config/ghostty"
-        check_link "$DOTFILES/picom/.config/picom" "$HOME/.config/picom"
-        check_link "$DOTFILES/dunst/.config/dunst" "$HOME/.config/dunst"
-        check_link "$DOTFILES/fontconfig/.config/fontconfig" "$HOME/.config/fontconfig"
-        check_link "$DOTFILES/chrome/.config/chrome-flags.conf" "$HOME/.config/chrome-flags.conf"
-    fi
+    for_each_link check_link
     if [ "$broken_count" -eq 0 ]; then
         printf "links:     all correct (%d symlinks)\n" "$link_count"
     else
@@ -406,6 +370,9 @@ cmd_mode() {
                     paru -Rns --noconfirm $to_remove || true
                 fi
             fi
+            # Remove desktop symlinks
+            _unlink() { [ -L "$2" ] && rm "$2"; }
+            _desktop_links _unlink
             # Disable desktop services
             sudo systemctl disable bluetooth.service 2>/dev/null || true
             # Update mode
@@ -439,25 +406,10 @@ cmd_mode() {
 }
 
 cmd_suckless() {
-    if [ "$DOTFILES_MINIMAL" -eq 1 ]; then
-        echo "Suckless tools not available in minimal mode"; exit 1
-    fi
+    [ "$DOTFILES_MINIMAL" -eq 1 ] && { echo "Suckless tools not available in minimal mode"; exit 1; }
     t="${1:-all}"; log "Building $t..."
-    if [ "$t" = "all" ]; then
-        # Parallel compilation
-        pids=""
-        for d in dwm dmenu dwmblocks; do
-            [ -d "$DOTFILES/$d" ] && {
-                sudo make -C "$DOTFILES/$d" clean install &
-                pids="$pids $!"
-            }
-        done
-        for pid in $pids; do wait "$pid" || true; done
-    else
-        [ -d "$DOTFILES/$t" ] && sudo make -C "$DOTFILES/$t" clean install
-    fi
-    pgrep -x dwm >/dev/null && pkill -HUP dwm
-    pgrep -x dwmblocks >/dev/null && { killall dwmblocks; dwmblocks & }
+    build_suckless "$t"
+    reload_suckless
 }
 
 cmd_hardware() { "$DOTFILES/install/hardware.sh" "$@"; }
@@ -490,11 +442,7 @@ cmd_fonts() {
     fi
 
     # Install
-    if find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) 2>/dev/null | grep -q .; then
-        log "Installing fonts..."
-        mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
-        find "$DOTFILES/fonts" -maxdepth 1 -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/" \;
-        fc-cache -f
+    if install_fonts; then
         log "Done!"
     else
         log "No font files found in repo"
