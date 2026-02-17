@@ -68,3 +68,6 @@ bindkey -s "^f" "sessionizer.sh\n"
 
 # bun completions
 [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
+
+# opencode
+export PATH=/home/seifhassan/.opencode/bin:$PATH

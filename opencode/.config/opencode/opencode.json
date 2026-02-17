@@ -1,4 +1,14 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "autoupdate": true
+  "autoupdate": true,
+  "share": "manual",
+  "provider": {
+    "opencode-zen": {
+      "options": { "apiKey": "{env:OPENCODE_API_KEY}" }
+    }
+  },
+  "instructions": [
+    "rules/biome.md",
+    "rules/workflow.md"
+  ]
 }
