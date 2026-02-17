@@ -9,8 +9,3 @@ vault = "Personal"
 [[ssh-keys]]
 item = "GitHub SSH Key"
 vault = "Work"
-
-# Remote Development Environment
-[[ssh-keys]]
-item = "Forge SSH Key"
-vault = "Personal"
