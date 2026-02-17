@@ -1,0 +1,9 @@
+[Unit]
+Description=Rotate wallpaper every hour
+
+[Timer]
+OnStartupSec=0
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

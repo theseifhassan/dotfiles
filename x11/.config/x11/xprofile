@@ -10,8 +10,9 @@ for program in $autostart; do
     pidof -sx "$program" || "$program" &
 done >/dev/null 2>&1
 
-# Restore wallpaper (set by wallpaper.sh, saved by feh)
-[ -f ~/.fehbg ] && . ~/.fehbg &
+# Set initial wallpaper and start rotation timer
+wallpaper.sh &
+systemctl --user start wallpaper.timer &
 
 # Machine-specific overrides (not tracked)
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile.local" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/x11/xprofile.local"
