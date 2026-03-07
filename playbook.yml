@@ -1,0 +1,55 @@
+---
+- name: Modular Dotfiles System
+  hosts: localhost
+  connection: local
+
+  roles:
+    # --- Foundation ---
+    - role: xdg
+      tags: [xdg]
+    - role: homebrew
+      tags: [homebrew]
+    - role: onepassword
+      tags: [onepassword]
+
+    # --- Identity & Credentials ---
+    - role: ssh
+      tags: [ssh]
+    - role: git
+      tags: [git]
+    - role: gh
+      tags: [gh]
+    - role: graphite
+      tags: [graphite]
+
+    # --- Shell ---
+    - role: zsh
+      tags: [zsh]
+    - role: starship
+      tags: [starship]
+    - role: mise
+      tags: [mise]
+
+    # --- Editors & Terminal ---
+    - role: ghostty
+      tags: [ghostty]
+    - role: tmux
+      tags: [tmux]
+    - role: neovim
+      tags: [neovim]
+    - role: claude-code
+      tags: [claude-code]
+    - role: zed
+      tags: [zed]
+
+    # --- Desktop ---
+    - role: aerospace
+      tags: [aerospace]
+    - role: raycast
+      tags: [raycast]
+    - role: apps
+      tags: [apps]
+
+    # --- Fonts (requires SSH for private repo) ---
+    - role: fonts
+      tags: [fonts]
