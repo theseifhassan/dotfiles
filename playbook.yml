@@ -50,6 +50,6 @@
     - role: apps
       tags: [apps]
 
-    # --- Fonts ---
+    # --- Fonts (requires SSH for private repo) ---
     - role: fonts
       tags: [fonts]
