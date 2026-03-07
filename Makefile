@@ -1,7 +1,9 @@
+.PHONY: help bootstrap apply lint
+
 .DEFAULT_GOAL := help
 
 help:            ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | sort | \
+	@grep -E '^[%a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*##"}; {printf "  %-15s %s\n", $$1, $$2}'
 
 bootstrap:       ## Full setup from scratch (fresh machine)
