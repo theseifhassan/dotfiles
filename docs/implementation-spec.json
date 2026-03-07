@@ -1,0 +1,511 @@
+{
+  "project": "Modular Dotfiles System",
+  "version": "0.1.0",
+  "date": "2026-03-07",
+  "based_on": {
+    "requirements": "docs/requirements.md v0.2.0",
+    "design": "docs/design.md v0.1.0"
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "phase": "scaffolding",
+      "title": "Create ansible.cfg",
+      "description": "Create the Ansible configuration file that sets localhost as the default target with local connection, disables SSH host key checking, and sets the roles path.",
+      "depends_on": [],
+      "definition_of_done": "ansible.cfg exists at repo root and ansible-playbook can parse it without errors.",
+      "acceptance_criteria": [
+        "File exists at ./ansible.cfg",
+        "inventory is set to localhost",
+        "connection is set to local",
+        "roles_path points to ./roles",
+        "Running `ansible-config dump --only-changed` reflects the settings"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-001"]
+    },
+    {
+      "id": "TASK-002",
+      "phase": "scaffolding",
+      "title": "Create group_vars/all.yml with shared variables",
+      "description": "Create the shared variables file that all roles can reference. Includes XDG paths, identity profile definitions, project directory conventions, and the Berkeley Mono repo URL.",
+      "depends_on": [],
+      "definition_of_done": "group_vars/all.yml exists and defines all shared variables referenced by the design doc.",
+      "acceptance_criteria": [
+        "File exists at ./group_vars/all.yml",
+        "Defines xdg_config_home, xdg_data_home, xdg_cache_home, xdg_state_home",
+        "Defines work and personal identity profile names",
+        "Defines project directory paths (~/Projects/work, ~/Projects/personal)",
+        "Defines berkeley_mono_repo variable (placeholder URL)",
+        "Defines 1Password item names/paths for each secret (SSH keys, tokens)",
+        "No secrets or tokens are present in the file"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-001", "US-002", "US-017"]
+    },
+    {
+      "id": "TASK-003",
+      "phase": "scaffolding",
+      "title": "Create playbook.yml with role ordering",
+      "description": "Create the top-level playbook that composes all roles in the correct dependency order as defined in the design doc section 4.",
+      "depends_on": [],
+      "definition_of_done": "playbook.yml exists, lists all roles in correct order, each role is tagged with its own name, and ansible-playbook --list-tasks succeeds.",
+      "acceptance_criteria": [
+        "File exists at ./playbook.yml",
+        "Targets localhost with connection: local",
+        "Lists all 19 roles in the order specified by design doc section 4",
+        "Each role entry includes a tag matching the role name",
+        "Running `ansible-playbook playbook.yml --list-tasks` succeeds and shows all roles",
+        "Running `ansible-playbook playbook.yml --list-tags` shows one tag per role"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-001"]
+    },
+    {
+      "id": "TASK-004",
+      "phase": "scaffolding",
+      "title": "Create Makefile with convenience targets",
+      "description": "Create the Makefile with help, bootstrap, apply, apply-%, and lint targets as defined in design doc section 11.",
+      "depends_on": [],
+      "definition_of_done": "Makefile exists and `make help` outputs all available targets with descriptions.",
+      "acceptance_criteria": [
+        "File exists at ./Makefile",
+        "make help prints all targets with descriptions",
+        "make bootstrap calls ./bootstrap.sh",
+        "make apply calls ansible-playbook playbook.yml",
+        "make apply-<role> calls ansible-playbook playbook.yml -t <role>",
+        "make lint calls ansible-lint playbook.yml"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-020"]
+    },
+    {
+      "id": "TASK-005",
+      "phase": "scaffolding",
+      "title": "Create bootstrap.sh",
+      "description": "Create the idempotent bootstrap script that installs Xcode CLI tools, Homebrew, Ansible, and 1Password CLI, then runs the playbook. Must be safe to re-run.",
+      "depends_on": ["TASK-003", "TASK-004"],
+      "definition_of_done": "bootstrap.sh exists, is executable, and each step is guarded by a check so re-running is safe.",
+      "acceptance_criteria": [
+        "File exists at ./bootstrap.sh with executable permission (755)",
+        "Installs Xcode Command Line Tools only if not already present",
+        "Installs Homebrew only if not already present",
+        "Installs ansible and 1password-cli via brew only if not already present",
+        "Prompts user to sign in to 1Password CLI if not authenticated",
+        "Calls ansible-playbook playbook.yml as the final step",
+        "Every step is idempotent — re-running on a configured machine produces no side effects",
+        "Script exits on first error (set -euo pipefail)"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-020"]
+    },
+    {
+      "id": "TASK-006",
+      "phase": "foundation",
+      "title": "Create xdg role",
+      "description": "Create the XDG base directory role that scaffolds all XDG directories and generates an environment file that the zsh role will source.",
+      "depends_on": ["TASK-001", "TASK-002", "TASK-003"],
+      "definition_of_done": "Running the xdg role creates all four XDG directories and writes an env file exporting the XDG variables.",
+      "acceptance_criteria": [
+        "Role exists at roles/xdg/tasks/main.yml",
+        "Creates ~/.config, ~/.local/share, ~/.local/state, ~/.cache directories",
+        "Creates ~/Projects/work and ~/Projects/personal directories",
+        "Generates an XDG env file at ~/.config/zsh/xdg.zsh exporting all four XDG vars",
+        "All directories are created with mode 0700",
+        "Role is idempotent — running twice produces no changes on second run",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-002"]
+    },
+    {
+      "id": "TASK-007",
+      "phase": "foundation",
+      "title": "Create homebrew role",
+      "description": "Create the Homebrew role that ensures Homebrew is installed, updated, and healthy.",
+      "depends_on": ["TASK-001", "TASK-003"],
+      "definition_of_done": "Running the homebrew role ensures Homebrew is present and runs brew update.",
+      "acceptance_criteria": [
+        "Role exists at roles/homebrew/tasks/main.yml",
+        "Checks if Homebrew is installed; skips install if present",
+        "Runs brew update to ensure formulae are current",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-004"]
+    },
+    {
+      "id": "TASK-008",
+      "phase": "foundation",
+      "title": "Create onepassword role",
+      "description": "Create the 1Password role that installs the 1Password desktop app and CLI via Homebrew, installs the community.general Ansible collection, and verifies CLI authentication.",
+      "depends_on": ["TASK-007"],
+      "definition_of_done": "Running the onepassword role installs 1Password app + CLI and fails with a clear message if not authenticated.",
+      "acceptance_criteria": [
+        "Role exists at roles/onepassword/tasks/main.yml",
+        "Installs 1password cask (desktop app) via Homebrew",
+        "Installs 1password-cli formula via Homebrew",
+        "Installs the community.general Ansible collection (for onepassword lookup plugin)",
+        "Verifies 1Password CLI is authenticated by running `op account list`",
+        "Fails with a clear, actionable error message if CLI is not signed in",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-018"]
+    },
+    {
+      "id": "TASK-009",
+      "phase": "identity",
+      "title": "Create ssh role",
+      "description": "Create the SSH role that provisions work and personal SSH keys from 1Password and deploys an SSH config with host aliases for identity-based routing.",
+      "depends_on": ["TASK-006", "TASK-008"],
+      "definition_of_done": "Running the ssh role writes SSH keys from 1Password to disk and deploys an SSH config that routes github.com-work and github.com-personal to the correct keys.",
+      "acceptance_criteria": [
+        "Role exists at roles/ssh/tasks/main.yml",
+        "Creates ~/.ssh directory with mode 0700",
+        "Provisions work private key to ~/.ssh/id_ed25519_work (mode 0600) from 1Password",
+        "Provisions work public key to ~/.ssh/id_ed25519_work.pub (mode 0644) from 1Password",
+        "Provisions personal private key to ~/.ssh/id_ed25519_personal (mode 0600) from 1Password",
+        "Provisions personal public key to ~/.ssh/id_ed25519_personal.pub (mode 0644) from 1Password",
+        "Deploys SSH config from a Jinja2 template with Host directives for github.com, github.com-work, and github.com-personal",
+        "SSH config sets IdentitiesOnly yes for all GitHub hosts",
+        "Default github.com host uses the personal key",
+        "1Password item names are sourced from group_vars, not hardcoded in the role",
+        "No private keys are stored in the dotfiles repository",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-012", "US-018"]
+    },
+    {
+      "id": "TASK-010",
+      "phase": "identity",
+      "title": "Create git role",
+      "description": "Create the Git role that installs Git via Homebrew, deploys a main config under XDG, and configures identity switching via includeIf directives based on project directory paths.",
+      "depends_on": ["TASK-006", "TASK-009"],
+      "definition_of_done": "Running the git role creates ~/.config/git/config with includeIf directives and separate identity config files for work and personal.",
+      "acceptance_criteria": [
+        "Role exists at roles/git/tasks/main.yml",
+        "Installs git via Homebrew",
+        "Creates ~/.config/git/ directory",
+        "Deploys main git config at ~/.config/git/config from a template",
+        "Main config contains includeIf gitdir:~/Projects/work/ pointing to config-work",
+        "Main config contains includeIf gitdir:~/Projects/personal/ pointing to config-personal",
+        "Deploys ~/.config/git/config-work with work identity (name, email, signing key) from group_vars",
+        "Deploys ~/.config/git/config-personal with personal identity from group_vars",
+        "Identity values (name, email) are defined in group_vars/all.yml, not hardcoded in the role",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-013"]
+    },
+    {
+      "id": "TASK-011",
+      "phase": "identity",
+      "title": "Create gh role",
+      "description": "Create the GitHub CLI role that installs gh via Homebrew and configures it to use XDG paths. Identity switching is handled at runtime by GH_TOKEN set via mise.",
+      "depends_on": ["TASK-006"],
+      "definition_of_done": "Running the gh role installs gh CLI and configures GH_CONFIG_DIR to use XDG path.",
+      "acceptance_criteria": [
+        "Role exists at roles/gh/tasks/main.yml",
+        "Installs gh via Homebrew",
+        "Exports GH_CONFIG_DIR=$XDG_CONFIG_HOME/gh in the shell environment file",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-014"]
+    },
+    {
+      "id": "TASK-012",
+      "phase": "identity",
+      "title": "Create graphite role",
+      "description": "Create the Graphite CLI role that installs Graphite via Homebrew and templates the user_config file with alternativeProfiles populated from 1Password.",
+      "depends_on": ["TASK-006", "TASK-008"],
+      "definition_of_done": "Running the graphite role installs Graphite CLI and generates ~/.config/graphite/user_config with work and personal profile tokens injected from 1Password.",
+      "acceptance_criteria": [
+        "Role exists at roles/graphite/tasks/main.yml",
+        "Installs @withgraphite/graphite-cli via Homebrew (or appropriate method)",
+        "Creates ~/.config/graphite/ directory",
+        "Deploys user_config from a Jinja2 template",
+        "Template contains alternativeProfiles array with work and personal entries",
+        "Auth tokens are retrieved from 1Password via the onepassword lookup plugin at provisioning time",
+        "The generated user_config file has mode 0600 (readable only by owner)",
+        "1Password item names are sourced from group_vars, not hardcoded",
+        "No auth tokens appear in the dotfiles repository",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-015", "US-018"]
+    },
+    {
+      "id": "TASK-013",
+      "phase": "shell",
+      "title": "Create zsh role",
+      "description": "Create the Zsh role that sets up ZDOTDIR redirect via ~/.zshenv, deploys base shell config under XDG, and sources the XDG environment file and any tool-specific env files.",
+      "depends_on": ["TASK-006"],
+      "definition_of_done": "Running the zsh role creates ~/.zshenv with ZDOTDIR redirect and deploys shell config files under ~/.config/zsh/.",
+      "acceptance_criteria": [
+        "Role exists at roles/zsh/tasks/main.yml",
+        "Creates ~/.zshenv containing only ZDOTDIR=$HOME/.config/zsh and sources $ZDOTDIR/.zshenv",
+        "Creates ~/.config/zsh/.zshenv that sources the XDG env file",
+        "Creates ~/.config/zsh/.zshrc with base shell configuration",
+        "The .zshrc sources all *.zsh files from a conf.d-style directory or sources tool env files",
+        "~/.zshenv is the ONLY dotfile placed in the home directory by this role",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-009", "US-002"]
+    },
+    {
+      "id": "TASK-014",
+      "phase": "shell",
+      "title": "Create starship role",
+      "description": "Create the Starship role that installs Starship via Homebrew, deploys the minimal prompt config, and adds the init hook to the zsh config.",
+      "depends_on": ["TASK-013"],
+      "definition_of_done": "Running the starship role installs Starship and deploys a config that produces a prompt showing exactly user@host:working_dir [git_branch].",
+      "acceptance_criteria": [
+        "Role exists at roles/starship/tasks/main.yml",
+        "Installs starship via Homebrew",
+        "Deploys starship.toml to $XDG_CONFIG_HOME/starship.toml",
+        "Exports STARSHIP_CONFIG=$XDG_CONFIG_HOME/starship.toml in shell env",
+        "Adds `eval \"$(starship init zsh)\"` to the zsh config",
+        "Prompt format displays: user@host:working_dir [git_branch_name]",
+        "No extra modules are enabled (aws, gcloud, nodejs, python, rust, golang, package, docker_context, cmd_duration are all disabled)",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-009"]
+    },
+    {
+      "id": "TASK-015",
+      "phase": "shell",
+      "title": "Create mise role",
+      "description": "Create the mise role that installs mise via Homebrew, deploys global config under XDG, and adds the shell activation hook to zsh.",
+      "depends_on": ["TASK-013"],
+      "definition_of_done": "Running the mise role installs mise, places config under XDG, and activates it in the shell so per-project .mise.toml files are respected.",
+      "acceptance_criteria": [
+        "Role exists at roles/mise/tasks/main.yml",
+        "Installs mise via Homebrew",
+        "Creates ~/.config/mise/ directory",
+        "Deploys a global mise config at ~/.config/mise/config.toml (minimal defaults)",
+        "Adds `eval \"$(mise activate zsh)\"` to zsh config",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-003"]
+    },
+    {
+      "id": "TASK-016",
+      "phase": "tools",
+      "title": "Create ghostty role",
+      "description": "Create the Ghostty role that installs Ghostty via Homebrew and deploys its config under XDG.",
+      "depends_on": ["TASK-006"],
+      "definition_of_done": "Running the ghostty role installs Ghostty and places config at ~/.config/ghostty/config.",
+      "acceptance_criteria": [
+        "Role exists at roles/ghostty/tasks/main.yml",
+        "Installs ghostty via Homebrew cask",
+        "Creates ~/.config/ghostty/ directory",
+        "Deploys config file at ~/.config/ghostty/config",
+        "Config references Berkeley Mono as the font family",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-005"]
+    },
+    {
+      "id": "TASK-017",
+      "phase": "tools",
+      "title": "Create tmux role",
+      "description": "Create the Tmux role that installs Tmux via Homebrew and deploys its config under XDG.",
+      "depends_on": ["TASK-006"],
+      "definition_of_done": "Running the tmux role installs Tmux and places config at ~/.config/tmux/tmux.conf.",
+      "acceptance_criteria": [
+        "Role exists at roles/tmux/tasks/main.yml",
+        "Installs tmux via Homebrew",
+        "Creates ~/.config/tmux/ directory",
+        "Deploys tmux.conf at ~/.config/tmux/tmux.conf",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-005"]
+    },
+    {
+      "id": "TASK-018",
+      "phase": "tools",
+      "title": "Create neovim role",
+      "description": "Create the Neovim role that installs Neovim via Homebrew. Config is expected at the XDG-native path ~/.config/nvim/ (managed separately or by the user).",
+      "depends_on": ["TASK-006"],
+      "definition_of_done": "Running the neovim role installs Neovim and ensures the XDG config directory exists.",
+      "acceptance_criteria": [
+        "Role exists at roles/neovim/tasks/main.yml",
+        "Installs neovim via Homebrew",
+        "Creates ~/.config/nvim/ directory if it does not exist",
+        "Plugin data directory ~/.local/share/nvim/ is created if it does not exist",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-006"]
+    },
+    {
+      "id": "TASK-019",
+      "phase": "tools",
+      "title": "Create claude-code role — installation",
+      "description": "Create the Claude Code role that installs Claude Code via the officially supported method (npm global or Homebrew) and ensures its config directory exists.",
+      "depends_on": ["TASK-006"],
+      "definition_of_done": "Running the claude-code role installs Claude Code and the claude command is available in the shell.",
+      "acceptance_criteria": [
+        "Role exists at roles/claude-code/tasks/main.yml",
+        "Installs Claude Code (via Homebrew or npm, whichever is officially supported)",
+        "Ensures config directory exists at ~/.config/claude/ (or the tool's default)",
+        "The `claude` command is available after running the role",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-007"]
+    },
+    {
+      "id": "TASK-020",
+      "phase": "tools",
+      "title": "Create claude-code MCP server global configuration",
+      "description": "Configure the global/user-level MCP server settings for Claude Code with default (personal) credentials. Projects that need work identity override via their own .mcp.json.",
+      "depends_on": ["TASK-019", "TASK-008"],
+      "definition_of_done": "A global MCP server config exists with personal-identity defaults for dual-account services (Linear, Figma). Credentials are sourced from 1Password.",
+      "acceptance_criteria": [
+        "Global MCP config is deployed to the Claude Code user-level settings location",
+        "Config includes Linear MCP server with personal account credentials",
+        "Config includes Figma MCP server with personal account credentials",
+        "Credentials reference environment variables (not hardcoded tokens)",
+        "A shell env file sets the default MCP credential env vars via op read from 1Password",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-007", "US-016"]
+    },
+    {
+      "id": "TASK-021",
+      "phase": "tools",
+      "title": "Create zed role",
+      "description": "Create the Zed role that installs Zed via Homebrew cask.",
+      "depends_on": ["TASK-006"],
+      "definition_of_done": "Running the zed role installs Zed editor.",
+      "acceptance_criteria": [
+        "Role exists at roles/zed/tasks/main.yml",
+        "Installs zed via Homebrew cask",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-008"]
+    },
+    {
+      "id": "TASK-022",
+      "phase": "desktop",
+      "title": "Create aerospace role",
+      "description": "Create the Aerospace role that installs Aerospace via Homebrew cask and deploys its config under XDG.",
+      "depends_on": ["TASK-006"],
+      "definition_of_done": "Running the aerospace role installs Aerospace and deploys config to ~/.config/aerospace/.",
+      "acceptance_criteria": [
+        "Role exists at roles/aerospace/tasks/main.yml",
+        "Installs aerospace via Homebrew cask",
+        "Creates ~/.config/aerospace/ directory",
+        "Deploys aerospace config file (aerospace.toml) to ~/.config/aerospace/",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-010"]
+    },
+    {
+      "id": "TASK-023",
+      "phase": "desktop",
+      "title": "Create raycast role",
+      "description": "Create the Raycast role that installs Raycast via Homebrew cask.",
+      "depends_on": [],
+      "definition_of_done": "Running the raycast role installs Raycast.",
+      "acceptance_criteria": [
+        "Role exists at roles/raycast/tasks/main.yml",
+        "Installs raycast via Homebrew cask",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-010"]
+    },
+    {
+      "id": "TASK-024",
+      "phase": "desktop",
+      "title": "Create apps role",
+      "description": "Create the apps role that installs remaining GUI applications (Google Chrome, Figma, Linear, Slack, Gather) via Homebrew casks.",
+      "depends_on": [],
+      "definition_of_done": "Running the apps role installs all listed GUI applications.",
+      "acceptance_criteria": [
+        "Role exists at roles/apps/tasks/main.yml",
+        "Installs google-chrome via Homebrew cask",
+        "Installs figma via Homebrew cask",
+        "Installs linear-linear via Homebrew cask",
+        "Installs slack via Homebrew cask",
+        "Installs gather via Homebrew cask (or correct cask name for GatherV2)",
+        "Removing an app from the list does not break the role",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-011"]
+    },
+    {
+      "id": "TASK-025",
+      "phase": "fonts",
+      "title": "Create fonts role (Berkeley Mono)",
+      "description": "Create the fonts role that clones the private Berkeley Mono repository via SSH and installs font files to ~/Library/Fonts/.",
+      "depends_on": ["TASK-009"],
+      "definition_of_done": "Running the fonts role clones the private repo and copies all .ttf/.otf files to ~/Library/Fonts/.",
+      "acceptance_criteria": [
+        "Role exists at roles/fonts/tasks/main.yml",
+        "Clones the private Berkeley Mono repo to $XDG_DATA_HOME/fonts/berkeley-mono using SSH",
+        "Repo URL is read from group_vars (berkeley_mono_repo variable), not hardcoded",
+        "Finds all .ttf and .otf files in the cloned repo recursively",
+        "Copies font files to ~/Library/Fonts/",
+        "Skips cloning if repo is already cloned and up to date (idempotent)",
+        "Font files are not stored in the dotfiles repository",
+        "Role is idempotent",
+        "Role has no meta/main.yml dependencies"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-019"]
+    },
+    {
+      "id": "TASK-026",
+      "phase": "documentation",
+      "title": "Create identity switching documentation and templates",
+      "description": "Create documentation that explains how identity switching works and provides template .mise.toml and .mcp.json files that users can copy into work projects.",
+      "depends_on": ["TASK-010", "TASK-011", "TASK-012", "TASK-020"],
+      "definition_of_done": "A docs/identity-switching.md file exists with clear instructions and copy-pasteable templates for setting up a work project.",
+      "acceptance_criteria": [
+        "File exists at docs/identity-switching.md",
+        "Explains the directory convention (~/Projects/work/ vs ~/Projects/personal/)",
+        "Explains how Git identity switching works automatically via includeIf",
+        "Explains how SSH host aliases work (github.com-work) and how to clone work repos",
+        "Provides a template .mise.toml for a work project with GH_TOKEN, GRAPHITE_PROFILE, LINEAR_API_KEY, and FIGMA_TOKEN using op read",
+        "Provides a template .mcp.json for a work project referencing env vars for MCP servers",
+        "Explains how to add a new dual-account MCP server",
+        "Explains the default fallback (personal identity when no context is set)"
+      ],
+      "status": "pending",
+      "requirements_ref": ["US-014", "US-015", "US-016", "US-017"]
+    }
+  ]
+}
