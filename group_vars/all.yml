@@ -1,0 +1,107 @@
+---
+# group_vars/all.yml
+# Shared variables for all roles in the Modular Dotfiles System.
+# This file contains ONLY references and configuration — no secrets or tokens.
+
+# =============================================================================
+# XDG Base Directory Paths
+# =============================================================================
+
+xdg_config_home: "{{ ansible_user_dir }}/.config"
+xdg_data_home: "{{ ansible_user_dir }}/.local/share"
+xdg_cache_home: "{{ ansible_user_dir }}/.cache"
+xdg_state_home: "{{ ansible_user_dir }}/.local/state"
+
+# =============================================================================
+# Identity Profiles
+# =============================================================================
+
+identity_profiles:
+  - work
+  - personal
+
+# =============================================================================
+# Project Directory Paths
+# =============================================================================
+
+projects_dir: "{{ ansible_user_dir }}/Projects"
+
+# Per-identity project directories (mirrors identity_profiles)
+project_dirs:
+  work: "{{ projects_dir }}/work"
+  personal: "{{ projects_dir }}/personal"
+
+# =============================================================================
+# Git Identities
+# =============================================================================
+
+git_identity:
+  work:
+    name: "WORK_NAME_PLACEHOLDER"
+    email: "WORK_EMAIL_PLACEHOLDER"
+  personal:
+    name: "PERSONAL_NAME_PLACEHOLDER"
+    email: "PERSONAL_EMAIL_PLACEHOLDER"
+
+# =============================================================================
+# Berkeley Mono Font Repository
+# =============================================================================
+
+berkeley_mono_repo: "git@github.com:YOUR_GITHUB_USERNAME_PLACEHOLDER/berkeley-mono.git"
+
+# =============================================================================
+# 1Password Item References
+# =============================================================================
+# These are 1Password item names used with the community.general.onepassword
+# lookup plugin. They reference items in the "Dotfiles" vault.
+# No secrets or tokens are stored here — only the item names and field names
+# needed to retrieve them at provisioning time.
+
+op_vault: "Dotfiles"
+
+# SSH Keys
+op_ssh_keys:
+  work:
+    item: "SSH Key - Work"
+    private_key_field: "private key"
+    public_key_field: "public key"
+  personal:
+    item: "SSH Key - Personal"
+    private_key_field: "private key"
+    public_key_field: "public key"
+
+# GitHub Tokens
+op_github_tokens:
+  work:
+    item: "GitHub Token - Work"
+    field: "credential"
+  personal:
+    item: "GitHub Token - Personal"
+    field: "credential"
+
+# Graphite Tokens
+op_graphite_tokens:
+  work:
+    item: "Graphite Token - Work"
+    field: "credential"
+  personal:
+    item: "Graphite Token - Personal"
+    field: "credential"
+
+# Linear API Keys
+op_linear_api_keys:
+  work:
+    item: "Linear API Key - Work"
+    field: "credential"
+  personal:
+    item: "Linear API Key - Personal"
+    field: "credential"
+
+# Figma Tokens
+op_figma_tokens:
+  work:
+    item: "Figma Token - Work"
+    field: "credential"
+  personal:
+    item: "Figma Token - Personal"
+    field: "credential"
