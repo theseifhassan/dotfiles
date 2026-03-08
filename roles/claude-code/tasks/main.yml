@@ -1,0 +1,100 @@
+---
+# roles/claude-code/tasks/main.yml
+# Installs Claude Code via Homebrew and deploys global configuration,
+# skills, and plugin marketplace settings.
+# Claude Code config lives at ~/.claude/ — see https://code.claude.com/docs/en/settings
+
+# =============================================================================
+# Prerequisites
+# =============================================================================
+
+- name: Verify Homebrew is installed
+  ansible.builtin.command: brew --version
+  register: brew_check
+  changed_when: false
+  failed_when: false
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
+
+- name: Fail if Homebrew is not installed
+  ansible.builtin.fail:
+    msg: "Homebrew is not installed. Run bootstrap.sh first."
+  when: brew_check.rc != 0
+
+# =============================================================================
+# Install Claude Code
+# =============================================================================
+
+- name: Install Claude Code
+  community.general.homebrew_cask:
+    name: claude-code
+    state: present
+    path: /opt/homebrew/bin:/usr/local/bin
+
+# =============================================================================
+# Configuration Directories
+# =============================================================================
+
+- name: Create Claude Code directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - "{{ ansible_user_dir }}/.claude"
+    - "{{ ansible_user_dir }}/.claude/skills"
+    - "{{ ansible_user_dir }}/.claude/plugins"
+
+# =============================================================================
+# Settings & Keybindings
+# =============================================================================
+
+- name: Deploy Claude Code settings
+  ansible.builtin.copy:
+    src: settings.json
+    dest: "{{ ansible_user_dir }}/.claude/settings.json"
+    mode: "0644"
+
+- name: Deploy Claude Code keybindings
+  ansible.builtin.copy:
+    src: keybindings.json
+    dest: "{{ ansible_user_dir }}/.claude/keybindings.json"
+    mode: "0644"
+
+# =============================================================================
+# Plugin Marketplace
+# =============================================================================
+
+- name: Deploy known marketplaces config
+  ansible.builtin.template:
+    src: known_marketplaces.json.j2
+    dest: "{{ ansible_user_dir }}/.claude/plugins/known_marketplaces.json"
+    mode: "0644"
+
+# =============================================================================
+# Skills
+# =============================================================================
+
+- name: Deploy Claude Code skills
+  ansible.builtin.copy:
+    src: skills/
+    dest: "{{ ansible_user_dir }}/.claude/skills/"
+    mode: "0644"
+    directory_mode: "0700"
+
+- name: Check for shared skill sources
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.agents/skills/{{ item }}"
+  register: shared_skill_sources
+  loop:
+    - find-skills
+    - notebooklm
+
+- name: Create shared skill symlinks
+  ansible.builtin.file:
+    src: "{{ item.stat.path }}"
+    dest: "{{ ansible_user_dir }}/.claude/skills/{{ item.item }}"
+    state: link
+    force: true
+  loop: "{{ shared_skill_sources.results }}"
+  when: item.stat.exists
