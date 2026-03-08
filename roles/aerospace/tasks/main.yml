@@ -1,0 +1,54 @@
+---
+# roles/aerospace/tasks/main.yml
+# Installs the AeroSpace tiling window manager via Homebrew cask and deploys
+# its configuration to the XDG config path.
+# AeroSpace natively respects XDG_CONFIG_HOME — the xdg role already sets it.
+
+# =============================================================================
+# Prerequisites
+# =============================================================================
+
+- name: Verify Homebrew is installed
+  ansible.builtin.command: brew --version
+  register: brew_check
+  changed_when: false
+  failed_when: false
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
+
+- name: Fail if Homebrew is not installed
+  ansible.builtin.fail:
+    msg: "Homebrew is not installed. Run bootstrap.sh first."
+  when: brew_check.rc != 0
+
+# =============================================================================
+# Install
+# =============================================================================
+
+- name: Tap nikitabobko/tap for AeroSpace
+  community.general.homebrew_tap:
+    name: nikitabobko/tap
+    state: present
+    path: /opt/homebrew/bin:/usr/local/bin
+
+- name: Install AeroSpace via Homebrew cask
+  community.general.homebrew_cask:
+    name: nikitabobko/tap/aerospace
+    state: present
+    path: /opt/homebrew/bin:/usr/local/bin
+
+# =============================================================================
+# Configuration
+# =============================================================================
+
+- name: Create aerospace config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/aerospace"
+    state: directory
+    mode: "0700"
+
+- name: Deploy aerospace config
+  ansible.builtin.copy:
+    src: aerospace.toml
+    dest: "{{ xdg_config_home }}/aerospace/aerospace.toml"
+    mode: "0644"
