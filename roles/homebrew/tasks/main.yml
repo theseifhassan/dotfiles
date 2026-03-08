@@ -1,0 +1,22 @@
+---
+- name: Verify Homebrew is installed
+  ansible.builtin.command: brew --version
+  register: brew_check
+  changed_when: false
+  failed_when: false
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
+
+- name: Fail if Homebrew is not installed
+  ansible.builtin.fail:
+    msg: "Homebrew is not installed. Run bootstrap.sh first."
+  when: brew_check.rc != 0
+
+- name: Update Homebrew formulae
+  ansible.builtin.command: brew update
+  register: brew_update
+  changed_when: >-
+    'Already up-to-date.' not in brew_update.stdout and
+    'Already up-to-date.' not in brew_update.stderr
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
