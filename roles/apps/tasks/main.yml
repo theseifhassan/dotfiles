@@ -6,18 +6,22 @@
   community.general.homebrew_cask:
     name: google-chrome
     state: present
+    path: /opt/homebrew/bin:/usr/local/bin
 
 - name: Install Figma
   community.general.homebrew_cask:
     name: figma
     state: present
+    path: /opt/homebrew/bin:/usr/local/bin
 
 - name: Install Linear
   community.general.homebrew_cask:
     name: linear-linear
     state: present
+    path: /opt/homebrew/bin:/usr/local/bin
 
 - name: Install Slack
   community.general.homebrew_cask:
     name: slack
     state: present
+    path: /opt/homebrew/bin:/usr/local/bin
