@@ -33,7 +33,7 @@
 - name: Create ZDOTDIR redirect in ~/.zshenv
   ansible.builtin.copy:
     content: |
-      export ZDOTDIR="$HOME/.config/zsh"
+      export ZDOTDIR="{{ xdg_config_home | replace(ansible_user_dir, '$HOME') }}/zsh"
       source "$ZDOTDIR/.zshenv"
     dest: "{{ ansible_user_dir }}/.zshenv"
     mode: "0644"
