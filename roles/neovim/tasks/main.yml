@@ -1,0 +1,47 @@
+---
+# roles/neovim/tasks/main.yml
+# Installs Neovim via Homebrew and deploys the LazyVim configuration.
+
+# =============================================================================
+# Prerequisites
+# =============================================================================
+
+- name: Verify Homebrew is installed
+  ansible.builtin.command: brew --version
+  register: brew_check
+  changed_when: false
+  failed_when: false
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
+
+- name: Fail if Homebrew is not installed
+  ansible.builtin.fail:
+    msg: "Homebrew is not installed. Run bootstrap.sh first."
+  when: brew_check.rc != 0
+
+# =============================================================================
+# Install Neovim
+# =============================================================================
+
+- name: Install Neovim
+  community.general.homebrew:
+    name: neovim
+    state: present
+    path: "/opt/homebrew/bin:/usr/local/bin"
+
+# =============================================================================
+# Configuration
+# =============================================================================
+
+- name: Deploy Neovim config
+  ansible.builtin.copy:
+    src: nvim/
+    dest: "{{ xdg_config_home }}/nvim/"
+    mode: "0644"
+    directory_mode: "0700"
+
+- name: Create Neovim data directory
+  ansible.builtin.file:
+    path: "{{ xdg_data_home }}/nvim"
+    state: directory
+    mode: "0700"
