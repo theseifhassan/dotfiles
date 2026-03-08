@@ -1,0 +1,23 @@
+---
+# roles/apps/tasks/main.yml
+# Installs GUI applications via Homebrew casks.
+
+- name: Install Google Chrome
+  community.general.homebrew_cask:
+    name: google-chrome
+    state: present
+
+- name: Install Figma
+  community.general.homebrew_cask:
+    name: figma
+    state: present
+
+- name: Install Linear
+  community.general.homebrew_cask:
+    name: linear-linear
+    state: present
+
+- name: Install Slack
+  community.general.homebrew_cask:
+    name: slack
+    state: present
