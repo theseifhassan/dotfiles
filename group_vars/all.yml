@@ -53,22 +53,42 @@ berkeley_mono_repo: "git@github.com:YOUR_GITHUB_USERNAME_PLACEHOLDER/berkeley-mo
 # 1Password Item References
 # =============================================================================
 # These are 1Password item names used with the community.general.onepassword
-# lookup plugin. They reference items in the "Dotfiles" vault.
-# No secrets or tokens are stored here — only the item names and field names
-# needed to retrieve them at provisioning time.
+# lookup plugin. SSH keys specify their vault per-entry; other items default
+# to op_vault.
+# No secrets or tokens are stored here — only the item names, field names,
+# and vault names needed to retrieve them at provisioning time.
 
 op_vault: "Dotfiles"
 
-# SSH Keys
+# SSH Keys — provisioned to ~/.ssh/id_ed25519_{name}
 op_ssh_keys:
   work:
-    item: "SSH Key - Work"
+    item: "GitHub SSH Key"
+    vault: "Work"
     private_key_field: "private key"
     public_key_field: "public key"
   personal:
-    item: "SSH Key - Personal"
+    item: "GitHub SSH Key"
+    vault: "Personal"
     private_key_field: "private key"
     public_key_field: "public key"
+  # Machine key — provisioned for remote authorized_keys, not for outbound SSH
+  macbook:
+    item: "MacBook SSH Key"
+    vault: "Personal"
+    private_key_field: "private key"
+    public_key_field: "public key"
+
+# SSH config host entries — rendered into ~/.ssh/config
+ssh_hosts:
+  - host: "work.github.com"
+    hostname: "github.com"
+    user: "git"
+    identity_key: "work"
+  - host: "github.com"
+    hostname: "github.com"
+    user: "git"
+    identity_key: "personal"
 
 # GitHub Tokens
 op_github_tokens:

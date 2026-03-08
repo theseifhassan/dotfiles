@@ -1,0 +1,48 @@
+---
+# roles/ssh/tasks/main.yml
+# Provisions SSH keys from 1Password and deploys an SSH config with
+# host aliases for identity-based routing.
+
+# =============================================================================
+# SSH Directory
+# =============================================================================
+
+- name: Create SSH directory
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.ssh"
+    state: directory
+    mode: "0700"
+
+# =============================================================================
+# SSH Key Provisioning
+# =============================================================================
+
+- name: Provision SSH private keys from 1Password
+  ansible.builtin.copy:
+    content: "{{ lookup('community.general.onepassword', item.value.item, field=item.value.private_key_field, vault=item.value.vault | default(op_vault)) }}\n"
+    dest: "{{ ansible_user_dir }}/.ssh/id_ed25519_{{ item.key }}"
+    mode: "0600"
+  loop: "{{ op_ssh_keys | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  no_log: true
+
+- name: Provision SSH public keys from 1Password
+  ansible.builtin.copy:
+    content: "{{ lookup('community.general.onepassword', item.value.item, field=item.value.public_key_field, vault=item.value.vault | default(op_vault)) }}\n"
+    dest: "{{ ansible_user_dir }}/.ssh/id_ed25519_{{ item.key }}.pub"
+    mode: "0644"
+  loop: "{{ op_ssh_keys | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+# =============================================================================
+# SSH Config
+# =============================================================================
+
+- name: Deploy SSH config
+  ansible.builtin.template:
+    src: config.j2
+    dest: "{{ ansible_user_dir }}/.ssh/config"
+    mode: "0600"
+    validate: "ssh -F %s -G localhost"
