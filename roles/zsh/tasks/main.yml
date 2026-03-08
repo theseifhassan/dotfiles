@@ -64,7 +64,6 @@
       HISTSIZE=50000
       SAVEHIST=50000
 
-      setopt APPEND_HISTORY
       setopt HIST_IGNORE_DUPS
       setopt HIST_IGNORE_SPACE
       setopt HIST_REDUCE_BLANKS
@@ -74,17 +73,19 @@
       # Completions (rebuild zcompdump once per day, skip on other launches)
       # ---------------------------------------------------------
       autoload -Uz compinit
-      local -a _zcompdump=("$XDG_CACHE_HOME/zsh/zcompdump"(N.mh+24))
-      if (( ${#_zcompdump} )); then
-        compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
-      else
-        compinit -C -d "$XDG_CACHE_HOME/zsh/zcompdump"
-      fi
+      () {
+        local -a _zcompdump=("$XDG_CACHE_HOME/zsh/zcompdump"(N.mh+24))
+        if (( ${#_zcompdump} )); then
+          compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
+        else
+          compinit -C -d "$XDG_CACHE_HOME/zsh/zcompdump"
+        fi
+      }
 
       # ---------------------------------------------------------
       # fzf integration (Ctrl+R history search)
       # ---------------------------------------------------------
-      if (( $+commands[fzf] )); then
+      if (( $+commands[fzf] )) && fzf --zsh &>/dev/null; then
         source <(fzf --zsh)
       fi
 
