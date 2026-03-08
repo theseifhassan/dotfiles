@@ -1,0 +1,42 @@
+# roles/starship/files/starship.toml
+format = "$username@$hostname:$directory$git_branch$line_break$character"
+
+[username]
+show_always = true
+format = "[$user](bold)"
+
+[hostname]
+ssh_only = false
+format = "[$hostname](bold)"
+
+[directory]
+truncation_length = 0
+truncate_to_repo = false
+format = "[$path]($style)"
+
+[git_branch]
+format = " [\\[$branch\\]]($style)"
+
+[character]
+success_symbol = "[\\$](bold)"
+error_symbol = "[\\$](bold red)"
+
+# Disable all other modules
+[aws]
+disabled = true
+[gcloud]
+disabled = true
+[nodejs]
+disabled = true
+[python]
+disabled = true
+[rust]
+disabled = true
+[golang]
+disabled = true
+[package]
+disabled = true
+[docker_context]
+disabled = true
+[cmd_duration]
+disabled = true
