@@ -83,6 +83,10 @@ else
   echo "==> 1Password CLI already authenticated."
 fi
 
-# 6. Run the playbook
+# 6. Install Ansible collections
+echo "==> Installing Ansible collections..."
+ansible-galaxy collection install -r requirements.yml
+
+# 7. Run the playbook
 echo "==> Running Ansible playbook..."
 ansible-playbook playbook.yml
