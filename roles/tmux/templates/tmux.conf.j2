@@ -1,0 +1,10 @@
+# tmux configuration — XDG-native (tmux 3.1+)
+
+# --- XDG-compliant TPM path ---
+set-environment -g TMUX_PLUGIN_MANAGER_PATH '{{ xdg_data_home }}/tmux/plugins'
+
+# --- Plugins (managed by TPM) ---
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+
+run '{{ xdg_data_home }}/tmux/plugins/tpm/tpm'
