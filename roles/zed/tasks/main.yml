@@ -1,0 +1,48 @@
+---
+# roles/zed/tasks/main.yml
+# Installs Zed editor via Homebrew cask and deploys its configuration
+# to the XDG config path.
+# Zed natively respects XDG_CONFIG_HOME — the xdg role already sets it.
+
+# =============================================================================
+# Prerequisites
+# =============================================================================
+
+- name: Verify Homebrew is installed
+  ansible.builtin.command: brew --version
+  register: brew_check
+  changed_when: false
+  failed_when: false
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
+
+- name: Fail if Homebrew is not installed
+  ansible.builtin.fail:
+    msg: "Homebrew is not installed. Run bootstrap.sh first."
+  when: brew_check.rc != 0
+
+# =============================================================================
+# Install
+# =============================================================================
+
+- name: Install Zed
+  community.general.homebrew_cask:
+    name: zed
+    state: present
+    path: /opt/homebrew/bin:/usr/local/bin
+
+# =============================================================================
+# Configuration
+# =============================================================================
+
+- name: Create Zed config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/zed"
+    state: directory
+    mode: "0700"
+
+- name: Deploy Zed settings
+  ansible.builtin.copy:
+    src: settings.json
+    dest: "{{ xdg_config_home }}/zed/settings.json"
+    mode: "0644"
