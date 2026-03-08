@@ -74,7 +74,8 @@
       # Completions (rebuild zcompdump once per day, skip on other launches)
       # ---------------------------------------------------------
       autoload -Uz compinit
-      if [[ -n "$XDG_CACHE_HOME/zsh/zcompdump"(N.mh+24) ]]; then
+      local -a _zcompdump=("$XDG_CACHE_HOME/zsh/zcompdump"(N.mh+24))
+      if (( ${#_zcompdump} )); then
         compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
       else
         compinit -C -d "$XDG_CACHE_HOME/zsh/zcompdump"
