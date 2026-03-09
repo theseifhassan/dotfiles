@@ -39,9 +39,13 @@ git_identity:
   work:
     name: "WORK_NAME_PLACEHOLDER"
     email: "WORK_EMAIL_PLACEHOLDER"
+    signing_key: ""
+    signing_format: "ssh"  # or "openpgp" for a GPG key
   personal:
     name: "PERSONAL_NAME_PLACEHOLDER"
     email: "PERSONAL_EMAIL_PLACEHOLDER"
+    signing_key: ""
+    signing_format: "ssh"  # or "openpgp" for a GPG key
 
 # =============================================================================
 # Berkeley Mono Font Repository
