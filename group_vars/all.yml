@@ -48,6 +48,9 @@ git_identity:
 # =============================================================================
 
 berkeley_mono_repo: "git@github.com:YOUR_GITHUB_USERNAME_PLACEHOLDER/berkeley-mono.git"
+# Optional overrides (defaults shown):
+# berkeley_mono_repo_branch: "main"
+# berkeley_mono_force_update: false
 
 # =============================================================================
 # 1Password Item References
