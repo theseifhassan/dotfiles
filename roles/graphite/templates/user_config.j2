@@ -1,0 +1,11 @@
+{
+  "authToken": {{ _graphite_tokens[identity_profiles[0]] | to_json }},
+  "alternativeProfiles": [
+{%- for profile in identity_profiles[1:] %}
+    {
+      "name": {{ profile | to_json }},
+      "authToken": {{ _graphite_tokens[profile] | to_json }}
+    }{{ "," if not loop.last else "" }}
+{%- endfor %}
+  ]
+}
