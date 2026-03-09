@@ -1,9 +1,7 @@
 {
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,
-    "greptile@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "linear@claude-plugins-official": true
+    "greptile@claude-plugins-official": true
   },
   "effortLevel": "high"
 }
