@@ -125,3 +125,12 @@ op_figma_tokens:
   personal:
     item: "Figma Token - Personal"
     field: "credential"
+
+# Greptile Tokens
+op_greptile_tokens:
+  work:
+    item: "Greptile Token - Work"
+    field: "credential"
+  personal:
+    item: "Greptile Token - Personal"
+    field: "credential"

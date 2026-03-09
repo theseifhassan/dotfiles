@@ -72,6 +72,87 @@
     mode: "0644"
 
 # =============================================================================
+# MCP Servers
+# =============================================================================
+
+- name: Read existing ~/.claude.json
+  ansible.builtin.slurp:
+    src: "{{ ansible_user_dir }}/.claude.json"
+  register: claude_json_raw
+  failed_when: false
+  no_log: true
+
+- name: Validate ~/.claude.json is parseable
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - "import json,sys,base64; json.loads(base64.b64decode(sys.argv[1]))"
+      - "{{ claude_json_raw.content }}"
+  changed_when: false
+  failed_when: false
+  register: claude_json_valid
+  when: claude_json_raw.content | default('', boolean=True) | length > 0
+  no_log: true
+
+- name: Parse existing ~/.claude.json
+  ansible.builtin.set_fact:
+    claude_json: >-
+      {{
+        (claude_json_raw.content | b64decode | from_json)
+        if (claude_json_valid.rc | default(1)) == 0
+        else {}
+      }}
+  no_log: true
+
+- name: Merge MCP servers into ~/.claude.json
+  ansible.builtin.copy:
+    content: >-
+      {{
+        claude_json
+        | combine({
+            'mcpServers':
+              (claude_json.mcpServers | default({}))
+              | combine(managed_mcp_servers)
+          })
+        | to_nice_json(indent=2)
+      }}
+    dest: "{{ ansible_user_dir }}/.claude.json"
+    mode: "0600"
+  no_log: true
+  vars:
+    managed_mcp_servers:
+      linear:
+        type: http
+        url: https://mcp.linear.app/mcp
+        headers:
+          Authorization: "Bearer ${LINEAR_API_KEY}"
+      figma:
+        type: http
+        url: https://mcp.figma.com/mcp
+        headers:
+          Authorization: "Bearer ${FIGMA_TOKEN}"
+
+- name: Ensure mise conf.d directory exists
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/mise/conf.d"
+    state: directory
+    mode: "0700"
+
+- name: Deploy MCP credential env vars to mise conf.d
+  # LINEAR_API_KEY and FIGMA_TOKEN are consumed by the MCP servers in ~/.claude.json.
+  # GREPTILE_TOKEN is consumed by the greptile@claude-plugins-official plugin (no
+  # standalone MCP server entry needed — the plugin reads from env directly).
+  ansible.builtin.copy:
+    content: |
+      [env]
+      LINEAR_API_KEY = "{{ '{{' }} exec(command='op read \"op://{{ op_vault }}/{{ op_linear_api_keys.personal.item }}/{{ op_linear_api_keys.personal.field }}\" --no-newline') {{ '}}' }}"
+      FIGMA_TOKEN = "{{ '{{' }} exec(command='op read \"op://{{ op_vault }}/{{ op_figma_tokens.personal.item }}/{{ op_figma_tokens.personal.field }}\" --no-newline') {{ '}}' }}"
+      GREPTILE_TOKEN = "{{ '{{' }} exec(command='op read \"op://{{ op_vault }}/{{ op_greptile_tokens.personal.item }}/{{ op_greptile_tokens.personal.field }}\" --no-newline') {{ '}}' }}"
+    dest: "{{ xdg_config_home }}/mise/conf.d/mcp.toml"
+    mode: "0600"
+
+# =============================================================================
 # Skills
 # =============================================================================
 
