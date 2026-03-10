@@ -80,11 +80,10 @@
   vars:
     managed_mcp_servers:
       context7:
-        type: stdio
-        command: npx
-        args:
-          - "-y"
-          - "@upstash/context7-mcp"
+        type: http
+        url: https://mcp.context7.com/mcp
+        headers:
+          CONTEXT7_API_KEY: "${CONTEXT7_API_KEY}"
       linear:
         type: http
         url: https://mcp.linear.app/mcp
@@ -96,9 +95,6 @@
         headers:
           Authorization: "Bearer ${GREPTILE_TOKEN}"
 
-# =============================================================================
-# Skills
-# =============================================================================
 # Skills are markdown files (SKILL.md + references). We clone the source repos
 # to XDG cache and symlink each skill into $CLAUDE_CONFIG_DIR/skills/.
 # No runtime (node/npx) needed.
