@@ -1,7 +1,7 @@
 ---
 # roles/graphite/tasks/main.yml
 # Installs the Graphite CLI via Homebrew and deploys a user_config with
-# work and personal profile tokens injected from 1Password.
+# work and personal profile tokens from Ansible Vault.
 # Graphite natively respects XDG_CONFIG_HOME.
 
 - name: Install Graphite CLI via Homebrew
@@ -15,24 +15,6 @@
     path: "{{ xdg_config_home }}/graphite"
     state: directory
     mode: "0700"
-
-- name: Resolve Graphite tokens from 1Password
-  ansible.builtin.set_fact:
-    _graphite_tokens: "{{ _graphite_tokens | default({}) | combine({item: lookup('community.general.onepassword', op_graphite_tokens[item].item, field=op_graphite_tokens[item].field, vault=op_graphite_tokens[item].vault)}) }}"
-  loop: "{{ identity_profiles }}"
-  loop_control:
-    label: "{{ item }}"
-  no_log: true
-
-- name: Verify Graphite tokens are non-empty
-  ansible.builtin.assert:
-    that:
-      - _graphite_tokens[item] | length > 0
-    fail_msg: "Graphite token for '{{ item }}' is empty or missing in 1Password (item: {{ op_graphite_tokens[item].item }})"
-  loop: "{{ identity_profiles }}"
-  loop_control:
-    label: "{{ item }}"
-  no_log: true
 
 - name: Deploy Graphite user_config
   ansible.builtin.template:

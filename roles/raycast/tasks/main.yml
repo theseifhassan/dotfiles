@@ -1,6 +1,0 @@
----
-- name: Install Raycast
-  community.general.homebrew_cask:
-    name: raycast
-    state: latest
-    path: /opt/homebrew/bin:/usr/local/bin

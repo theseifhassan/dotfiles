@@ -5,7 +5,7 @@
   changed_when: false
   failed_when: false
   environment:
-    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
 
 - name: Fail if Homebrew is not installed
   ansible.builtin.fail:
@@ -19,4 +19,4 @@
     'Already up-to-date.' not in brew_update.stdout and
     'Already up-to-date.' not in brew_update.stderr
   environment:
-    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"

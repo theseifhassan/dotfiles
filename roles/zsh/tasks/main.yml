@@ -25,9 +25,9 @@
 - name: Create ZDOTDIR redirect in ~/.zshenv
   ansible.builtin.copy:
     content: |
-      export ZDOTDIR="{{ xdg_config_home | replace(ansible_user_dir, '$HOME') }}/zsh"
+      export ZDOTDIR="{{ xdg_config_home | replace(ansible_facts['user_dir'], '$HOME') }}/zsh"
       source "$ZDOTDIR/.zshenv"
-    dest: "{{ ansible_user_dir }}/.zshenv"
+    dest: "{{ ansible_facts['user_dir'] }}/.zshenv"
     mode: "0644"
 
 - name: Create zsh environment file
@@ -40,32 +40,6 @@
 
 - name: Create zsh interactive config
   ansible.builtin.copy:
-    content: |
-      HISTFILE="$XDG_STATE_HOME/zsh/history"
-      HISTSIZE=50000
-      SAVEHIST=50000
-
-      setopt HIST_IGNORE_DUPS
-      setopt HIST_IGNORE_SPACE
-      setopt HIST_REDUCE_BLANKS
-      setopt SHARE_HISTORY
-
-      autoload -Uz compinit
-      () {
-        local -a _zcompdump=("$XDG_CACHE_HOME/zsh/zcompdump"(N.mh+24))
-        if (( ${#_zcompdump} )); then
-          compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
-        else
-          compinit -C -d "$XDG_CACHE_HOME/zsh/zcompdump"
-        fi
-      }
-
-      if (( $+commands[fzf] )) && fzf --zsh &>/dev/null; then
-        source <(fzf --zsh)
-      fi
-
-      for conf in "$ZDOTDIR"/conf.d/*.zsh(N); do
-        source "$conf"
-      done
+    src: .zshrc
     dest: "{{ xdg_config_home }}/zsh/.zshrc"
     mode: "0644"

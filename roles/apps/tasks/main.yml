@@ -7,6 +7,16 @@
       path: /opt/homebrew/bin:/usr/local/bin
 
   block:
+    - name: Install 1Password
+      community.general.homebrew_cask:
+        name: 1password
+        state: present
+
+    - name: Install 1Password CLI
+      community.general.homebrew_cask:
+        name: 1password-cli
+        state: present
+
     - name: Install Google Chrome
       community.general.homebrew_cask:
         name: google-chrome
@@ -30,4 +40,9 @@
     - name: Install Obsidian
       community.general.homebrew_cask:
         name: obsidian
+        state: latest
+
+    - name: Install Raycast
+      community.general.homebrew_cask:
+        name: raycast
         state: latest
