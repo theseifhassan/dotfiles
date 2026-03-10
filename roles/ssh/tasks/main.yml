@@ -11,7 +11,7 @@
 
 - name: Provision SSH private keys
   ansible.builtin.copy:
-    content: "{{ vault_ssh_keys[item].private_key }}"
+    content: "{{ vault_ssh_keys[item].private_key }}\n"
     dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ item }}"
     mode: "0600"
   loop: "{{ vault_ssh_keys | list }}"
@@ -26,7 +26,7 @@
 
 - name: Provision machine SSH private key
   ansible.builtin.copy:
-    content: "{{ vault_machine_ssh_key.private_key }}"
+    content: "{{ vault_machine_ssh_key.private_key }}\n"
     dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ ansible_facts['hostname'] }}"
     mode: "0600"
   no_log: true
