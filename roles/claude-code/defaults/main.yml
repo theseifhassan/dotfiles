@@ -1,0 +1,12 @@
+---
+# roles/claude-code/defaults/main.yml
+
+claude_code_skills:
+  - skill: "skill-creator"
+    source: "anthropics-skills"
+  - skill: "implement-design"
+    source: "figma-mcp-server-guide"
+  - skill: "create-design-system-rules"
+    source: "figma-mcp-server-guide"
+  - skill: "code-connect-components"
+    source: "figma-mcp-server-guide"
