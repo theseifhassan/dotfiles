@@ -2,36 +2,11 @@
 # roles/ghostty/tasks/main.yml
 # Installs Ghostty terminal emulator and deploys its configuration file.
 
-# =============================================================================
-# Homebrew Guard
-# =============================================================================
-
-- name: Verify Homebrew is installed
-  ansible.builtin.command: brew --version
-  register: brew_check
-  changed_when: false
-  failed_when: false
-  environment:
-    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
-
-- name: Fail if Homebrew is not installed
-  ansible.builtin.fail:
-    msg: "Homebrew is not installed. Run bootstrap.sh first."
-  when: brew_check.rc != 0
-
-# =============================================================================
-# Install Ghostty
-# =============================================================================
-
 - name: Install Ghostty
   community.general.homebrew_cask:
     name: ghostty
-    state: present
+    state: latest
     path: /opt/homebrew/bin:/usr/local/bin
-
-# =============================================================================
-# Configuration
-# =============================================================================
 
 - name: Create Ghostty config directory
   ansible.builtin.file:
@@ -41,7 +16,6 @@
 
 - name: Deploy Ghostty config
   ansible.builtin.copy:
-    content: |
-      font-family = Berkeley Mono
+    src:  config
     dest: "{{ xdg_config_home }}/ghostty/config"
     mode: "0644"

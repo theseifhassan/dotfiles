@@ -1,11 +1,7 @@
 ---
 # roles/fonts/tasks/main.yml
-# Clones the private Berkeley Mono font repository via SSH and installs
+# Clones the private fonts repository via SSH and installs
 # font files (.ttf, .otf) to ~/Library/Fonts/ for system use.
-
-# =============================================================================
-# Directories
-# =============================================================================
 
 - name: Create fonts data directory
   ansible.builtin.file:
@@ -19,10 +15,6 @@
     state: directory
     mode: "0755"
 
-# =============================================================================
-# Clone Berkeley Mono Repository
-# =============================================================================
-
 # Key sourced from:
 # https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
 - name: Pin GitHub SSH host key
@@ -31,21 +23,17 @@
     key: "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
     state: present
 
-- name: Clone Berkeley Mono repository
+- name: Clone fonts repository
   ansible.builtin.git:
-    repo: "{{ berkeley_mono_repo }}"
-    dest: "{{ xdg_data_home }}/fonts/berkeley-mono"
-    version: "{{ berkeley_mono_repo_branch | default('main') }}"
-    update: "{{ berkeley_mono_force_update | default(false) }}"
+    repo: "{{ fonts_repo }}"
+    dest: "{{ xdg_data_home }}/fonts"
+    version: "{{ fonts_repo_branch | default('master') }}"
+    update: "{{ fonts_repo_force_update | default(false) }}"
     depth: 1
 
-# =============================================================================
-# Install Fonts
-# =============================================================================
-
-- name: Find all font files in Berkeley Mono repo
+- name: Find all font files in fonts repo
   ansible.builtin.find:
-    paths: "{{ xdg_data_home }}/fonts/berkeley-mono"
+    paths: "{{ xdg_data_home }}/fonts"
     patterns:
       - "*.ttf"
       - "*.otf"
@@ -57,8 +45,8 @@
     that: font_files.files | length > 0
     fail_msg: >-
       No .ttf or .otf files found in
-      {{ xdg_data_home }}/fonts/berkeley-mono —
-      check that berkeley_mono_repo points to the correct repository.
+      {{ xdg_data_home }}/fonts —
+      check that fonts_repo points to the correct repository.
 
 - name: Assert no duplicate font basenames
   ansible.builtin.assert:

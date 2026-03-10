@@ -3,52 +3,17 @@
 # Installs Starship via Homebrew and deploys a minimal prompt config that
 # produces: user@host:working_dir [git_branch_name]
 
-# =============================================================================
-# Prerequisites
-# =============================================================================
-
-- name: Verify Homebrew is installed
-  ansible.builtin.command: brew --version
-  register: brew_check
-  changed_when: false
-  failed_when: false
-  environment:
-    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
-
-- name: Fail if Homebrew is not installed
-  ansible.builtin.fail:
-    msg: "Homebrew is not installed. Run bootstrap.sh first."
-  when: brew_check.rc != 0
-
-# =============================================================================
-# Install
-# =============================================================================
-
 - name: Install Starship via Homebrew
   community.general.homebrew:
     name: starship
     state: present
     path: "/opt/homebrew/bin:/usr/local/bin"
 
-# =============================================================================
-# Configuration
-# =============================================================================
-
 - name: Deploy Starship config
   ansible.builtin.copy:
     src: starship.toml
     dest: "{{ xdg_config_home }}/starship.toml"
     mode: "0644"
-
-# =============================================================================
-# Zsh Integration
-# =============================================================================
-
-- name: Ensure zsh conf.d directory exists
-  ansible.builtin.file:
-    path: "{{ xdg_config_home }}/zsh/conf.d"
-    state: directory
-    mode: "0700"
 
 - name: Deploy Starship zsh init hook
   ansible.builtin.copy:

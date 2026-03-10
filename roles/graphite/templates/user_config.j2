@@ -1,7 +1,6 @@
 {
-  "authToken": {{ _graphite_tokens[identity_profiles[0]] | to_json }},
   "alternativeProfiles": [
-{%- for profile in identity_profiles[1:] %}
+{%- for profile in identity_profiles %}
     {
       "name": {{ profile | to_json }},
       "authToken": {{ _graphite_tokens[profile] | to_json }}

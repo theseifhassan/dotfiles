@@ -3,23 +3,15 @@
 # Provisions SSH keys from 1Password and deploys an SSH config with
 # host aliases for identity-based routing.
 
-# =============================================================================
-# SSH Directory
-# =============================================================================
-
 - name: Create SSH directory
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.ssh"
     state: directory
     mode: "0700"
 
-# =============================================================================
-# SSH Key Provisioning
-# =============================================================================
-
 - name: Provision SSH private keys from 1Password
   ansible.builtin.copy:
-    content: "{{ lookup('community.general.onepassword', item.value.item, field=item.value.private_key_field, vault=item.value.vault | default(op_vault)) }}\n"
+    content: "{{ lookup('community.general.onepassword', item.value.item, field=item.value.private_key_field, vault=item.value.vault) }}\n"
     dest: "{{ ansible_user_dir }}/.ssh/id_ed25519_{{ item.key }}"
     mode: "0600"
   loop: "{{ op_ssh_keys | dict2items }}"
@@ -29,16 +21,25 @@
 
 - name: Provision SSH public keys from 1Password
   ansible.builtin.copy:
-    content: "{{ lookup('community.general.onepassword', item.value.item, field=item.value.public_key_field, vault=item.value.vault | default(op_vault)) }}\n"
+    content: "{{ lookup('community.general.onepassword', item.value.item, field=item.value.public_key_field, vault=item.value.vault) }}\n"
     dest: "{{ ansible_user_dir }}/.ssh/id_ed25519_{{ item.key }}.pub"
     mode: "0644"
   loop: "{{ op_ssh_keys | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
-# =============================================================================
-# SSH Config
-# =============================================================================
+- name: Provision machine SSH private key from 1Password
+  ansible.builtin.copy:
+    content: "{{ lookup('community.general.onepassword', op_machine_ssh_key.item, field=op_machine_ssh_key.private_key_field, vault=op_machine_ssh_key.vault) }}\n"
+    dest: "{{ ansible_user_dir }}/.ssh/id_ed25519_{{ ansible_hostname }}"
+    mode: "0600"
+  no_log: true
+
+- name: Provision machine SSH public key from 1Password
+  ansible.builtin.copy:
+    content: "{{ lookup('community.general.onepassword', op_machine_ssh_key.item, field=op_machine_ssh_key.public_key_field, vault=op_machine_ssh_key.vault) }}\n"
+    dest: "{{ ansible_user_dir }}/.ssh/id_ed25519_{{ ansible_hostname }}.pub"
+    mode: "0644"
 
 - name: Deploy SSH config
   ansible.builtin.template:

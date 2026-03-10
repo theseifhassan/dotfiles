@@ -5,6 +5,19 @@ set-environment -g TMUX_PLUGIN_MANAGER_PATH '{{ xdg_data_home }}/tmux/plugins'
 
 # --- Plugins (managed by TPM) ---
 set -g @plugin 'tmux-plugins/tpm'
-set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+
+set -g base-index 1
+set -g set-clipboard on
+
+set-window-option -g mode-keys vi
+bind -T copy-mode-vi v send-keys -X begin-selection
+
+# vim-like pane switching
+bind -r ^ last-window
+bind -r k select-pane -U
+bind -r j select-pane -D
+bind -r h select-pane -L
+bind -r l select-pane -R
 
 run '{{ xdg_data_home }}/tmux/plugins/tpm/tpm'

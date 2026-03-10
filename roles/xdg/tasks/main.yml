@@ -3,10 +3,6 @@
 # Creates XDG base directories, project directories, and generates an
 # environment file exporting the four XDG variables for zsh to source.
 
-# =============================================================================
-# XDG Base Directories
-# =============================================================================
-
 - name: Create XDG config home directory
   ansible.builtin.file:
     path: "{{ xdg_config_home }}"
@@ -39,10 +35,6 @@
     state: directory
     mode: "0700"
 
-# =============================================================================
-# Project Directories
-# =============================================================================
-
 - name: Create projects root directory
   ansible.builtin.file:
     path: "{{ projects_dir }}"
@@ -55,10 +47,6 @@
     state: directory
     mode: "0700"
   loop: "{{ identity_profiles }}"
-
-# =============================================================================
-# XDG Environment File
-# =============================================================================
 
 - name: Create zsh config directory
   ansible.builtin.file:

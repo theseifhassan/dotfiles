@@ -1,0 +1,6 @@
+font = Berkeley Mono
+font-size = 16
+
+theme = light:Atom One Light, dark:Atom One Dark
+
+macos-option-as-alt = true

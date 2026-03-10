@@ -12,4 +12,4 @@ Host {{ entry.host }}
 Host *
     AddKeysToAgent yes
     HashKnownHosts yes
-    IdentityFile {{ ansible_user_dir }}/.ssh/id_ed25519_macbook
+    IdentityFile {{ ansible_user_dir }}/.ssh/id_ed25519_{{ ansible_hostname }}
