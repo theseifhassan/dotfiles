@@ -12,7 +12,7 @@
 
 - name: Install Graphite CLI via Homebrew
   community.general.homebrew:
-    name: graphite
+    name: withgraphite/tap/graphite
     state: latest
     path: "/opt/homebrew/bin:/usr/local/bin"
 
