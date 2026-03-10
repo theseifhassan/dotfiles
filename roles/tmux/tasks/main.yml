@@ -3,37 +3,11 @@
 # Installs tmux via Homebrew, deploys its configuration to the XDG config path,
 # and clones the Tmux Plugin Manager (TPM) into the XDG data path.
 # tmux natively respects XDG_CONFIG_HOME since version 3.1.
-
-# =============================================================================
-# Prerequisites
-# =============================================================================
-
-- name: Verify Homebrew is installed
-  ansible.builtin.command: brew --version
-  register: brew_check
-  changed_when: false
-  failed_when: false
-  environment:
-    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
-
-- name: Fail if Homebrew is not installed
-  ansible.builtin.fail:
-    msg: "Homebrew is not installed. Run bootstrap.sh first."
-  when: brew_check.rc != 0
-
-# =============================================================================
-# Install
-# =============================================================================
-
 - name: Install tmux via Homebrew
   community.general.homebrew:
     name: tmux
-    state: present
+    state: latest
     path: "/opt/homebrew/bin:/usr/local/bin"
-
-# =============================================================================
-# Configuration
-# =============================================================================
 
 - name: Create tmux config directory
   ansible.builtin.file:
@@ -46,10 +20,6 @@
     src: tmux.conf.j2
     dest: "{{ xdg_config_home }}/tmux/tmux.conf"
     mode: "0644"
-
-# =============================================================================
-# Tmux Plugin Manager (TPM)
-# =============================================================================
 
 - name: Create tmux data directory
   ansible.builtin.file:

@@ -10,19 +10,24 @@
     - name: Install Google Chrome
       community.general.homebrew_cask:
         name: google-chrome
-        state: present
+        state: latest
 
     - name: Install Figma
       community.general.homebrew_cask:
         name: figma
-        state: present
+        state: latest
 
     - name: Install Linear
       community.general.homebrew_cask:
         name: linear-linear
-        state: present
+        state: latest
 
     - name: Install Slack
       community.general.homebrew_cask:
         name: slack
-        state: present
+        state: latest
+
+    - name: Install Obsidian
+      community.general.homebrew_cask:
+        name: obsidian
+        state: latest

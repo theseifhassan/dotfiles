@@ -37,35 +37,33 @@ project_dirs:
 
 git_identity:
   work:
-    name: "WORK_NAME_PLACEHOLDER"
-    email: "WORK_EMAIL_PLACEHOLDER"
-    signing_key: ""
+    name: "Seif Hassan"
+    email: "seif@skydeo.com"
+    signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILWCQt7l1XK5FGHMWPa1wpu9OjHUBYTg/NAJYggHLsXT"
     signing_format: "ssh"  # or "openpgp" for a GPG key
   personal:
-    name: "PERSONAL_NAME_PLACEHOLDER"
-    email: "PERSONAL_EMAIL_PLACEHOLDER"
-    signing_key: ""
+    name: "Seif Hassan"
+    email: "theseifhassan@gmail.com"
+    signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPalbjJuNDXybI6YhqhYTbXT4Jc+wLUH2PYoTIJ8YPH5"
     signing_format: "ssh"  # or "openpgp" for a GPG key
 
 # =============================================================================
-# Berkeley Mono Font Repository
+# Fonts Repository
 # =============================================================================
 
-berkeley_mono_repo: "git@github.com:YOUR_GITHUB_USERNAME_PLACEHOLDER/berkeley-mono.git"
+fonts_repo: "git@github.com:theseifhassan/fonts.git"
 # Optional overrides (defaults shown):
-# berkeley_mono_repo_branch: "main"
-# berkeley_mono_force_update: false
+# fonts_repo_branch: "master"
+# fonts_repo_force_update: false
 
 # =============================================================================
 # 1Password Item References
 # =============================================================================
 # These are 1Password item names used with the community.general.onepassword
-# lookup plugin. SSH keys specify their vault per-entry; other items default
-# to op_vault.
+# lookup plugin.
+#
 # No secrets or tokens are stored here — only the item names, field names,
 # and vault names needed to retrieve them at provisioning time.
-
-op_vault: "Dotfiles"
 
 # SSH Keys — provisioned to ~/.ssh/id_ed25519_{name}
 op_ssh_keys:
@@ -79,12 +77,13 @@ op_ssh_keys:
     vault: "Personal"
     private_key_field: "private key"
     public_key_field: "public key"
-  # Machine key — provisioned for remote authorized_keys, not for outbound SSH
-  macbook:
-    item: "MacBook SSH Key"
-    vault: "Personal"
-    private_key_field: "private key"
-    public_key_field: "public key"
+  
+# Machine key — provisioned for remote authorized_keys, not for outbound SSH
+op_machine_ssh_key:
+  item: "{{ ansible_hostname }} SSH Key"
+  vault: "Personal"
+  private_key_field: "private key"
+  public_key_field: "public key"
 
 # SSH config host entries — rendered into ~/.ssh/config
 ssh_hosts:
@@ -100,44 +99,54 @@ ssh_hosts:
 # GitHub Tokens
 op_github_tokens:
   work:
-    item: "GitHub Token - Work"
-    field: "credential"
+    item: "GitHub Token"
+    vault: "Work"
+    field: "token"
   personal:
-    item: "GitHub Token - Personal"
-    field: "credential"
+    item: "GitHub Token"
+    vault: "Personal"
+    field: "token"
 
 # Graphite Tokens
 op_graphite_tokens:
   work:
-    item: "Graphite Token - Work"
-    field: "credential"
+    item: "Graphite Token"
+    vault: "Work"
+    field: "password"
   personal:
-    item: "Graphite Token - Personal"
-    field: "credential"
+    item: "Graphite Token"
+    vault: "Personal"
+    field: "password"
 
-# Linear API Keys
+# Linear Tokens
 op_linear_api_keys:
   work:
-    item: "Linear API Key - Work"
-    field: "credential"
+    item: "Linear Token"
+    vault: "Work"
+    field: "password"
   personal:
-    item: "Linear API Key - Personal"
-    field: "credential"
+    item: "Linear Token"
+    vault: "Personal"
+    field: "password"
 
 # Figma Tokens
 op_figma_tokens:
   work:
-    item: "Figma Token - Work"
-    field: "credential"
+    item: "Figma Token"
+    vault: "Work"
+    field: "password"
   personal:
-    item: "Figma Token - Personal"
-    field: "credential"
+    item: "Figma Token"
+    vault: "Personal"
+    field: "password"
 
 # Greptile Tokens
 op_greptile_tokens:
   work:
-    item: "Greptile Token - Work"
-    field: "credential"
+    item: "Greptile Token"
+    vault: "Work"
+    field: "password"
   personal:
-    item: "Greptile Token - Personal"
-    field: "credential"
+    item: "Greptile Token"
+    vault: "Personal"
+    field: "password"

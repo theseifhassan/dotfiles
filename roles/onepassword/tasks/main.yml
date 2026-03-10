@@ -2,6 +2,7 @@
 # community.general is pre-installed by bootstrap.sh via requirements.yml.
 # This task is a safety net for direct playbook runs — note that collections
 # installed mid-run are only available on the next run.
+
 - name: Ensure Ansible collections from requirements.yml are installed
   ansible.builtin.command: ansible-galaxy collection install -r "{{ playbook_dir }}/requirements.yml"
   register: collection_install_result
