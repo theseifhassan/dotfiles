@@ -5,11 +5,11 @@
 Host {{ entry.host }}
     HostName {{ entry.hostname }}
     User {{ entry.user }}
-    IdentityFile {{ ansible_user_dir }}/.ssh/id_ed25519_{{ entry.identity_key }}
+    IdentityFile {{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ entry.identity_key }}
     IdentitiesOnly yes
 
 {% endfor %}
 Host *
     AddKeysToAgent yes
     HashKnownHosts yes
-    IdentityFile {{ ansible_user_dir }}/.ssh/id_ed25519_{{ ansible_hostname }}
+    IdentityFile {{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ ansible_facts['hostname'] }}

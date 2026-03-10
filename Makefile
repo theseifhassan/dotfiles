@@ -10,10 +10,10 @@ bootstrap:       ## Full setup from scratch (fresh machine)
 	./bootstrap.sh
 
 apply:           ## Run full Ansible playbook
-	ansible-playbook playbook.yml
+	ansible-playbook playbook.yml --ask-vault-pass
 
 apply-%:         ## Run a single role (e.g., make apply-git)
-	ansible-playbook playbook.yml -t $*
+	ansible-playbook playbook.yml -t $* --ask-vault-pass
 
 lint:            ## Lint all roles with ansible-lint
 	ansible-lint playbook.yml

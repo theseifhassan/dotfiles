@@ -4,14 +4,6 @@
   connection: local
 
   roles:
-    # --- Foundation ---
-    - role: xdg
-      tags: [xdg]
-    - role: homebrew
-      tags: [homebrew]
-    - role: onepassword
-      tags: [onepassword]
-
     # --- Identity & Credentials ---
     - role: ssh
       tags: [ssh]
@@ -45,8 +37,6 @@
     # --- Desktop ---
     - role: aerospace
       tags: [aerospace]
-    - role: raycast
-      tags: [raycast]
     - role: apps
       tags: [apps]
 
