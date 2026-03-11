@@ -1,7 +1,8 @@
 ---
 # roles/claude-code/tasks/main.yml
 # Installs Claude Code, configures global MCP servers with identity-switchable
-# credentials, and installs standalone skills (no plugins).
+# credentials, deploys per-identity CLAUDE.md for OAuth server routing, and
+# installs standalone skills.
 # Claude Code has partial XDG support via CLAUDE_CONFIG_DIR.
 
 - name: Install Claude Code
@@ -62,6 +63,10 @@
       }}
   no_log: true
 
+# Bearer-token MCP servers use ${ENV_VAR} references. mise sets the correct
+# token values based on the project directory (work vs personal).
+# OAuth MCP servers (if any) are deployed with identity-prefixed names
+# (e.g., gmail-work, gmail-personal) so each has its own OAuth session.
 - name: Merge MCP servers into $CLAUDE_CONFIG_DIR/.claude.json
   ansible.builtin.copy:
     content: >-
@@ -70,7 +75,8 @@
         | combine({
             'mcpServers':
               (claude_json.mcpServers | default({}))
-              | combine(managed_mcp_servers)
+              | combine(bearer_mcp_servers)
+              | combine(oauth_mcp_entries)
           })
         | to_nice_json(indent=2)
       }}
@@ -78,7 +84,7 @@
     mode: "0600"
   no_log: true
   vars:
-    managed_mcp_servers:
+    bearer_mcp_servers:
       context7:
         type: http
         url: https://mcp.context7.com/mcp
@@ -94,6 +100,26 @@
         url: https://api.greptile.com/mcp
         headers:
           Authorization: "Bearer ${GREPTILE_TOKEN}"
+    # Build {name}-{identity} entries for each OAuth MCP server × identity.
+    # When oauth_mcp_servers is empty (default), this produces {}.
+    oauth_mcp_entries: >-
+      {%- set ns = namespace(entries={}) -%}
+      {%- for name, config in oauth_mcp_servers.items() -%}
+        {%- for identity in identity_profiles -%}
+          {%- set ns.entries = ns.entries | combine({name ~ '-' ~ identity: config}) -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {{ ns.entries }}
+
+# Per-identity CLAUDE.md — Claude Code reads CLAUDE.md from parent directories,
+# so these apply to all repos under each project directory. They instruct Claude
+# to use the correct identity-prefixed OAuth MCP servers.
+- name: Deploy per-identity CLAUDE.md
+  ansible.builtin.template:
+    src: CLAUDE.md.j2
+    dest: "{{ project_dirs[item] }}/CLAUDE.md"
+    mode: "0644"
+  loop: "{{ identity_profiles }}"
 
 # Skills are markdown files (SKILL.md + references). We clone the source repos
 # to XDG cache and symlink each skill into $CLAUDE_CONFIG_DIR/skills/.

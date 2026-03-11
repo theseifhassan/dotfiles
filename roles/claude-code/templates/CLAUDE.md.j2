@@ -1,0 +1,6 @@
+# Identity: {{ item }}
+
+This is a **{{ item }}** project. When using MCP servers that have identity-prefixed
+variants (e.g., `gmail-work` and `gmail-personal`), always use the `{{ item }}` variant.
+
+For example, prefer `gmail-{{ item }}` over `gmail-{{ identity_profiles | reject('equalto', item) | first }}`.
