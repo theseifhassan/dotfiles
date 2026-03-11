@@ -46,8 +46,10 @@
 - name: Mark per-identity mise configs as trusted
   ansible.builtin.command:
     argv:
-      - /opt/homebrew/bin/mise
+      - mise
       - trust
       - "{{ project_dirs[item] }}/.mise.toml"
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
   loop: "{{ identity_profiles }}"
   changed_when: false
