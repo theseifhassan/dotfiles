@@ -59,6 +59,8 @@
       tags: [aerospace]
     - role: apps
       tags: [apps]
+    - role: obs-studio
+      tags: [obs-studio]
 
     # --- Fonts (requires SSH for private repo) ---
     - role: fonts

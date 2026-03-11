@@ -1,0 +1,28 @@
+---
+- module_defaults:
+    community.general.homebrew_cask:
+      path: /opt/homebrew/bin:/usr/local/bin
+  block:
+    - name: Install OBS Studio
+      community.general.homebrew_cask:
+        name: obs
+        state: present
+
+    - name: Install DroidCam OBS Plugin
+      community.general.homebrew_cask:
+        name: droidcam-obs
+        state: present
+
+- name: Create user OBS Studio plugins directory
+  ansible.builtin.file:
+    path: ~/Library/Application Support/obs-studio/plugins
+    state: directory
+    mode: "0755"
+
+- name: Copy DroidCam plugin to user plugins directory
+  ansible.builtin.copy:
+    src: /Library/Application Support/obs-studio/plugins/droidcamobs.plugin
+    dest: ~/Library/Application Support/obs-studio/plugins/droidcamobs.plugin
+    remote_src: true
+    mode: "0755"
+  become: false
