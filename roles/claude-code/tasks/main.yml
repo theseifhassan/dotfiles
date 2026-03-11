@@ -120,6 +120,7 @@
     dest: "{{ project_dirs[item] }}/CLAUDE.md"
     mode: "0644"
   loop: "{{ identity_profiles }}"
+  when: oauth_mcp_servers | length > 0
 
 # Skills are markdown files (SKILL.md + references). We clone the source repos
 # to XDG cache and symlink each skill into $CLAUDE_CONFIG_DIR/skills/.
