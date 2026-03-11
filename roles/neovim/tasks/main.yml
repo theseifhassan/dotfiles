@@ -6,7 +6,6 @@
   community.general.homebrew:
     name: neovim
     state: present
-    path: "/opt/homebrew/bin:/usr/local/bin"
 
 - name: Deploy Neovim config
   ansible.builtin.copy:

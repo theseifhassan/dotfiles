@@ -2,6 +2,30 @@
 - name: Modular Dotfiles System
   hosts: localhost
   connection: local
+  gather_facts: true
+  gather_subset:
+    - "!all"
+    - user_dir
+    - env
+
+  module_defaults:
+    community.general.homebrew:
+      path: /opt/homebrew/bin:/usr/local/bin
+    community.general.homebrew_cask:
+      path: /opt/homebrew/bin:/usr/local/bin
+    community.general.homebrew_tap:
+      path: /opt/homebrew/bin:/usr/local/bin
+
+  pre_tasks:
+    - name: Run xdg role
+      ansible.builtin.include_role:
+        name: xdg
+      tags: [always]
+
+    - name: Run homebrew role
+      ansible.builtin.include_role:
+        name: homebrew
+      tags: [always]
 
   roles:
     # --- Identity & Credentials ---
@@ -9,10 +33,6 @@
       tags: [ssh]
     - role: git
       tags: [git]
-    - role: gh
-      tags: [gh]
-    - role: graphite
-      tags: [graphite]
 
     # --- Shell ---
     - role: zsh

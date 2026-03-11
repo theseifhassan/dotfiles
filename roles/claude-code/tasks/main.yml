@@ -9,7 +9,6 @@
   community.general.homebrew_cask:
     name: claude-code
     state: latest
-    path: /opt/homebrew/bin:/usr/local/bin
 
 - name: Create Claude Code directories
   ansible.builtin.file:
@@ -132,6 +131,7 @@
     dest: "{{ xdg_cache_home }}/claude-skills/{{ item.name }}"
     depth: 1
     version: main
+    update: true
   loop:
     - name: anthropics-skills
       repo: "https://github.com/anthropics/skills.git"

@@ -9,7 +9,6 @@
   community.general.homebrew:
     name: mise
     state: latest
-    path: "/opt/homebrew/bin:/usr/local/bin"
 
 - name: Create mise config directory
   ansible.builtin.file:

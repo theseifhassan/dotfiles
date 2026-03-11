@@ -8,7 +8,6 @@
   community.general.homebrew_cask:
     name: zed
     state: present
-    path: /opt/homebrew/bin:/usr/local/bin
 
 - name: Create Zed config directory
   ansible.builtin.file:

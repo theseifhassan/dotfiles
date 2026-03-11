@@ -6,7 +6,6 @@
   community.general.homebrew_cask:
     name: ghostty
     state: latest
-    path: /opt/homebrew/bin:/usr/local/bin
 
 - name: Create Ghostty config directory
   ansible.builtin.file:
