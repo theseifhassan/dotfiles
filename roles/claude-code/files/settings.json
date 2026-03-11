@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {},
+  "permissions": {
+    "allow": ["mcp__context7__*", "mcp__linear__*", "mcp__greptile__*"]
+  }
+}
