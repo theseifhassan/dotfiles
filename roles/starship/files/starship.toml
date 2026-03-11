@@ -1,25 +1,25 @@
 # roles/starship/files/starship.toml
-format = "$username@$hostname:$directory$git_branch$line_break$character"
+format = "$username@$hostname:$directory$git_branch$character"
 
 [username]
 show_always = true
-format = "[$user](bold)"
+format = "$user"
 
 [hostname]
 ssh_only = false
-format = "[$hostname](bold)"
+format = "$hostname"
 
 [directory]
 truncation_length = 0
 truncate_to_repo = false
-format = "[$path]($style)"
+format = "$path"
 
 [git_branch]
-format = " [\\[$branch\\]]($style)"
+format = " \\[$branch\\]"
 
 [character]
-success_symbol = "[\\$](bold)"
-error_symbol = "[\\$](bold red)"
+success_symbol = " \\$"
+error_symbol = " \\$"
 
 # Disable all other modules
 [aws]
