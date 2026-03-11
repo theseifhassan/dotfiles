@@ -30,6 +30,7 @@
     version: "{{ fonts_repo_branch | default('master') }}"
     update: "{{ fonts_repo_force_update | default(false) }}"
     depth: 1
+  register: fonts_repo_clone
 
 - name: Find all font files in fonts repo
   ansible.builtin.find:
@@ -39,6 +40,7 @@
       - "*.otf"
     recurse: true
   register: font_files
+  when: fonts_repo_clone is changed
 
 - name: Assert font files were found
   ansible.builtin.assert:
@@ -47,6 +49,7 @@
       No .ttf or .otf files found in
       {{ xdg_data_home }}/fonts —
       check that fonts_repo points to the correct repository.
+  when: fonts_repo_clone is changed
 
 - name: Assert no duplicate font basenames
   ansible.builtin.assert:
@@ -54,6 +57,7 @@
       font_files.files | map(attribute='path') | map('basename') | list | length ==
       font_files.files | map(attribute='path') | map('basename') | unique | list | length
     fail_msg: "Duplicate font basenames detected — copy would silently overwrite files"
+  when: fonts_repo_clone is changed
 
 - name: Copy font files to ~/Library/Fonts
   ansible.builtin.copy:
@@ -61,6 +65,7 @@
     dest: "{{ ansible_facts['user_dir'] }}/Library/Fonts/{{ item.path | basename }}"
     mode: "0644"
     remote_src: true
-  loop: "{{ font_files.files }}"
+  loop: "{{ font_files.files | default([]) }}"
   loop_control:
     label: "{{ item.path | basename }}"
+  when: fonts_repo_clone is changed

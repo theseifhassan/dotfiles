@@ -7,7 +7,6 @@
   community.general.homebrew:
     name: starship
     state: present
-    path: "/opt/homebrew/bin:/usr/local/bin"
 
 - name: Deploy Starship config
   ansible.builtin.copy:

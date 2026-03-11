@@ -1,13 +1,14 @@
 ---
 # roles/git/tasks/main.yml
-# Installs Git via Homebrew and deploys a config under XDG with includeIf
-# directives for automatic identity switching based on project directory.
+# Installs Git, GitHub CLI, and Graphite CLI via Homebrew and deploys configs
+# under XDG with includeIf directives for automatic identity switching.
+
+# --- Git ---
 
 - name: Install git via Homebrew
   community.general.homebrew:
     name: git
     state: latest
-    path: "/opt/homebrew/bin:/usr/local/bin"
 
 - name: Assert git identity placeholders have been replaced
   ansible.builtin.assert:
@@ -43,3 +44,39 @@
     src: config-personal.j2
     dest: "{{ xdg_config_home }}/git/config-personal"
     mode: "0600"
+
+# --- GitHub CLI ---
+# gh natively respects XDG_CONFIG_HOME, so no explicit GH_CONFIG_DIR export is
+# needed — the xdg role already sets XDG_CONFIG_HOME.
+
+- name: Install gh via Homebrew
+  community.general.homebrew:
+    name: gh
+    state: latest
+
+# --- Graphite CLI ---
+# Graphite natively respects XDG_CONFIG_HOME.
+
+- name: Tap withgraphite/tap Homebrew repository
+  community.general.homebrew_tap:
+    name: withgraphite/tap
+    state: present
+
+- name: Install Graphite CLI via Homebrew
+  community.general.homebrew:
+    name: withgraphite/tap/graphite
+    state: latest
+
+- name: Create Graphite config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/graphite"
+    state: directory
+    mode: "0700"
+
+- name: Deploy Graphite user_config
+  ansible.builtin.template:
+    src: graphite-user_config.j2
+    dest: "{{ xdg_config_home }}/graphite/user_config"
+    mode: "0600"
+    validate: "python3 -m json.tool %s"
+  no_log: true

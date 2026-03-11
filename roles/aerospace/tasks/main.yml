@@ -8,13 +8,11 @@
   community.general.homebrew_tap:
     name: nikitabobko/tap
     state: present
-    path: /opt/homebrew/bin:/usr/local/bin
 
 - name: Install AeroSpace via Homebrew cask
   community.general.homebrew_cask:
     name: nikitabobko/tap/aerospace
     state: latest
-    path: /opt/homebrew/bin:/usr/local/bin
 
 - name: Create aerospace config directory
   ansible.builtin.file:

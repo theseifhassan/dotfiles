@@ -7,7 +7,6 @@
   community.general.homebrew:
     name: tmux
     state: latest
-    path: "/opt/homebrew/bin:/usr/local/bin"
 
 - name: Create tmux config directory
   ansible.builtin.file:

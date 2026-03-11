@@ -2,47 +2,42 @@
 # roles/apps/tasks/main.yml
 # Installs GUI applications via Homebrew casks.
 
-- module_defaults:
-    community.general.homebrew_cask:
-      path: /opt/homebrew/bin:/usr/local/bin
+- name: Install 1Password
+  community.general.homebrew_cask:
+    name: 1password
+    state: present
 
-  block:
-    - name: Install 1Password
-      community.general.homebrew_cask:
-        name: 1password
-        state: present
+- name: Install 1Password CLI
+  community.general.homebrew_cask:
+    name: 1password-cli
+    state: present
 
-    - name: Install 1Password CLI
-      community.general.homebrew_cask:
-        name: 1password-cli
-        state: present
+- name: Install Google Chrome
+  community.general.homebrew_cask:
+    name: google-chrome
+    state: latest
 
-    - name: Install Google Chrome
-      community.general.homebrew_cask:
-        name: google-chrome
-        state: latest
+- name: Install Figma
+  community.general.homebrew_cask:
+    name: figma
+    state: latest
 
-    - name: Install Figma
-      community.general.homebrew_cask:
-        name: figma
-        state: latest
+- name: Install Linear
+  community.general.homebrew_cask:
+    name: linear-linear
+    state: latest
 
-    - name: Install Linear
-      community.general.homebrew_cask:
-        name: linear-linear
-        state: latest
+- name: Install Slack
+  community.general.homebrew_cask:
+    name: slack
+    state: latest
 
-    - name: Install Slack
-      community.general.homebrew_cask:
-        name: slack
-        state: latest
+- name: Install Obsidian
+  community.general.homebrew_cask:
+    name: obsidian
+    state: latest
 
-    - name: Install Obsidian
-      community.general.homebrew_cask:
-        name: obsidian
-        state: latest
-
-    - name: Install Raycast
-      community.general.homebrew_cask:
-        name: raycast
-        state: latest
+- name: Install Raycast
+  community.general.homebrew_cask:
+    name: raycast
+    state: latest
