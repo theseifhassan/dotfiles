@@ -3,64 +3,54 @@
 # Shared variables for all roles in the Modular Dotfiles System.
 # This file contains ONLY references and configuration — no secrets or tokens.
 
-# =============================================================================
-# XDG Base Directory Paths
-# =============================================================================
-
 xdg_config_home: "{{ ansible_facts['user_dir'] }}/.config"
 xdg_data_home: "{{ ansible_facts['user_dir'] }}/.local/share"
 xdg_cache_home: "{{ ansible_facts['user_dir'] }}/.cache"
 xdg_state_home: "{{ ansible_facts['user_dir'] }}/.local/state"
 
-# =============================================================================
-# Identity Profiles
-# =============================================================================
-
 identity_profiles:
   - work
   - personal
 
-# =============================================================================
-# Project Directory Paths
-# =============================================================================
-
 projects_dir: "{{ ansible_facts['user_dir'] }}/Projects"
 
-# Per-identity project directories (mirrors identity_profiles)
 project_dirs:
   work: "{{ projects_dir }}/work"
   personal: "{{ projects_dir }}/personal"
 
-# =============================================================================
-# Git Identities
-# =============================================================================
+identity_env:
+  personal:
+    GH_TOKEN: "{{ vault_gh_tokens.personal }}"
+    LINEAR_TOKEN: "{{ vault_linear_tokens.personal }}"
+    GREPTILE_TOKEN: "{{ vault_greptile_tokens.personal }}"
+    CONTEXT7_API_KEY: "{{ vault_context7_api_keys.personal }}"
+    GRAPHITE_PROFILE: "personal"
+  work:
+    GH_TOKEN: "{{ vault_gh_tokens.work }}"
+    LINEAR_TOKEN: "{{ vault_linear_tokens.work }}"
+    GREPTILE_TOKEN: "{{ vault_greptile_tokens.work }}"
+    CONTEXT7_API_KEY: "{{ vault_context7_api_keys.work }}"
+    GRAPHITE_PROFILE: "work"
+
+oauth_mcp_servers: {}
 
 git_identity:
   work:
     name: "Seif Hassan"
     email: "seif@skydeo.com"
     signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILWCQt7l1XK5FGHMWPa1wpu9OjHUBYTg/NAJYggHLsXT"
-    signing_format: "ssh"  # or "openpgp" for a GPG key
+    signing_format: "ssh"
   personal:
     name: "Seif Hassan"
     email: "theseifhassan@gmail.com"
     signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPalbjJuNDXybI6YhqhYTbXT4Jc+wLUH2PYoTIJ8YPH5"
-    signing_format: "ssh"  # or "openpgp" for a GPG key
-
-# =============================================================================
-# Fonts Repository
-# =============================================================================
+    signing_format: "ssh"
 
 fonts_repo: "git@github.com:theseifhassan/fonts.git"
 # Optional overrides (defaults shown):
 # fonts_repo_branch: "master"
 # fonts_repo_force_update: false
 
-# =============================================================================
-# SSH Config
-# =============================================================================
-
-# SSH config host entries — rendered into ~/.ssh/config
 ssh_hosts:
   - host: "work.github.com"
     hostname: "github.com"
