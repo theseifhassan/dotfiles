@@ -19,7 +19,7 @@ format = " \\[$branch\\]"
 
 [character]
 success_symbol = " \\$"
-error_symbol = " \\$"
+error_symbol = " !\\$"
 
 # Disable all other modules
 [aws]
