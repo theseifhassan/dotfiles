@@ -1,4 +1,4 @@
-font = Berkeley Mono
+font-family = Berkeley Mono
 font-size = 16
 
 theme = light:Atom One Light, dark:Atom One Dark

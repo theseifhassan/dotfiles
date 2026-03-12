@@ -1,9 +1,7 @@
 ---
 # roles/mise/tasks/main.yml
-# Installs mise via Homebrew, deploys global config under XDG, activates it in
-# zsh, and deploys per-identity .mise.toml files into project directories for
-# automatic credential switching based on working directory.
-# mise natively respects XDG_CONFIG_HOME.
+# Installs mise via Homebrew, deploys global config under XDG, and activates
+# it in zsh. mise natively respects XDG_CONFIG_HOME.
 
 - name: Install mise via Homebrew
   community.general.homebrew:
@@ -31,24 +29,3 @@
       fi
     dest: "{{ xdg_config_home }}/zsh/conf.d/mise.zsh"
     mode: "0644"
-
-- name: Deploy per-identity mise env configs
-  ansible.builtin.template:
-    src: mise-identity.toml.j2
-    dest: "{{ project_dirs[item] }}/.mise.toml"
-    mode: "0600"
-  loop: "{{ identity_profiles }}"
-  vars:
-    identity: "{{ item }}"
-  no_log: true
-
-- name: Mark per-identity mise configs as trusted
-  ansible.builtin.command:
-    argv:
-      - mise
-      - trust
-      - "{{ project_dirs[item] }}/.mise.toml"
-  environment:
-    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_env.PATH }}"
-  loop: "{{ identity_profiles }}"
-  changed_when: false

@@ -1,0 +1,24 @@
+---
+# roles/claude/tasks/main.yml
+# Installs Claude Code and configures XDG-based config directory.
+
+- name: Install Claude Code
+  community.general.homebrew_cask:
+    name: claude-code
+    state: latest
+
+- name: Create Claude Code directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - "{{ xdg_config_home }}/claude"
+    - "{{ xdg_config_home }}/claude/skills"
+
+- name: Deploy Claude Code shell config
+  ansible.builtin.copy:
+    content: |
+      export CLAUDE_CONFIG_DIR="{{ xdg_config_home }}/claude"
+    dest: "{{ xdg_config_home }}/zsh/conf.d/claude-code.zsh"
+    mode: "0644"

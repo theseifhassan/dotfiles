@@ -20,9 +20,8 @@
     mode: "0755"
 
 - name: Copy DroidCam plugin to user plugins directory
-  ansible.builtin.copy:
-    src: /Library/Application Support/obs-studio/plugins/droidcamobs.plugin
-    dest: ~/Library/Application Support/obs-studio/plugins/droidcamobs.plugin
-    remote_src: true
-    mode: "0755"
+  ansible.posix.synchronize:
+    src: /Library/Application Support/obs-studio/plugins/droidcamobs.plugin/
+    dest: ~/Library/Application Support/obs-studio/plugins/droidcamobs.plugin/
+    delete: true
   become: false

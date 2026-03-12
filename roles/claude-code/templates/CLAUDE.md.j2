@@ -1,6 +1,0 @@
-# Identity: {{ item }}
-
-This is a **{{ item }}** project. When using MCP servers that have identity-prefixed
-variants, always use the `{{ item }}` variant.
-
-For example, prefer `{{ oauth_mcp_servers.keys() | first }}-{{ item }}` over `{{ oauth_mcp_servers.keys() | first }}-{{ identity_profiles | reject('equalto', item) | first }}`.

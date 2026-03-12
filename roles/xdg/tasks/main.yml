@@ -1,7 +1,7 @@
 ---
 # roles/xdg/tasks/main.yml
-# Creates XDG base directories, project directories, and generates an
-# environment file exporting the four XDG variables for zsh to source.
+# Creates XDG base directories and generates an environment file exporting
+# the four XDG variables for zsh to source.
 
 - name: Create XDG config home directory
   ansible.builtin.file:
@@ -34,19 +34,6 @@
     path: "{{ xdg_cache_home }}"
     state: directory
     mode: "0700"
-
-- name: Create projects root directory
-  ansible.builtin.file:
-    path: "{{ projects_dir }}"
-    state: directory
-    mode: "0700"
-
-- name: Create per-identity project directories
-  ansible.builtin.file:
-    path: "{{ projects_dir }}/{{ item }}"
-    state: directory
-    mode: "0700"
-  loop: "{{ identity_profiles }}"
 
 - name: Create zsh config directory
   ansible.builtin.file:

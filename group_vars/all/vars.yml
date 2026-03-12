@@ -8,32 +8,6 @@ xdg_data_home: "{{ ansible_facts['user_dir'] }}/.local/share"
 xdg_cache_home: "{{ ansible_facts['user_dir'] }}/.cache"
 xdg_state_home: "{{ ansible_facts['user_dir'] }}/.local/state"
 
-identity_profiles:
-  - work
-  - personal
-
-projects_dir: "{{ ansible_facts['user_dir'] }}/Projects"
-
-project_dirs:
-  work: "{{ projects_dir }}/work"
-  personal: "{{ projects_dir }}/personal"
-
-identity_env:
-  personal:
-    GH_TOKEN: "{{ vault_gh_tokens.personal }}"
-    LINEAR_TOKEN: "{{ vault_linear_tokens.personal }}"
-    GREPTILE_TOKEN: "{{ vault_greptile_tokens.personal }}"
-    CONTEXT7_API_KEY: "{{ vault_context7_api_keys.personal }}"
-    GRAPHITE_PROFILE: "personal"
-  work:
-    GH_TOKEN: "{{ vault_gh_tokens.work }}"
-    LINEAR_TOKEN: "{{ vault_linear_tokens.work }}"
-    GREPTILE_TOKEN: "{{ vault_greptile_tokens.work }}"
-    CONTEXT7_API_KEY: "{{ vault_context7_api_keys.work }}"
-    GRAPHITE_PROFILE: "work"
-
-oauth_mcp_servers: {}
-
 git_identity:
   work:
     name: "Seif Hassan"

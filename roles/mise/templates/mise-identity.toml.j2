@@ -1,9 +1,0 @@
-# {{ ansible_managed }}
-# Identity: {{ identity }}
-# Env vars for {{ identity }} projects — applied to all repos under
-# {{ project_dirs[identity] }}/ via mise's parent-directory traversal.
-
-[env]
-{% for name, value in identity_env[identity].items() %}
-{{ name }} = {{ value | to_json }}
-{% endfor %}

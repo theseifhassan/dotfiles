@@ -28,40 +28,44 @@
       tags: [always]
 
   roles:
-    # --- Identity & Credentials ---
     - role: ssh
       tags: [ssh]
+
     - role: git
       tags: [git]
 
-    # --- Shell ---
     - role: zsh
       tags: [zsh]
+
     - role: starship
       tags: [starship]
+
     - role: mise
       tags: [mise]
 
-    # --- Editors & Terminal ---
     - role: ghostty
       tags: [ghostty]
+
     - role: tmux
       tags: [tmux]
+
     - role: neovim
       tags: [neovim]
-    - role: claude-code
-      tags: [claude-code]
+
+    - role: claude
+      tags: [claude]
+
     - role: zed
       tags: [zed]
 
-    # --- Desktop ---
     - role: aerospace
       tags: [aerospace]
+
     - role: apps
       tags: [apps]
-    - role: obs-studio
-      tags: [obs-studio]
 
-    # --- Fonts (requires SSH for private repo) ---
+    - role: obs
+      tags: [obs]
+
     - role: fonts
       tags: [fonts]

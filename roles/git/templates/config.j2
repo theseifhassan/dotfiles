@@ -4,8 +4,8 @@
 # require explicit identity configuration. This is intentional to prevent
 # accidental commits under the wrong identity.
 
-[includeIf "gitdir/i:{{ project_dirs.work }}/"]
+[includeIf "gitdir/i:{{ ansible_facts['user_dir'] }}/Projects/work/"]
     path = "{{ xdg_config_home }}/git/config-work"
 
-[includeIf "gitdir/i:{{ project_dirs.personal }}/"]
+[includeIf "gitdir/i:{{ ansible_facts['user_dir'] }}/Projects/personal/"]
     path = "{{ xdg_config_home }}/git/config-personal"
