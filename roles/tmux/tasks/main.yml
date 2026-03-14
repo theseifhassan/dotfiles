@@ -15,10 +15,11 @@
     mode: "0700"
 
 - name: Deploy tmux config
-  ansible.builtin.template:
-    src: tmux.conf.j2
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/tmux.conf"
     dest: "{{ xdg_config_home }}/tmux/tmux.conf"
-    mode: "0644"
+    state: link
+    force: true
 
 - name: Create tmux data directory
   ansible.builtin.file:
@@ -39,3 +40,23 @@
     version: master
     depth: 1
     update: false  # Only clone once; run TPM's update keybinding (<prefix> U) to upgrade manually
+
+- name: Create local bin directory
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.local/bin"
+    state: directory
+    mode: "0700"
+
+- name: Deploy tmux-sessionizer script
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/tmux-sessionizer"
+    dest: "{{ ansible_facts['user_dir'] }}/.local/bin/tmux-sessionizer"
+    state: link
+    force: true
+
+- name: Deploy tmux-sessionizer zsh integration
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/tmux-sessionizer.zsh"
+    dest: "{{ xdg_config_home }}/zsh/conf.d/tmux-sessionizer.zsh"
+    state: link
+    force: true

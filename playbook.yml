@@ -43,6 +43,9 @@
     - role: mise
       tags: [mise]
 
+    - role: fzf
+      tags: [fzf]
+
     - role: ghostty
       tags: [ghostty]
 
@@ -54,6 +57,9 @@
 
     - role: claude
       tags: [claude]
+
+    - role: opencode
+      tags: [opencode]
 
     - role: zed
       tags: [zed]

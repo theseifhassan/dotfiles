@@ -3,8 +3,6 @@
 # Installs Git, GitHub CLI, and Graphite CLI via Homebrew and deploys git
 # configs under XDG with includeIf directives for work/personal identity.
 
-# --- Git ---
-
 - name: Install git via Homebrew
   community.general.homebrew:
     name: git
@@ -59,4 +57,3 @@
   community.general.homebrew:
     name: withgraphite/tap/graphite
     state: latest
-

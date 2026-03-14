@@ -7,6 +7,10 @@ setopt HIST_IGNORE_SPACE
 setopt HIST_REDUCE_BLANKS
 setopt SHARE_HISTORY
 
+# Vi mode
+bindkey -v
+export KEYTIMEOUT=1
+
 autoload -Uz compinit
 () {
   local -a _zcompdump=("$XDG_CACHE_HOME/zsh/zcompdump"(N.mh+24))

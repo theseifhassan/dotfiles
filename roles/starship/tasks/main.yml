@@ -9,13 +9,15 @@
     state: present
 
 - name: Deploy Starship config
-  ansible.builtin.copy:
-    src: starship.toml
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/starship.toml"
     dest: "{{ xdg_config_home }}/starship.toml"
-    mode: "0644"
+    state: link
+    force: true
 
 - name: Deploy Starship zsh init hook
-  ansible.builtin.copy:
-    src: starship.zsh
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/starship.zsh"
     dest: "{{ xdg_config_home }}/zsh/conf.d/starship.zsh"
-    mode: "0644"
+    state: link
+    force: true

@@ -2,11 +2,6 @@
 # roles/apps/tasks/main.yml
 # Installs applications via Homebrew (GUI casks and CLI tools).
 
-- name: Install Beads (task tracker for AI agents)
-  community.general.homebrew:
-    name: beads
-    state: latest
-
 - name: Install 1Password
   community.general.homebrew_cask:
     name: 1password
@@ -50,4 +45,9 @@
 - name: Install Alcove
   community.general.homebrew_cask:
     name: alcove
+    state: latest
+
+- name: Install Beads CLI
+  community.general.homebrew:
+    name: beads
     state: latest

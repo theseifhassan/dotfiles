@@ -14,7 +14,8 @@
     mode: "0700"
 
 - name: Deploy Ghostty config
-  ansible.builtin.copy:
-    src:  config
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/config"
     dest: "{{ xdg_config_home }}/ghostty/config"
-    mode: "0644"
+    state: link
+    force: true

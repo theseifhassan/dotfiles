@@ -15,10 +15,11 @@
     mode: "0700"
 
 - name: Deploy mise config
-  ansible.builtin.template:
-    src: config.toml.j2
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/config.toml"
     dest: "{{ xdg_config_home }}/mise/config.toml"
-    mode: "0644"
+    state: link
+    force: true
 
 - name: Deploy mise activation to zsh
   ansible.builtin.copy:

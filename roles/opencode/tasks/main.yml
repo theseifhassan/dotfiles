@@ -1,0 +1,26 @@
+---
+# roles/opencode/tasks/main.yml
+# Installs OpenCode from the upstream Homebrew tap and pins its user-level
+# configuration to XDG paths.
+
+- name: Tap anomalyco/tap for OpenCode
+  community.general.homebrew_tap:
+    name: anomalyco/tap
+    state: present
+
+- name: Install OpenCode via Homebrew
+  community.general.homebrew:
+    name: anomalyco/tap/opencode
+    state: latest
+
+- name: Create OpenCode config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/opencode"
+    state: directory
+    mode: "0700"
+
+- name: Create OpenCode data directory
+  ansible.builtin.file:
+    path: "{{ xdg_data_home }}/opencode"
+    state: directory
+    mode: "0700"
