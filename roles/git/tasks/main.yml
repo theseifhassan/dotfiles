@@ -57,3 +57,15 @@
   community.general.homebrew:
     name: withgraphite/tap/graphite
     state: latest
+
+- name: Create Graphite config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/graphite"
+    state: directory
+    mode: "0700"
+
+- name: Deploy Graphite user config
+  ansible.builtin.template:
+    src: graphite-user-config.json.j2
+    dest: "{{ xdg_config_home }}/graphite/user_config"
+    mode: "0600"
