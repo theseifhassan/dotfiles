@@ -51,3 +51,45 @@
   community.general.homebrew:
     name: beads
     state: latest
+
+- name: Install DataGrip
+  community.general.homebrew_cask:
+    name: datagrip
+    state: latest
+
+- name: Install Lazygit
+  community.general.homebrew:
+    name: lazygit
+    state: latest
+
+- name: Check if Gather Town is installed
+  ansible.builtin.stat:
+    path: /Applications/GatherV2.app
+  register: gather_app
+
+- name: Install Gather Town from DMG
+  when: not gather_app.stat.exists
+  block:
+    - name: Download Gather Town DMG
+      ansible.builtin.get_url:
+        url: https://api.v2.gather.town/api/v2/releases/latest/macos/v2
+        dest: /tmp/gather.dmg
+        mode: "0644"
+
+    - name: Mount Gather Town DMG
+      ansible.builtin.command:
+        cmd: hdiutil attach /tmp/gather.dmg -nobrowse -mountpoint /tmp/gather_mount
+      changed_when: false
+
+    - name: Copy Gather Town to Applications
+      ansible.builtin.command:
+        cmd: ditto /tmp/gather_mount/GatherV2.app /Applications/GatherV2.app
+
+    - name: Remove quarantine flag from Gather Town
+      ansible.builtin.command:
+        cmd: xattr -rd com.apple.quarantine /Applications/GatherV2.app
+
+    - name: Unmount Gather Town DMG
+      ansible.builtin.command:
+        cmd: hdiutil detach /tmp/gather_mount
+      changed_when: false

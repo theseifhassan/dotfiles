@@ -12,7 +12,7 @@ Ansible-based macOS dotfiles.
 ansible-playbook playbook.yml --ask-vault-pass
 
 # Single role
-ansible-playbook playbook.yml -t opencode --ask-vault-pass
+ansible-playbook playbook.yml -t claude --ask-vault-pass
 ```
 
 ## Roles
@@ -27,9 +27,8 @@ ansible-playbook playbook.yml -t opencode --ask-vault-pass
 | fzf | Fuzzy finder, fzf-tab completions, history search |
 | ghostty | Terminal emulator |
 | tmux | Terminal multiplexer + tmux-sessionizer |
-| neovim | Neovim |
+| neovim | Neovim (tool only, no config) |
 | claude | Claude Code |
-| opencode | OpenCode |
 | zed | Zed editor |
 | aerospace | Tiling window manager |
 | apps | Homebrew casks and CLI tools |
@@ -50,12 +49,12 @@ Foundation roles (`xdg`, `homebrew`) are pulled in automatically via role depend
 
 ## tmux-sessionizer
 
-Based on [ThePrimeagen's script](https://github.com/ThePrimeagen/.dotfiles). Searches `~/Projects` and `~/Documents` for project directories, then creates or switches to a named tmux session rooted at the selected directory.
+Based on [ThePrimeagen's script](https://github.com/ThePrimeagen/.dotfiles). Searches `~/Desktop` and `~/Documents` for project directories, then creates or switches to a named tmux session rooted at the selected directory.
 
 The script is deployed to `~/.local/bin/tmux-sessionizer` and can also be called directly with a path argument:
 
 ```bash
-tmux-sessionizer ~/Projects/my-app
+tmux-sessionizer ~/Desktop/my-app
 ```
 
 ## Secrets
