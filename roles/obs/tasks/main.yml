@@ -12,6 +12,7 @@
       community.general.homebrew_cask:
         name: droidcam-obs
         state: present
+        sudo_password: "{{ vault_sudo_password }}"
 
 - name: Create user OBS Studio plugins directory
   ansible.builtin.file:
