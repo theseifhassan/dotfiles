@@ -11,5 +11,6 @@ Host {{ entry.host }}
 {% endfor %}
 Host *
     AddKeysToAgent yes
+    UseKeychain yes
     HashKnownHosts yes
-    IdentityFile {{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ ansible_facts['hostname'] }}
+    IdentityFile {{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ machine_hostname }}
