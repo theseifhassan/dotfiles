@@ -24,18 +24,30 @@
     mode: "0644"
   loop: "{{ vault_ssh_keys | list }}"
 
+- name: Get machine hostname
+  ansible.builtin.command:
+    cmd: scutil --get LocalHostName
+  register: hostname_result
+  changed_when: false
+
+- name: Set machine hostname fact
+  ansible.builtin.set_fact:
+    machine_hostname: "{{ hostname_result.stdout }}"
+
 - name: Provision machine SSH private key
   ansible.builtin.copy:
-    content: "{{ vault_machine_ssh_key.private_key }}\n"
-    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ ansible_facts['hostname'] }}"
+    content: "{{ vault_machine_ssh_keys[machine_hostname].private_key }}\n"
+    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ machine_hostname }}"
     mode: "0600"
   no_log: true
+  when: machine_hostname in vault_machine_ssh_keys
 
 - name: Provision machine SSH public key
   ansible.builtin.copy:
-    content: "{{ vault_machine_ssh_key.public_key }}\n"
-    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ ansible_facts['hostname'] }}.pub"
+    content: "{{ vault_machine_ssh_keys[machine_hostname].public_key }}\n"
+    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ machine_hostname }}.pub"
     mode: "0644"
+  when: machine_hostname in vault_machine_ssh_keys
 
 - name: Deploy SSH config
   ansible.builtin.template:
