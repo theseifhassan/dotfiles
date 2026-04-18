@@ -3,9 +3,9 @@
 # Installs Claude Code and configures XDG-based config directory.
 
 - name: Install Claude Code
-  community.general.homebrew_cask:
-    name: claude-code
-    state: latest
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://claude.ai/install.sh | bash
+  changed_when: true
 
 - name: Create Claude Code directories
   ansible.builtin.file:

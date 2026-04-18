@@ -1,5 +1,32 @@
 {
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  },
+  "ssh_connections": [
+    {
+      "host": "macbook",
+      "args": [],
+      "projects": [
+        {
+          "paths": ["/Users/seifhassan/Projects/skydeo"],
+        },
+      ],
+    },
+    {
+      "host": "macbook",
+      "args": [],
+      "projects": [],
+    },
+  ],
   "buffer_font_family": "Berkeley Mono",
   "buffer_font_size": 16,
-  "vim_mode": true
+  "vim_mode": true,
+  "context_servers": {
+    "skydeo-mcp": {
+      "settings": {},
+      "url": "https://skydeo-pve4npod2-skydeo.vercel.app/api/mcp",
+    },
+  },
 }

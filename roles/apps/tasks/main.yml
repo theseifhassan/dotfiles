@@ -42,6 +42,11 @@
     name: raycast
     state: latest
 
+- name: Install Discord
+  community.general.homebrew_cask:
+    name: discord
+    state: latest
+
 - name: Install Alcove
   community.general.homebrew_cask:
     name: alcove
