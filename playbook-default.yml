@@ -64,8 +64,32 @@
     - role: aerospace
       tags: [aerospace]
 
+    - role: 1password
+      tags: [1password]
+
+    - role: slack
+      tags: [slack]
+
+    - role: datagrip
+      tags: [datagrip]
+
+    - role: figma
+      tags: [figma]
+
+    - role: linear
+      tags: [linear]
+
+    - role: discord
+      tags: [discord]
+
     - role: apps
       tags: [apps]
+
+    - role: gather
+      tags: [gather]
+
+    - role: wispr-flow
+      tags: [wispr-flow]
 
     - role: obs
       tags: [obs]

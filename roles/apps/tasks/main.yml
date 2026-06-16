@@ -2,34 +2,9 @@
 # roles/apps/tasks/main.yml
 # Installs applications via Homebrew (GUI casks and CLI tools).
 
-- name: Install 1Password
-  community.general.homebrew_cask:
-    name: 1password
-    state: present
-
-- name: Install 1Password CLI
-  community.general.homebrew_cask:
-    name: 1password-cli
-    state: present
-
 - name: Install Google Chrome
   community.general.homebrew_cask:
     name: google-chrome
-    state: latest
-
-- name: Install Figma
-  community.general.homebrew_cask:
-    name: figma
-    state: latest
-
-- name: Install Linear
-  community.general.homebrew_cask:
-    name: linear-linear
-    state: latest
-
-- name: Install Slack
-  community.general.homebrew_cask:
-    name: slack
     state: latest
 
 - name: Install Obsidian
@@ -42,11 +17,6 @@
     name: raycast
     state: latest
 
-- name: Install Discord
-  community.general.homebrew_cask:
-    name: discord
-    state: latest
-
 - name: Install Alcove
   community.general.homebrew_cask:
     name: alcove
@@ -57,44 +27,7 @@
     name: beads
     state: latest
 
-- name: Install DataGrip
-  community.general.homebrew_cask:
-    name: datagrip
-    state: latest
-
 - name: Install Lazygit
   community.general.homebrew:
     name: lazygit
     state: latest
-
-- name: Check if Gather Town is installed
-  ansible.builtin.stat:
-    path: /Applications/GatherV2.app
-  register: gather_app
-
-- name: Install Gather Town from DMG
-  when: not gather_app.stat.exists
-  block:
-    - name: Download Gather Town DMG
-      ansible.builtin.get_url:
-        url: https://api.v2.gather.town/api/v2/releases/latest/macos/v2
-        dest: /tmp/gather.dmg
-        mode: "0644"
-
-    - name: Mount Gather Town DMG
-      ansible.builtin.command:
-        cmd: hdiutil attach /tmp/gather.dmg -nobrowse -mountpoint /tmp/gather_mount
-      changed_when: false
-
-    - name: Copy Gather Town to Applications
-      ansible.builtin.command:
-        cmd: ditto /tmp/gather_mount/GatherV2.app /Applications/GatherV2.app
-
-    - name: Remove quarantine flag from Gather Town
-      ansible.builtin.command:
-        cmd: xattr -rd com.apple.quarantine /Applications/GatherV2.app
-
-    - name: Unmount Gather Town DMG
-      ansible.builtin.command:
-        cmd: hdiutil detach /tmp/gather_mount
-      changed_when: false

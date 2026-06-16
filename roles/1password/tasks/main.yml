@@ -1,0 +1,13 @@
+---
+# roles/1password/tasks/main.yml
+# Installs 1Password and the 1Password CLI via Homebrew cask.
+
+- name: Install 1Password
+  community.general.homebrew_cask:
+    name: 1password
+    state: present
+
+- name: Install 1Password CLI
+  community.general.homebrew_cask:
+    name: 1password-cli
+    state: present

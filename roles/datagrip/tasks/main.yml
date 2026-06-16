@@ -1,0 +1,8 @@
+---
+# roles/datagrip/tasks/main.yml
+# Installs DataGrip via Homebrew cask.
+
+- name: Install DataGrip
+  community.general.homebrew_cask:
+    name: datagrip
+    state: latest

@@ -3,7 +3,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-echo "==> Starting dotfiles bootstrap..."
+# Optional playbook argument (defaults to the full playbook).
+# Use the slim profile for thin clients, e.g.: ./bootstrap.sh playbook-slim.yml
+PLAYBOOK="${1:-playbook-default.yml}"
+
+echo "==> Starting dotfiles bootstrap ($PLAYBOOK)..."
 
 # 1. Xcode Command Line Tools
 if ! xcode-select -p &>/dev/null; then
@@ -62,5 +66,5 @@ echo "==> Installing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
 
 # 5. Run the playbook
-echo "==> Running Ansible playbook..."
-ansible-playbook playbook.yml --ask-vault-pass
+echo "==> Running Ansible playbook ($PLAYBOOK)..."
+ansible-playbook "$PLAYBOOK" --ask-vault-pass
