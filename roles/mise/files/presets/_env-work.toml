@@ -1,0 +1,7 @@
+# Work profile env — appended by `mise run init <preset> work`.
+# Secrets resolve from 1Password at runtime; adjust the op:// paths to your
+# work vault/item names (`op item list`).
+[env]
+GRAPHITE_PROFILE = "work"
+GH_TOKEN = "{{ exec(command='op read op://Work/GitHub/token') }}"
+GREPTILE_API_KEY = "{{ exec(command='op read op://Work/Greptile/api_key') }}"

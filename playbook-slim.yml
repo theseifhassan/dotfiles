@@ -3,7 +3,8 @@
 # Slim provisioning for thin-client Macs that mainly connect to remote servers.
 # Sets up only the essentials: SSH keys, git config (core git only, no gh or
 # Graphite), 1Password, Slack, DataGrip, Figma, Linear, Discord, Claude Code,
-# Zed, Gather, OBS, Wispr Flow, fonts (plus the xdg/homebrew foundation).
+# Zed, Gather, OBS, Wispr Flow, fonts, and Tailscale (to reach the dev server),
+# plus the xdg/homebrew foundation.
 # Note: claude pulls in zsh via its role dependency.
 #
 # Run with: ansible-playbook playbook-slim.yml --ask-vault-pass
@@ -80,3 +81,8 @@
 
     - role: fonts
       tags: [fonts]
+
+    # Join the tailnet so this thin client can reach the dev server over
+    # Tailscale (SSH + remote editors).
+    - role: tailscale
+      tags: [tailscale]

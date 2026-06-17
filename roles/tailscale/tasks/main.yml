@@ -1,0 +1,82 @@
+---
+# roles/tailscale/tasks/main.yml
+# Installs the open-source Tailscale CLI/daemon (Homebrew formula, NOT the
+# sandboxed App Store cask) and runs tailscaled as a system daemon so the
+# tailnet stays up with no GUI login — required for a headless dev server.
+
+- name: Get machine hostname for the tailnet device name
+  ansible.builtin.command:
+    cmd: scutil --get LocalHostName
+  register: tailscale_hostname_result
+  changed_when: false
+  check_mode: false # read-only probe; must run even during --check
+
+- name: Set tailnet hostname fact
+  ansible.builtin.set_fact:
+    tailscale_local_hostname: "{{ tailscale_hostname_result.stdout }}"
+
+- name: Install tailscale via Homebrew
+  community.general.homebrew:
+    name: tailscale
+    state: latest
+
+- name: Check whether the tailscaled system daemon is installed
+  ansible.builtin.command:
+    cmd: launchctl print system/com.tailscale.tailscaled
+  register: tailscaled_daemon
+  changed_when: false
+  failed_when: false
+  check_mode: false # read-only probe; must run even during --check
+
+- name: Install tailscaled as a system daemon
+  ansible.builtin.command:
+    cmd: "{{ homebrew_prefix | default('/opt/homebrew') }}/bin/tailscaled install-system-daemon"
+  become: true
+  when: tailscaled_daemon.rc != 0
+  changed_when: true
+
+- name: Get current Tailscale backend state
+  ansible.builtin.command:
+    cmd: tailscale status --json
+  register: tailscale_status
+  changed_when: false
+  failed_when: false
+  check_mode: false # read-only probe; must run even during --check
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+- name: Set fact for whether Tailscale is already running
+  ansible.builtin.set_fact:
+    tailscale_running: >-
+      {{ (tailscale_status.stdout | default('{}') | from_json).BackendState | default('NoState') == 'Running' }}
+
+- name: Bring up Tailscale (non-interactive, with auth key)
+  ansible.builtin.command:
+    cmd: >-
+      tailscale up
+      --hostname={{ tailscale_hostname }}
+      {% if tailscale_ssh | bool %}--ssh{% endif %}
+      {% if tailscale_accept_routes | bool %}--accept-routes{% endif %}
+      --authkey={{ tailscale_authkey }}
+      {{ tailscale_extra_args }}
+  become: true
+  no_log: true
+  when:
+    - not tailscale_running
+    - tailscale_authkey | length > 0
+  changed_when: true
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+- name: Show manual login command (no auth key provided)
+  ansible.builtin.debug:
+    msg: >-
+      Tailscale is installed but not logged in. Run this once to authenticate
+      in a browser:
+      sudo tailscale up --hostname={{ tailscale_hostname }}
+      {% if tailscale_ssh | bool %}--ssh {% endif %}
+      {% if tailscale_accept_routes | bool %}--accept-routes {% endif %}
+      {{ tailscale_extra_args }}
+  when:
+    - not tailscale_running
+    - tailscale_authkey | length == 0

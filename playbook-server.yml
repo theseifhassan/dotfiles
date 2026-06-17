@@ -1,5 +1,19 @@
 ---
-- name: Modular Dotfiles System
+# playbook-server.yml
+# Provisioning for the always-on dev server (Mac mini). Runs the full default
+# role set, then layers on the server-specific roles:
+#   - tailscale  : joins the tailnet AND advertises Tailscale SSH so clients
+#                  can reach it headless
+#   - server     : sleep prevention (never sleeps, disks never spin down)
+#   - colima     : headless Docker runtime
+#   - onepassword: headless `op` via a 1Password service-account token
+#
+# Server roles touch system settings and need sudo; ansible_become_password is
+# wired from vault_sudo_password (group_vars), so --ask-vault-pass is enough.
+#
+# Run with: ansible-playbook playbook-server.yml --ask-vault-pass
+#       or: ./bootstrap.sh playbook-server.yml
+- name: Modular Dotfiles System (server)
   hosts: localhost
   connection: local
   gather_facts: true
@@ -97,7 +111,19 @@
     - role: fonts
       tags: [fonts]
 
-    # Join the tailnet so this machine can reach the dev server (and vice
-    # versa) over Tailscale. Server-specific roles live in playbook-server.yml.
+    # Networking — join the tailnet and advertise Tailscale SSH so clients can
+    # reach this server headless.
     - role: tailscale
       tags: [tailscale]
+      vars:
+        tailscale_ssh: true
+
+    # Always-on server infrastructure.
+    - role: server
+      tags: [server]
+
+    - role: colima
+      tags: [colima]
+
+    - role: onepassword
+      tags: [onepassword]

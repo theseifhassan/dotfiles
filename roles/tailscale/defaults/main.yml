@@ -1,0 +1,24 @@
+---
+# roles/tailscale/defaults/main.yml
+# Tailscale joins every machine to the tailnet. The server enables Tailscale
+# SSH and route acceptance so clients can reach it headless; clients just join.
+
+# Enable Tailscale SSH (host acts as an SSH target authenticated by the
+# tailnet — no separate sshd key management needed). Off by default; the
+# server playbook turns it on.
+tailscale_ssh: false
+
+# Accept subnet routes advertised by other nodes.
+tailscale_accept_routes: true
+
+# Friendly device name on the tailnet (MagicDNS hostname). Defaults to the
+# machine's LocalHostName, which the role looks up itself.
+tailscale_hostname: "{{ tailscale_local_hostname }}"
+
+# Optional reusable auth key for non-interactive login. Prefer storing this in
+# group_vars/all/vault.yml as `vault_tailscale_authkey` and referencing it here.
+# When empty, the role prints the interactive `tailscale up` command to run.
+tailscale_authkey: "{{ vault_tailscale_authkey | default('') }}"
+
+# Extra flags appended to `tailscale up` (e.g. "--advertise-exit-node").
+tailscale_extra_args: ""

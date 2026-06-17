@@ -1,0 +1,46 @@
+---
+# roles/colima/tasks/main.yml
+# Server-only. Installs a headless Docker runtime via Colima plus the docker
+# CLI and compose plugin, sizes the VM, and enables boot autostart.
+
+- name: Install Colima and Docker CLI tooling via Homebrew
+  community.general.homebrew:
+    name:
+      - colima
+      - docker
+      - docker-compose
+    state: latest
+
+- name: Check Colima status
+  ansible.builtin.command:
+    cmd: colima status
+  register: colima_status
+  changed_when: false
+  failed_when: false
+  check_mode: false # read-only probe; must run even during --check
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+- name: Start Colima with configured resources
+  ansible.builtin.command:
+    cmd: >-
+      colima start
+      --cpu {{ colima_cpu }}
+      --memory {{ colima_memory }}
+      --disk {{ colima_disk }}
+      --vm-type {{ colima_vm_type }}
+      --mount-type {{ colima_mount_type }}
+  register: colima_start
+  changed_when: "'done' in colima_start.stdout or 'starting' in colima_start.stdout"
+  when: "'Running' not in colima_status.stderr and 'Running' not in colima_status.stdout"
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+- name: Enable Colima autostart on boot via brew services
+  ansible.builtin.command:
+    cmd: brew services start colima
+  register: colima_service
+  changed_when: "'already started' not in colima_service.stdout"
+  when: colima_autostart | bool
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"

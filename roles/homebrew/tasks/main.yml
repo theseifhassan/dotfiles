@@ -4,6 +4,7 @@
   register: brew_check
   changed_when: false
   failed_when: false
+  check_mode: false # read-only probe; must run even during --check
   environment:
     PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
 

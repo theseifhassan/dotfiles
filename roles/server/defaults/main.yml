@@ -1,0 +1,20 @@
+---
+# roles/server/defaults/main.yml
+# Sleep prevention for a headless Mac mini dev server.
+#
+# NOTE: power-on after a power failure is handled by the macOS native setting
+# "Start up automatically after a power failure", so this role does NOT manage
+# autorestart. Caveat: with FileVault on, the mini boots to the locked login
+# screen after a power loss and stays unreachable until it's unlocked once.
+
+# Minutes of idle before the *display* sleeps (the system itself never sleeps).
+# 0 keeps the display awake too.
+server_display_sleep_minutes: 10
+
+# Desired pmset settings applied on AC power. Keys map to `pmset` options.
+server_power_settings:
+  sleep: 0 # never sleep the system
+  disksleep: 0 # never spin down disks
+  powernap: 0 # no Power Nap wake cycles
+  standby: 0 # no standby (deep sleep)
+  autopoweroff: 0 # no auto power off
