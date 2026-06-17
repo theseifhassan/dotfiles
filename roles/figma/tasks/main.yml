@@ -1,0 +1,8 @@
+---
+# roles/figma/tasks/main.yml
+# Installs Figma via Homebrew cask.
+
+- name: Install Figma
+  community.general.homebrew_cask:
+    name: figma
+    state: latest

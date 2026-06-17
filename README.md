@@ -5,22 +5,32 @@ Ansible-based macOS dotfiles.
 ## Quick Start
 
 ```bash
-# Fresh machine
+# Fresh machine (full setup)
 ./bootstrap.sh
 
+# Fresh thin client (SSH/git/editor essentials only)
+./bootstrap.sh playbook-slim.yml
+
 # Re-run (all roles)
-ansible-playbook playbook.yml --ask-vault-pass
+ansible-playbook playbook-default.yml --ask-vault-pass
 
 # Single role
-ansible-playbook playbook.yml -t claude --ask-vault-pass
+ansible-playbook playbook-default.yml -t claude --ask-vault-pass
 ```
+
+## Playbooks
+
+| Playbook | Use case |
+|----------|----------|
+| `playbook-default.yml` | Full workstation setup (all roles) |
+| `playbook-slim.yml` | Thin clients that mostly connect to remote servers: `ssh`, `git` (core only, no `gh`/Graphite), `1password`, `slack`, `datagrip`, `figma`, `linear`, `discord`, `claude`, `zed`, `gather`, `obs`, `wispr-flow`, `fonts` (+ `xdg`/`homebrew`, and `zsh` via `claude`) |
 
 ## Roles
 
 | Role | What it does |
 |------|-------------|
 | ssh | SSH keys + host aliases |
-| git | Git config with `includeIf`, GitHub CLI, Graphite CLI |
+| git | Git config with `includeIf`; GitHub CLI + Graphite CLI (skip via `git_install_extras: false`) |
 | zsh | Zsh config under `ZDOTDIR` |
 | starship | Minimal prompt |
 | mise | Per-project tool/env management |
@@ -29,9 +39,17 @@ ansible-playbook playbook.yml -t claude --ask-vault-pass
 | tmux | Terminal multiplexer + tmux-sessionizer |
 | neovim | Neovim (tool only, no config) |
 | claude | Claude Code |
+| 1password | 1Password + 1Password CLI |
+| slack | Slack |
+| datagrip | DataGrip |
+| figma | Figma |
+| linear | Linear |
+| discord | Discord |
 | zed | Zed editor |
 | aerospace | Tiling window manager |
 | apps | Homebrew casks and CLI tools |
+| gather | Gather Town (from official DMG) |
+| wispr-flow | Wispr Flow voice-to-text (from official DMG) |
 | obs | OBS Studio with DroidCam plugin |
 | fonts | Berkeley Mono from private repo |
 

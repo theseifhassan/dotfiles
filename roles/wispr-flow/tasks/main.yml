@@ -1,0 +1,46 @@
+---
+# roles/wispr-flow/tasks/main.yml
+# Installs Wispr Flow (voice-to-text dictation) from the official DMG release.
+
+- name: Check if Wispr Flow is installed
+  ansible.builtin.stat:
+    path: /Applications/Wispr Flow.app
+  register: wispr_flow_app
+
+- name: Install Wispr Flow from DMG
+  when: not wispr_flow_app.stat.exists
+  block:
+    - name: Download Wispr Flow DMG
+      ansible.builtin.get_url:
+        url: https://dl.wisprflow.ai/mac-apple/latest
+        dest: /tmp/wispr-flow.dmg
+        mode: "0644"
+
+    - name: Mount Wispr Flow DMG
+      ansible.builtin.command:
+        cmd: hdiutil attach /tmp/wispr-flow.dmg -nobrowse -mountpoint /tmp/wispr_flow_mount
+      changed_when: false
+
+    - name: Find Wispr Flow app bundle in mounted DMG
+      ansible.builtin.find:
+        paths: /tmp/wispr_flow_mount
+        patterns: "*.app"
+        file_type: directory
+      register: wispr_flow_bundle
+
+    - name: Copy Wispr Flow to Applications
+      ansible.builtin.command:
+        cmd: ditto "{{ wispr_flow_bundle.files[0].path }}" "/Applications/{{ wispr_flow_bundle.files[0].path | basename }}"
+      when: wispr_flow_bundle.matched > 0
+
+    - name: Remove quarantine flag from Wispr Flow
+      ansible.builtin.command:
+        cmd: xattr -rd com.apple.quarantine "/Applications/{{ wispr_flow_bundle.files[0].path | basename }}"
+      when: wispr_flow_bundle.matched > 0
+
+  always:
+    - name: Unmount Wispr Flow DMG
+      ansible.builtin.command:
+        cmd: hdiutil detach /tmp/wispr_flow_mount
+      changed_when: false
+      failed_when: false

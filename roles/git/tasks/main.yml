@@ -1,7 +1,8 @@
 ---
 # roles/git/tasks/main.yml
-# Installs Git, GitHub CLI, and Graphite CLI via Homebrew and deploys git
-# configs under XDG with includeIf directives for work/personal identity.
+# Installs Git via Homebrew and deploys git configs under XDG with includeIf
+# directives for work/personal identity. GitHub CLI + Graphite are installed
+# too unless git_install_extras is false (see defaults/main.yml).
 
 - name: Install git via Homebrew
   community.general.homebrew:
@@ -43,29 +44,32 @@
     dest: "{{ xdg_config_home }}/git/config-personal"
     mode: "0600"
 
-- name: Install gh via Homebrew
-  community.general.homebrew:
-    name: gh
-    state: latest
+- name: Install dev-workflow CLIs (GitHub CLI + Graphite)
+  when: git_install_extras | bool
+  block:
+    - name: Install gh via Homebrew
+      community.general.homebrew:
+        name: gh
+        state: latest
 
-- name: Tap withgraphite/tap Homebrew repository
-  community.general.homebrew_tap:
-    name: withgraphite/tap
-    state: present
+    - name: Tap withgraphite/tap Homebrew repository
+      community.general.homebrew_tap:
+        name: withgraphite/tap
+        state: present
 
-- name: Install Graphite CLI via Homebrew
-  community.general.homebrew:
-    name: withgraphite/tap/graphite
-    state: latest
+    - name: Install Graphite CLI via Homebrew
+      community.general.homebrew:
+        name: withgraphite/tap/graphite
+        state: latest
 
-- name: Create Graphite config directory
-  ansible.builtin.file:
-    path: "{{ xdg_config_home }}/graphite"
-    state: directory
-    mode: "0700"
+    - name: Create Graphite config directory
+      ansible.builtin.file:
+        path: "{{ xdg_config_home }}/graphite"
+        state: directory
+        mode: "0700"
 
-- name: Deploy Graphite user config
-  ansible.builtin.template:
-    src: graphite-user-config.json.j2
-    dest: "{{ xdg_config_home }}/graphite/user_config"
-    mode: "0600"
+    - name: Deploy Graphite user config
+      ansible.builtin.template:
+        src: graphite-user-config.json.j2
+        dest: "{{ xdg_config_home }}/graphite/user_config"
+        mode: "0600"

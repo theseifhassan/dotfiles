@@ -1,0 +1,8 @@
+---
+# roles/linear/tasks/main.yml
+# Installs Linear via Homebrew cask.
+
+- name: Install Linear
+  community.general.homebrew_cask:
+    name: linear-linear
+    state: latest
