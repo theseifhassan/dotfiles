@@ -10,15 +10,33 @@
       "args": [],
       "projects": [
         {
-          "paths": ["/Users/seifhassan/Projects/skydeo"],
+          "paths": [
+            "/Users/seifhassan/Projects/skydeo"
+          ]
         },
-      ],
+        {
+          "paths": [
+            "/home/seifhassan/Desktop/skydeo/./"
+          ]
+        }
+      ]
     },
     {
       "host": "macbook",
       "args": [],
-      "projects": [],
+      "projects": []
     },
+    {
+      "host": "forge",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/seifhassan/Desktop/learning/effect/./"
+          ]
+        }
+      ]
+    }
   ],
   "buffer_font_family": "Berkeley Mono",
   "buffer_font_size": 16,
