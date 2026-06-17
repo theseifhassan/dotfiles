@@ -21,6 +21,15 @@ function zle-keymap-select zle-line-init {
 zle -N zle-keymap-select
 zle -N zle-line-init
 
+# Prompt (native zsh): user@host:path [branch] $   ($ turns to !$ on error)
+setopt PROMPT_SUBST
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git:*' formats ' [%b]'
+zstyle ':vcs_info:git:*' actionformats ' [%b|%a]'
+precmd() { vcs_info }
+PROMPT='%n@%m:%~${vcs_info_msg_0_} %(?.$.!$) '
+
 autoload -Uz compinit
 () {
   local -a _zcompdump=("$XDG_CACHE_HOME/zsh/zcompdump"(N.mh+24))

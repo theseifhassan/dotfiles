@@ -51,17 +51,11 @@
     - role: zsh
       tags: [zsh]
 
-    - role: starship
-      tags: [starship]
-
     - role: mise
       tags: [mise]
 
     - role: fzf
       tags: [fzf]
-
-    - role: ghostty
-      tags: [ghostty]
 
     - role: tmux
       tags: [tmux]
@@ -74,9 +68,6 @@
 
     - role: zed
       tags: [zed]
-
-    - role: aerospace
-      tags: [aerospace]
 
     - role: 1password
       tags: [1password]

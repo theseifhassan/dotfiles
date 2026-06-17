@@ -2,31 +2,6 @@
 # roles/apps/tasks/main.yml
 # Installs applications via Homebrew (GUI casks and CLI tools).
 
-- name: Install Google Chrome
-  community.general.homebrew_cask:
-    name: google-chrome
-    state: latest
-
-- name: Install Obsidian
-  community.general.homebrew_cask:
-    name: obsidian
-    state: latest
-
-- name: Install Raycast
-  community.general.homebrew_cask:
-    name: raycast
-    state: latest
-
-- name: Install Alcove
-  community.general.homebrew_cask:
-    name: alcove
-    state: latest
-
-- name: Install Beads CLI
-  community.general.homebrew:
-    name: beads
-    state: latest
-
 - name: Install Lazygit
   community.general.homebrew:
     name: lazygit

@@ -31,11 +31,9 @@ ansible-playbook playbook-default.yml -t claude --ask-vault-pass
 |------|-------------|
 | ssh | SSH keys + host aliases |
 | git | Git config with `includeIf`; GitHub CLI + Graphite CLI (skip via `git_install_extras: false`) |
-| zsh | Zsh config under `ZDOTDIR` |
-| starship | Minimal prompt |
+| zsh | Zsh config under `ZDOTDIR` (vi mode + native prompt) |
 | mise | Per-project tool/env management |
 | fzf | Fuzzy finder, fzf-tab completions, history search |
-| ghostty | Terminal emulator |
 | tmux | Terminal multiplexer + tmux-sessionizer |
 | neovim | Neovim (tool only, no config) |
 | claude | Claude Code |
@@ -46,8 +44,7 @@ ansible-playbook playbook-default.yml -t claude --ask-vault-pass
 | linear | Linear |
 | discord | Discord |
 | zed | Zed editor |
-| aerospace | Tiling window manager |
-| apps | Homebrew casks and CLI tools |
+| apps | Lazygit (and other Homebrew CLI tools / casks) |
 | gather | Gather Town (from official DMG) |
 | wispr-flow | Wispr Flow voice-to-text (from official DMG) |
 | obs | OBS Studio with DroidCam plugin |

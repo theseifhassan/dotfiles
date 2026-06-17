@@ -22,6 +22,14 @@
     state: directory
     mode: "0700"
 
+- name: Remove stale starship artifacts (prompt is now native zsh)
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ xdg_config_home }}/zsh/conf.d/starship.zsh"
+    - "{{ xdg_config_home }}/starship.toml"
+
 - name: Create ZDOTDIR redirect in ~/.zshenv
   ansible.builtin.copy:
     content: |
