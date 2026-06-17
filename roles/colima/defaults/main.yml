@@ -1,0 +1,16 @@
+---
+# roles/colima/defaults/main.yml
+# Colima provides a headless Docker runtime (no Docker Desktop GUI login
+# required) with a real Docker socket, so docker/docker-compose and Docker-aware
+# tooling (DataGrip, testcontainers, dev containers) work zero-config.
+#
+# On macOS this still runs a Linux VM, so the RAM footprint is the VM size
+# below — keep it modest on a 16 GB Mac mini so macOS and the Claude-native
+# stack (Cowork, Claude Code, Channels) have room. Start heavy DBs on demand.
+
+colima_cpu: 4 # vCPUs allocated to the Linux VM
+colima_memory: 6 # GiB of RAM allocated to the VM (~6 of 16)
+colima_disk: 60 # GiB virtual disk
+colima_vm_type: vz # Apple Virtualization framework (Apple Silicon native)
+colima_mount_type: virtiofs # fast bind mounts on vz
+colima_autostart: true # start Colima on boot via brew services

@@ -1,0 +1,7 @@
+# Personal profile env — appended by `mise run init <preset>` (default profile).
+# Secrets resolve from 1Password at runtime; adjust the op:// paths to your
+# personal vault/item names (`op item list`).
+[env]
+GRAPHITE_PROFILE = "personal"
+GH_TOKEN = "{{ exec(command='op read op://Personal/GitHub/token') }}"
+GREPTILE_API_KEY = "{{ exec(command='op read op://Personal/Greptile/api_key') }}"

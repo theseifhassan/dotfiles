@@ -21,6 +21,13 @@
     state: link
     force: true
 
+- name: Deploy mise project presets
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/presets"
+    dest: "{{ xdg_config_home }}/mise/presets"
+    state: link
+    force: true
+
 - name: Deploy mise activation to zsh
   ansible.builtin.copy:
     content: |

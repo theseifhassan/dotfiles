@@ -1,2 +1,51 @@
 # mise configuration — global defaults
-# Per-project tool versions are managed via .mise.toml files in project directories.
+# Per-project tool versions are managed via project mise.toml files.
+#
+# Reuse strategy (no hand-copied config):
+#   - Toolchain (node/pnpm/tasks) lives in presets/<name>.toml — identical
+#     across work and personal projects.
+#   - Profile-varying env vars (GH_TOKEN, GREPTILE_API_KEY, GRAPHITE_PROFILE)
+#     live in presets/_env-work.toml and presets/_env-personal.toml.
+#   - `mise run init <preset> [profile]` stamps the chosen toolchain + profile
+#     into a project's mise.toml. Profile defaults to "personal" (matching the
+#     git role, where work = ~/Desktop/sky* and personal is the default).
+
+[tasks.init]
+description = "Scaffold ./mise.toml from a preset, e.g. `mise run init node` (profile auto-detected from the git remote; pass work|personal to override)"
+run = """
+set -e
+preset="{{arg(name='preset', default='node')}}"
+profile="{{arg(name='profile', default='auto')}}"
+dir="$HOME/.config/mise/presets"
+
+# Auto-detect the profile from the git remote, mirroring the git role's
+# work.github.com signal. Falls back to personal (no remote / not work).
+if [ "$profile" = "auto" ]; then
+  url="$(git remote get-url origin 2>/dev/null || true)"
+  [ -z "$url" ] && url="$(git config --get-regexp 'remote\\..*\\.url' 2>/dev/null | head -n1 | awk '{print $2}')"
+  case "$url" in
+    *work.github.com*) profile=work ;;
+    *) profile=personal ;;
+  esac
+fi
+
+tools="$dir/$preset.toml"
+env="$dir/_env-$profile.toml"
+if [ ! -f "$tools" ]; then
+  echo "Unknown preset '$preset'. Available:"
+  ls "$dir" | grep -v '^_' | sed 's/\\.toml$//'
+  exit 1
+fi
+if [ ! -f "$env" ]; then
+  echo "Unknown profile '$profile' (expected: work | personal)."
+  exit 1
+fi
+if [ -f ./mise.toml ]; then
+  echo "./mise.toml already exists — refusing to overwrite."
+  exit 1
+fi
+{ cat "$tools"; echo; cat "$env"; } > ./mise.toml
+mise trust ./mise.toml
+mise install
+echo "Created ./mise.toml from preset '$preset' (profile: $profile)."
+"""

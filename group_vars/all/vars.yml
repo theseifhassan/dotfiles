@@ -8,6 +8,11 @@ xdg_data_home: "{{ ansible_facts['user_dir'] }}/.local/share"
 xdg_cache_home: "{{ ansible_facts['user_dir'] }}/.cache"
 xdg_state_home: "{{ ansible_facts['user_dir'] }}/.local/state"
 
+# Privilege escalation for become tasks (the tailscale/server roles run some
+# steps as root). Pulled from the vault so a single --ask-vault-pass run also
+# satisfies sudo — no separate --ask-become-pass prompt needed.
+ansible_become_password: "{{ vault_sudo_password }}"
+
 git_identity:
   work:
     name: "Seif Hassan"
@@ -19,6 +24,14 @@ git_identity:
     email: "theseifhassan@gmail.com"
     signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPalbjJuNDXybI6YhqhYTbXT4Jc+wLUH2PYoTIJ8YPH5"
     signing_format: "ssh"
+
+# Git applies the work identity to any repo whose remote URL matches one of
+# these globs (via `includeIf "hasconfig:remote.*.url:..."`). This keys off the
+# work SSH host alias, so work repos are detected regardless of folder or name.
+# Add more patterns here if work repos use other hosts/orgs (e.g. an https org
+# remote like "https://github.com/skydeo/**").
+git_work_remote_globs:
+  - "git@work.github.com:**"
 
 fonts_repo: "git@github.com:theseifhassan/fonts.git"
 # Optional overrides (defaults shown):

@@ -29,6 +29,7 @@
     cmd: scutil --get LocalHostName
   register: hostname_result
   changed_when: false
+  check_mode: false # read-only probe; must run even during --check
 
 - name: Set machine hostname fact
   ansible.builtin.set_fact:
