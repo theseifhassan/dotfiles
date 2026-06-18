@@ -1,0 +1,21 @@
+---
+# roles/ghostty/tasks/main.yml
+# Installs Ghostty terminal emulator and deploys its configuration file.
+
+- name: Install Ghostty
+  community.general.homebrew_cask:
+    name: ghostty
+    state: latest
+
+- name: Create Ghostty config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/ghostty"
+    state: directory
+    mode: "0700"
+
+- name: Deploy Ghostty config
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/config"
+    dest: "{{ xdg_config_home }}/ghostty/config"
+    state: link
+    force: true

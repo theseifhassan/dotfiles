@@ -1,0 +1,5 @@
+---
+# roles/raycast/defaults/main.yml
+# Raycast is installed from the official Beta DMG (not the stable Homebrew
+# cask). Bump this URL to upgrade to a newer beta build.
+raycast_dmg_url: "https://x-r2.raycast-releases.com/Raycast_Beta_0.65.1.0_66eacbc22e_arm64.dmg"

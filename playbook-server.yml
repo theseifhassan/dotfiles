@@ -57,6 +57,9 @@
     - role: fzf
       tags: [fzf]
 
+    - role: ghostty
+      tags: [ghostty]
+
     - role: tmux
       tags: [tmux]
 
@@ -95,6 +98,9 @@
 
     - role: wispr-flow
       tags: [wispr-flow]
+
+    - role: raycast
+      tags: [raycast]
 
     - role: obs
       tags: [obs]

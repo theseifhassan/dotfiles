@@ -34,6 +34,7 @@ ansible-playbook playbook-default.yml -t claude --ask-vault-pass
 | zsh | Zsh config under `ZDOTDIR` (vi mode + native prompt) |
 | mise | Per-project tool/env management |
 | fzf | Fuzzy finder, fzf-tab completions, history search |
+| ghostty | Terminal emulator |
 | tmux | Terminal multiplexer + tmux-sessionizer |
 | neovim | Neovim (tool only, no config) |
 | claude | Claude Code |
@@ -44,9 +45,10 @@ ansible-playbook playbook-default.yml -t claude --ask-vault-pass
 | linear | Linear |
 | discord | Discord |
 | zed | Zed editor |
-| apps | Lazygit (and other Homebrew CLI tools / casks) |
+| apps | Homebrew casks and CLI tools (Google Chrome, Lazygit) |
 | gather | Gather Town (from official DMG) |
 | wispr-flow | Wispr Flow voice-to-text (from official DMG) |
+| raycast | Raycast Beta (from official DMG) |
 | obs | OBS Studio with DroidCam plugin |
 | fonts | Berkeley Mono from private repo |
 | tailscale | Headless `tailscaled` system daemon (joins the tailnet) |

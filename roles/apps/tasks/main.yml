@@ -2,6 +2,11 @@
 # roles/apps/tasks/main.yml
 # Installs applications via Homebrew (GUI casks and CLI tools).
 
+- name: Install Google Chrome
+  community.general.homebrew_cask:
+    name: google-chrome
+    state: latest
+
 - name: Install Lazygit
   community.general.homebrew:
     name: lazygit
