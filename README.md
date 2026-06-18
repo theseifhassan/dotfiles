@@ -23,7 +23,7 @@ ansible-playbook playbook-default.yml -t claude --ask-vault-pass
 | Playbook | Use case |
 |----------|----------|
 | `playbook-default.yml` | Full workstation setup (all roles) |
-| `playbook-slim.yml` | Thin clients that mostly connect to remote servers: `ssh`, `git` (core only, no `gh`/Graphite), `1password`, `slack`, `datagrip`, `figma`, `linear`, `discord`, `claude`, `zed`, `gather`, `obs`, `wispr-flow`, `fonts` (+ `xdg`/`homebrew`, and `zsh` via `claude`) |
+| `playbook-slim.yml` | Thin clients that mostly connect to remote servers: `ssh`, `git` (core only, no `gh`/Graphite), `1password`, `slack`, `datagrip`, `figma`, `linear`, `discord`, `claude`, `zed`, `gather`, `obs`, `wisprflow`, `fonts` (+ `xdg`/`homebrew`, and `zsh` via `claude`) |
 
 ## Roles
 
@@ -47,7 +47,7 @@ ansible-playbook playbook-default.yml -t claude --ask-vault-pass
 | zed | Zed editor |
 | apps | Homebrew casks and CLI tools (Google Chrome, Lazygit) |
 | gather | Gather Town (from official DMG) |
-| wispr-flow | Wispr Flow voice-to-text (from official DMG) |
+| wisprflow | Wispr Flow voice-to-text (from official DMG) |
 | raycast | Raycast Beta (from official DMG) |
 | obs | OBS Studio with DroidCam plugin |
 | fonts | Berkeley Mono from private repo |

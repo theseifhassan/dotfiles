@@ -96,8 +96,8 @@
     - role: gather
       tags: [gather]
 
-    - role: wispr-flow
-      tags: [wispr-flow]
+    - role: wisprflow
+      tags: [wisprflow]
 
     - role: raycast
       tags: [raycast]

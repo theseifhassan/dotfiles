@@ -1,5 +1,5 @@
 ---
-# roles/wispr-flow/tasks/main.yml
+# roles/wisprflow/tasks/main.yml
 # Installs Wispr Flow (voice-to-text dictation) from the official DMG release.
 
 - name: Check if Wispr Flow is installed

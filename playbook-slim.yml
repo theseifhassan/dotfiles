@@ -76,8 +76,8 @@
     - role: obs
       tags: [obs]
 
-    - role: wispr-flow
-      tags: [wispr-flow]
+    - role: wisprflow
+      tags: [wisprflow]
 
     - role: fonts
       tags: [fonts]
