@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# zed-term — per-project persistent tmux workspace for Zed terminals.
+#
+# Model: one tmux session GROUP per project (named after the project directory),
+# on a dedicated 'zed' socket. All of a project's terminals SHARE ONE WINDOW
+# LIST, so they behave as windows of a single project workspace — navigable from
+# any of them with prefix n/p/w. Each Zed terminal is pinned to its own window
+# via a grouped session, so tabs show different content without the mirroring /
+# size-fight that multiple clients on a plain shared session would cause.
+#
+#   - New terminal in a project    -> new window in that project's group.
+#   - Reopen after Zed/SSH restart  -> reattach to the project's detached windows.
+#   - Close a terminal while Zed is alive -> kill that window (clean up).
+#   - Quit Zed / connection drops   -> persist everything for reattach.
+#   - tmux can't start              -> plain shell fallback, never a dead terminal.
+#
+# Close vs. disconnect: tmux can't distinguish them (both are a client
+# detaching). We tell them apart heuristically — on detach we wait a short grace
+# and check whether any Zed client is still attached. Some clients still there =>
+# Zed is alive => you closed this one terminal => kill its window. Nothing left
+# => Zed quit or the link dropped => leave it detached for reattach.
+#
+# NB: `tmux -L zed ls` lists grouped session objects (proj, proj-2, …); each
+# independent live view needs a session, but they share one window list. Reach
+# them from a plain shell with `tmux -L zed attach -t <proj>`.
+#
+# Deliberately NO `set -e`: under it, a tmux command exiting non-zero aborts the
+# script, and since this runs as the login shell that closes the terminal (the
+# original crash). Errors are handled explicitly; the worst case is a shell.
+
+log() { printf '%s [%d] %s\n' "$(date '+%H:%M:%S')" "$$" "$*" >>"$HOME/.cache/zed-term.log" 2>/dev/null || true; }
+
+conf="$HOME/.config/tmux/zed.conf"
+tm=(tmux -L zed -f "$conf")
+
+# Project key = directory Zed opened the terminal in. Sanitize for tmux, whose
+# session names may not contain '.' or ':'.
+projdir="${ZED_WORKTREE_ROOT:-$PWD}"
+proj="$(basename "$projdir" 2>/dev/null)"
+proj="${proj//[^A-Za-z0-9_-]/_}"
+[ -n "$proj" ] || proj="zed"
+
+# Does session $1 belong to this project's group? "<proj>" or "<proj>-<N>".
+matches_proj() {
+  [ "$1" = "$proj" ] && return 0
+  case "$1" in "$proj"-*) [[ "${1##*-}" =~ ^[0-9]+$ ]] && return 0 ;; esac
+  return 1
+}
+
+snapshot() { "${tm[@]}" list-sessions -F '#{session_attached} #{session_name}' 2>/dev/null; }
+
+# First free <proj>[-N] session name (sets global $free).
+pick_free() {
+  free="$proj"; local i=2
+  while "${tm[@]}" has-session -t "$free" 2>/dev/null; do free="$proj-$i"; i=$((i + 1)); done
+}
+
+# Reattach target: first detached session for this project, if any.
+orphan=""
+while read -r attached name; do
+  if [ "$attached" = 0 ] && matches_proj "$name"; then orphan="$name"; break; fi
+done < <(snapshot)
+
+log "start proj=$proj orphan=${orphan:-none}"
+
+# Prepare the session DETACHED (so we can record our window and arm the close
+# handler before the blocking attach). Sets $sess and $win; returns non-zero if
+# tmux can't be driven at all.
+sess=""; win=""
+prepare() {
+  if [ -n "$orphan" ]; then
+    sess="$orphan"
+  else
+    local tries=0 ok=1 anchor
+    while [ "$ok" != 0 ] && [ "$tries" -lt 5 ]; do
+      anchor=""
+      while read -r a n; do matches_proj "$n" && anchor="$n"; done < <(snapshot)
+      pick_free
+      if [ -n "$anchor" ]; then
+        log "join group via $anchor as $free + new window (try $tries)"
+        "${tm[@]}" new-session -d -t "$anchor" -s "$free" \; new-window -c "$projdir"; ok=$?
+      else
+        log "create base session $free (try $tries)"
+        "${tm[@]}" new-session -d -c "$projdir" -s "$free"; ok=$?
+      fi
+      tries=$((tries + 1))
+    done
+    [ "$ok" = 0 ] || return 1
+    sess="$free"
+  fi
+  # The window this terminal owns (its session's current window).
+  win="$("${tm[@]}" display-message -p -t "$sess" '#{window_id}' 2>/dev/null)"
+  return 0
+}
+
+if ! prepare; then
+  log "tmux unavailable — falling back to plain shell"
+  exec env ZED_TERM_NO_TMUX=1 "${SHELL:-/bin/zsh}"
+fi
+
+# Close handler: fires on SIGHUP (terminal closed or connection dropped). Wait a
+# grace, then decide: any Zed client still attached => deliberate close => kill
+# our window + view; otherwise => mass detach (quit/drop) => persist.
+closed=0
+on_hup() {
+  [ "$closed" = 1 ] && return; closed=1
+  sleep 2
+  local n; n="$("${tm[@]}" list-clients 2>/dev/null | grep -c .)"
+  if [ "${n:-0}" -gt 0 ]; then
+    log "close while Zed alive (${n} client(s)) -> kill window $win + session $sess"
+    [ -n "$win" ] && "${tm[@]}" kill-window -t "$win" 2>/dev/null
+    "${tm[@]}" kill-session -t "$sess" 2>/dev/null
+  else
+    log "mass detach -> persist $sess for reattach"
+  fi
+}
+trap on_hup HUP
+
+log "attach $sess (window $win)"
+"${tm[@]}" attach-session -t "$sess"
+
+# Reached on a clean detach (prefix-d), session end, or after the HUP handler
+# ran — nothing more to do; let the terminal close.
+exit 0
