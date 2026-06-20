@@ -1,0 +1,6 @@
+---
+# roles/dmg/defaults/main.yml
+# Raycast is installed from the official Beta DMG (not the stable Homebrew
+# cask). Unlike Gather/Wispr Flow (which fetch a "latest" URL), this is pinned
+# to a specific build — bump it to upgrade, then delete the old app and re-run.
+raycast_dmg_url: "https://x-r2.raycast-releases.com/Raycast_Beta_0.65.1.0_66eacbc22e_arm64.dmg"

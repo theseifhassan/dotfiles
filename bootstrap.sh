@@ -3,9 +3,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-# Optional playbook argument (defaults to the full playbook).
-# Use the slim profile for thin clients, e.g.: ./bootstrap.sh playbook-slim.yml
-PLAYBOOK="${1:-playbook-default.yml}"
+# Optional playbook argument (defaults to the dev-server profile — the primary
+# workstation). Use the thin profile for thin clients, e.g.:
+#   ./bootstrap.sh playbook-thin.yml
+PLAYBOOK="${1:-playbook-server.yml}"
 
 echo "==> Starting dotfiles bootstrap ($PLAYBOOK)..."
 
