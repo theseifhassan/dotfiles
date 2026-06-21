@@ -1,5 +1,41 @@
 ---
+# roles/neovim/tasks/main.yml
+# Installs Neovim (0.12+) and our owned config, plus the language servers and
+# formatters the config enables. We deliberately do NOT use Mason — standalone
+# binaries come from Homebrew, and the Node-based servers are declared in the
+# mise global config (see the `mise` role's config.toml) and realized here with
+# `mise install`. Neovim wires them up with the native vim.lsp API. Server
+# profile only.
+
 - name: Install Neovim
   community.general.homebrew:
     name: neovim
+    state: latest
+
+- name: Install Neovim toolchain + standalone language servers (brew)
+  community.general.homebrew:
+    name:
+      - tree-sitter-cli # `tree-sitter` CLI to compile parsers (nvim-treesitter main); NOT the lib-only `tree-sitter` formula
+      - lua-language-server # lua_ls
+      - marksman # markdown LSP
+      - stylua # lua formatter
     state: present
+
+# Realize the global mise tools (node + the Node-based language servers and
+# formatters declared in the mise role's config.toml). `mise install` is
+# idempotent and, unlike `mise use`, does NOT rewrite the (symlinked, tracked)
+# config file.
+- name: Install global mise tools (Node language servers + formatters)
+  ansible.builtin.command:
+    cmd: mise install
+  register: mise_install
+  changed_when: "'install' in (mise_install.stderr | default('') | lower)"
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+- name: Symlink Neovim config into place
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/nvim"
+    dest: "{{ xdg_config_home }}/nvim"
+    state: link
+    force: true

@@ -36,7 +36,7 @@ ansible-playbook playbook-server.yml -t claude --ask-vault-pass
 | fzf | Fuzzy finder, fzf-tab completions, history search |
 | ghostty | Terminal emulator |
 | tmux | Terminal multiplexer + tmux-sessionizer |
-| neovim | Neovim (tool only, no config) |
+| neovim | Neovim 0.12 + owned config (vim.pack, native LSP, native completion); installs language servers via brew + mise npm backend (no Mason) |
 | claude | Claude Code |
 | 1password | 1Password app + `op` CLI; on the server (`op_headless: true`) also deploys a service-account token for headless `op read` (tag `op`) |
 | zed | Zed editor |
