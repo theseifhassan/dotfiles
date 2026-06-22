@@ -3,8 +3,9 @@ local o = vim.opt
 
 o.number = true
 o.relativenumber = true
-o.signcolumn = 'yes'
+o.signcolumn = "yes"
 o.cursorline = true
+o.colorcolumn = "80"
 o.scrolloff = 8
 o.wrap = false
 
@@ -24,8 +25,8 @@ o.incsearch = true
 -- Behaviour.
 o.undofile = true
 o.swapfile = false
-o.clipboard = 'unnamedplus'
-o.mouse = 'a'
+o.clipboard = "unnamedplus"
+o.mouse = "a"
 o.splitright = true
 o.splitbelow = true
 o.termguicolors = true
@@ -34,8 +35,8 @@ o.timeoutlen = 400
 o.confirm = true
 
 -- Floating-window borders for hover / signature / diagnostics (0.11+).
-o.winborder = 'rounded'
+o.winborder = "rounded"
 
 -- Native completion (Neovim 0.12) — driven by the LSP, no completion plugin.
-o.completeopt = 'menu,menuone,noselect,fuzzy,popup'
+o.completeopt = "menu,menuone,noselect,fuzzy,popup"
 o.pumheight = 12
