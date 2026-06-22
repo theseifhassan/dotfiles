@@ -1,0 +1,54 @@
+---
+# roles/dmg/tasks/install.yml
+# Generic "install a .app from an official DMG" routine. Included once per app
+# by main.yml with these vars:
+#   dmg_name  : human-readable app name (used in task names + temp paths)
+#   dmg_app   : absolute path of the installed bundle (the idempotency guard)
+#   dmg_url   : DMG download URL
+#   dmg_slug  : filesystem-safe token for temp file/mount paths
+#
+# Steps: stat (skip if installed) -> download -> mount -> copy *.app ->
+# de-quarantine -> unmount (always, even on failure).
+
+- name: "Check if {{ dmg_name }} is installed"
+  ansible.builtin.stat:
+    path: "{{ dmg_app }}"
+  register: dmg_installed
+
+- name: "Install {{ dmg_name }} from DMG"
+  when: not dmg_installed.stat.exists
+  block:
+    - name: "Download {{ dmg_name }} DMG"
+      ansible.builtin.get_url:
+        url: "{{ dmg_url }}"
+        dest: "/tmp/{{ dmg_slug }}.dmg"
+        mode: "0644"
+
+    - name: "Mount {{ dmg_name }} DMG"
+      ansible.builtin.command:
+        cmd: "hdiutil attach /tmp/{{ dmg_slug }}.dmg -nobrowse -mountpoint /tmp/{{ dmg_slug }}_mount"
+      changed_when: false
+
+    - name: "Find {{ dmg_name }} app bundle in mounted DMG"
+      ansible.builtin.find:
+        paths: "/tmp/{{ dmg_slug }}_mount"
+        patterns: "*.app"
+        file_type: directory
+      register: dmg_bundle
+
+    - name: "Copy {{ dmg_name }} to Applications"
+      ansible.builtin.command:
+        cmd: 'ditto "{{ dmg_bundle.files[0].path }}" "/Applications/{{ dmg_bundle.files[0].path | basename }}"'
+      when: dmg_bundle.matched > 0
+
+    - name: "Remove quarantine flag from {{ dmg_name }}"
+      ansible.builtin.command:
+        cmd: 'xattr -rd com.apple.quarantine "/Applications/{{ dmg_bundle.files[0].path | basename }}"'
+      when: dmg_bundle.matched > 0
+
+  always:
+    - name: "Unmount {{ dmg_name }} DMG"
+      ansible.builtin.command:
+        cmd: "hdiutil detach /tmp/{{ dmg_slug }}_mount"
+      changed_when: false
+      failed_when: false

@@ -1,8 +1,0 @@
----
-# roles/slack/tasks/main.yml
-# Installs Slack via Homebrew cask.
-
-- name: Install Slack
-  community.general.homebrew_cask:
-    name: slack
-    state: latest

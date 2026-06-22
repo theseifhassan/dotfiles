@@ -1,13 +1,15 @@
 ---
 # roles/apps/tasks/main.yml
-# Installs applications via Homebrew (GUI casks and CLI tools).
-
-- name: Install Google Chrome
-  community.general.homebrew_cask:
-    name: google-chrome
-    state: latest
+# Server-only developer CLI tools installed via Homebrew. GUI apps live in
+# their own roles (chrome, zed, slack, ...); this role is just the loose CLIs
+# that don't warrant a role of their own.
 
 - name: Install Lazygit
   community.general.homebrew:
     name: lazygit
+    state: latest
+
+- name: Install ripgrep
+  community.general.homebrew:
+    name: ripgrep
     state: latest

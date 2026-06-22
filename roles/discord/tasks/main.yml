@@ -1,8 +1,0 @@
----
-# roles/discord/tasks/main.yml
-# Installs Discord via Homebrew cask.
-
-- name: Install Discord
-  community.general.homebrew_cask:
-    name: discord
-    state: latest

@@ -2,28 +2,28 @@
 
 Ansible-based macOS dotfiles.
 
+Two machine profiles:
+
+- **Dev server** (`playbook-server.yml`) — the always-on Mac mini, the primary
+  workstation. Full developer toolchain + GUI apps + server infrastructure.
+- **Thin client** (`playbook-thin.yml`) — a MacBook that connects to the dev
+  server over Tailscale SSH. GUI apps and Claude Code only, no dev toolchain.
+
 ## Quick Start
 
 ```bash
-# Fresh machine (full setup)
+# Dev server (default)
 ./bootstrap.sh
 
-# Fresh thin client (SSH/git/editor essentials only)
-./bootstrap.sh playbook-slim.yml
+# Thin client
+./bootstrap.sh playbook-thin.yml
 
 # Re-run (all roles)
-ansible-playbook playbook-default.yml --ask-vault-pass
+ansible-playbook playbook-server.yml --ask-vault-pass
 
 # Single role
-ansible-playbook playbook-default.yml -t claude --ask-vault-pass
+ansible-playbook playbook-server.yml -t claude --ask-vault-pass
 ```
-
-## Playbooks
-
-| Playbook | Use case |
-|----------|----------|
-| `playbook-default.yml` | Full workstation setup (all roles) |
-| `playbook-slim.yml` | Thin clients that mostly connect to remote servers: `ssh`, `git` (core only, no `gh`/Graphite), `1password`, `slack`, `datagrip`, `figma`, `linear`, `discord`, `claude`, `zed`, `gather`, `obs`, `wisprflow`, `fonts` (+ `xdg`/`homebrew`, and `zsh` via `claude`) |
 
 ## Roles
 
@@ -36,25 +36,18 @@ ansible-playbook playbook-default.yml -t claude --ask-vault-pass
 | fzf | Fuzzy finder, fzf-tab completions, history search |
 | ghostty | Terminal emulator |
 | tmux | Terminal multiplexer + tmux-sessionizer |
-| neovim | Neovim (tool only, no config) |
+| neovim | Neovim 0.12 + owned config (vim.pack, native LSP, native completion); installs language servers via brew + mise npm backend (no Mason) |
 | claude | Claude Code |
-| 1password | 1Password + 1Password CLI |
-| slack | Slack |
-| datagrip | DataGrip |
-| figma | Figma |
-| linear | Linear |
-| discord | Discord |
+| 1password | 1Password app + `op` CLI; on the server (`op_headless: true`) also deploys a service-account token for headless `op read` (tag `op`) |
 | zed | Zed editor |
-| apps | Homebrew casks and CLI tools (Google Chrome, Lazygit) |
-| gather | Gather Town (from official DMG) |
-| wisprflow | Wispr Flow voice-to-text (from official DMG) |
-| raycast | Raycast Beta (from official DMG) |
+| casks | Trivial single-cask GUI apps (Chrome, Notion, Slack, Figma, Linear, Discord, DataGrip); each task is tagged, so `-t slack` targets one and `-t casks` runs all |
+| apps | Loose developer CLIs with no role of their own (Lazygit, ripgrep) — server only |
+| dmg | GUI apps installed from official DMGs (Gather Town, Wispr Flow, Raycast Beta); shared install logic, each tagged — `-t raycast` targets one, `-t dmg` runs all |
 | obs | OBS Studio with DroidCam plugin |
 | fonts | Berkeley Mono from private repo |
 | tailscale | Headless `tailscaled` system daemon (joins the tailnet) |
 | server | Sleep prevention for an always-on host (server playbook only) |
 | colima | Headless Docker runtime via Colima (server playbook only) |
-| onepassword | Headless `op` via 1Password service-account token (server playbook only) |
 
 Foundation roles (`xdg`, `homebrew`) are pulled in automatically via role dependencies.
 
@@ -65,14 +58,15 @@ Pick the playbook that matches the machine (pass it to `bootstrap.sh`, or run
 
 | Playbook | For | What it provisions |
 |----------|-----|--------------------|
-| `playbook-default.yml` | Primary dev Mac (default) | Full toolchain + apps, plus `tailscale` to join the tailnet |
-| `playbook-slim.yml` | Thin clients (e.g. MacBook) | Essentials only — core git (no gh/Graphite), key apps, and `tailscale` |
-| `playbook-server.yml` | Always-on dev server (Mac mini) | Everything in default **plus** server roles: Tailscale SSH, sleep prevention, Colima, headless `op` |
+| `playbook-server.yml` | Always-on dev server (Mac mini), the primary workstation | Full developer toolchain (Claude Code, Ghostty, Lazygit, mise, Neovim, gh, Graphite, 1Password CLI, fzf, ripgrep, tmux, Colima) + GUI apps, **plus** server roles: Tailscale SSH, sleep prevention, Colima, headless `op` |
+| `playbook-thin.yml` | Thin clients (e.g. MacBook) | GUI apps + Claude Code only — no dev toolchain. Keeps `ssh`, core `git` (no gh/Graphite), and `tailscale` to reach the server |
+
+GUI apps on both profiles: Google Chrome, Raycast Beta, Slack, Gather, Figma,
+Linear, Notion, 1Password, Wispr Flow, Zed, DataGrip, Discord, OBS.
 
 ```bash
-./bootstrap.sh                       # playbook-default.yml
-./bootstrap.sh playbook-slim.yml     # thin client
-./bootstrap.sh playbook-server.yml   # dev server
+./bootstrap.sh                       # playbook-server.yml (default)
+./bootstrap.sh playbook-thin.yml     # thin client
 ```
 
 The server playbook's roles touch system settings and need sudo;

@@ -49,3 +49,18 @@ mise trust ./mise.toml
 mise install
 echo "Created ./mise.toml from preset '$preset' (profile: $profile)."
 """
+
+# Global tools. The Node-based language servers + formatters here are consumed
+# by Neovim (the `neovim` role enables them via the native vim.lsp API and
+# conform.nvim). They live in the global mise config — rather than being
+# installed imperatively — so the declaration is version-controlled and `mise
+# install` realizes them without rewriting this file. `node` provides the
+# runtime for mise's npm backend.
+[tools]
+node = "lts"
+"npm:@vtsls/language-server" = "latest"        # ts/js LSP (vtsls)
+"npm:vscode-langservers-extracted" = "latest"  # eslint LSP (vscode-eslint-language-server)
+"npm:yaml-language-server" = "latest"          # yaml LSP (yamlls)
+"npm:@biomejs/biome" = "latest"                # formatter — code (js/ts/jsx/tsx/json/css)
+"npm:prettier" = "latest"                       # formatter — yaml + markdown only (biome covers code)
+"npm:@fsouza/prettierd" = "latest"             # prettier daemon (fast)

@@ -1,12 +1,14 @@
 ---
 # playbook-server.yml
-# Provisioning for the always-on dev server (Mac mini). Runs the full default
-# role set, then layers on the server-specific roles:
+# Provisioning for the always-on dev server (Mac mini) — the primary
+# workstation. Runs the full developer toolchain plus GUI apps, then layers on
+# the server-specific roles:
 #   - tailscale  : joins the tailnet AND advertises Tailscale SSH so clients
 #                  can reach it headless
 #   - server     : sleep prevention (never sleeps, disks never spin down)
 #   - colima     : headless Docker runtime
-#   - onepassword: headless `op` via a 1Password service-account token
+# It also enables headless `op` on the 1password role (op_headless: true) so
+# `op read` works over SSH via a service-account token.
 #
 # Server roles touch system settings and need sudo; ansible_become_password is
 # wired from vault_sudo_password (group_vars), so --ask-vault-pass is enough.
@@ -72,35 +74,27 @@
     - role: zed
       tags: [zed]
 
+    # Headless `op` enabled here so `op read` works over SSH (service-account
+    # token); the desktop app + CLI install on every profile.
     - role: 1password
       tags: [1password]
+      vars:
+        op_headless: true
 
-    - role: slack
-      tags: [slack]
+    # Trivial single-cask GUI apps (chrome, notion, slack, figma, linear,
+    # discord, datagrip). Each task is individually tagged, so `-t slack` still
+    # targets one app; `-t casks` runs them all.
+    - role: casks
+      tags: [casks]
 
-    - role: datagrip
-      tags: [datagrip]
-
-    - role: figma
-      tags: [figma]
-
-    - role: linear
-      tags: [linear]
-
-    - role: discord
-      tags: [discord]
-
+    # Loose developer CLIs (lazygit, ripgrep) with no role of their own.
     - role: apps
       tags: [apps]
 
-    - role: gather
-      tags: [gather]
-
-    - role: wisprflow
-      tags: [wisprflow]
-
-    - role: raycast
-      tags: [raycast]
+    # GUI apps installed from official DMGs (gather, wisprflow, raycast). Each
+    # is tagged, so `-t raycast` targets one app; `-t dmg` runs them all.
+    - role: dmg
+      tags: [dmg]
 
     - role: obs
       tags: [obs]
@@ -121,6 +115,3 @@
 
     - role: colima
       tags: [colima]
-
-    - role: onepassword
-      tags: [onepassword]

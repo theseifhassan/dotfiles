@@ -1,0 +1,80 @@
+---
+# playbook-thin.yml
+# Thin-client Macs (e.g. the MacBook) that connect to the dev server over
+# Tailscale SSH. Installs the GUI apps and Claude Code only — no developer
+# toolchain (no ghostty/mise/neovim/tmux/fzf/ripgrep/lazygit/colima/gh/gt).
+#
+# Connectivity essentials are kept: ssh (keys + host aliases to reach the
+# server), core git (no gh/Graphite), and tailscale (joins the tailnet).
+# Note: claude pulls in zsh via its role dependency.
+#
+# Run with: ansible-playbook playbook-thin.yml --ask-vault-pass
+#       or: ./bootstrap.sh playbook-thin.yml
+- name: Modular Dotfiles System (thin client)
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  gather_subset:
+    - "!all"
+    - user_dir
+    - env
+
+  module_defaults:
+    community.general.homebrew:
+      path: /opt/homebrew/bin:/usr/local/bin
+    community.general.homebrew_cask:
+      path: /opt/homebrew/bin:/usr/local/bin
+    community.general.homebrew_tap:
+      path: /opt/homebrew/bin:/usr/local/bin
+
+  pre_tasks:
+    - name: Run xdg role
+      ansible.builtin.include_role:
+        name: xdg
+      tags: [always]
+
+    - name: Run homebrew role
+      ansible.builtin.include_role:
+        name: homebrew
+      tags: [always]
+
+  roles:
+    # Connectivity essentials — reach the dev server over Tailscale SSH.
+    - role: ssh
+      tags: [ssh]
+
+    - role: git
+      tags: [git]
+      vars:
+        git_install_extras: false
+
+    - role: claude
+      tags: [claude]
+
+    # GUI applications.
+    # Trivial single-cask apps (chrome, notion, slack, figma, linear, discord,
+    # datagrip). Per-task tags mean `-t slack` targets one app; `-t casks` all.
+    - role: casks
+      tags: [casks]
+
+    # GUI apps from official DMGs (gather, wisprflow, raycast). `-t raycast`
+    # targets one; `-t dmg` runs all.
+    - role: dmg
+      tags: [dmg]
+
+    - role: 1password
+      tags: [1password]
+
+    - role: zed
+      tags: [zed]
+
+    - role: obs
+      tags: [obs]
+
+    - role: fonts
+      tags: [fonts]
+
+    # Join the tailnet so this thin client can reach the dev server over
+    # Tailscale (SSH + remote editors).
+    - role: tailscale
+      tags: [tailscale]
