@@ -61,5 +61,6 @@ node = "lts"
 "npm:@vtsls/language-server" = "latest"        # ts/js LSP (vtsls)
 "npm:vscode-langservers-extracted" = "latest"  # eslint LSP (vscode-eslint-language-server)
 "npm:yaml-language-server" = "latest"          # yaml LSP (yamlls)
-"npm:prettier" = "latest"                       # formatter (ts/js/yaml/md/json)
+"npm:@biomejs/biome" = "latest"                # formatter — code (js/ts/jsx/tsx/json/css)
+"npm:prettier" = "latest"                       # formatter — yaml + markdown only (biome covers code)
 "npm:@fsouza/prettierd" = "latest"             # prettier daemon (fast)
