@@ -5,14 +5,17 @@
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(find ~/Desktop ~/Documents -mindepth 1 -maxdepth 1 -type d 2>/dev/null | fzf)
+    selected=$(find ~/Desktop/worktrees -mindepth 2 -maxdepth 2 -type d 2>/dev/null | fzf)
 fi
 
 if [[ -z $selected ]]; then
     exit 0
 fi
 
-selected_name=$(basename "$selected" | tr . _)
+# Name the session "{project}/{worktree}" so worktrees of different projects
+# (e.g. two "main" worktrees) don't collide.
+selected_name=$(basename "$(dirname "$selected")")/$(basename "$selected")
+selected_name=$(echo "$selected_name" | tr . _)
 tmux_running=$(pgrep -x tmux)
 
 if ! tmux has-session -t="$selected_name" 2>/dev/null; then
