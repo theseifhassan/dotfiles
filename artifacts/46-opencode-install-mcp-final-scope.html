@@ -1,0 +1,446 @@
+<!doctype html>
+<!--
+  SAW scope artifact template.
+
+  Locked design reference — tracks the claude.ai/design bundle 1:1. Do not
+  edit per-project. The plugin owns this file; render reads from
+  plugins/saw/defaults/templates/scope.html directly.
+
+  Slot contract:
+    {{title}}         scope-artifact title (work-item name + class/domain)
+    {{lede}}          one-line summary, prose
+    {{state}}         status label visible in the pill (e.g. "Needs review")
+    {{state_class}}   one of: draft | review | approved | blocked | info
+    {{source_link}}   <a>…</a> to source PR / commit / branch (HTML)
+    {{owner}}         owner display string
+    {{last_updated}}  human date + time
+    {{problem_and_outcome}}      HTML — paragraphs; use <span class="pa-mark"> to highlight
+    {{context}}                  HTML — paragraphs + DashList
+    {{decision_tree}}            HTML — DecisionTree row markup
+    {{alternatives}}             HTML — AlternativesTable row markup
+    {{requirements}}             HTML — TraceableRequirements row markup
+    {{acceptance_criteria}}      HTML — AcceptanceCriteria row markup
+    {{assumptions}}              HTML — AssumptionsList row markup
+    {{constraints}}              HTML — DashList items wrapping strong-labelled prose
+    {{out_of_scope}}             HTML — DashList items
+    {{open_questions}}           HTML — OpenQuestions row markup
+    {{execution_notes}}          HTML — DashList items
+    {{references}}               HTML — ReferenceList row markup
+    {{design_decisions}}         HTML — AppendOnlyLog <tr> markup
+
+  Artifacts are write-once. There is no in-place update slot — revisions are
+  new artifact files at a new path that cite the prior artifact(s) in
+  {{references}}.
+
+  Render rule: drop any <section> whose body (excluding heading) is empty
+  or whitespace after substitution. The contents-list script auto-hides
+  links whose target section is dropped.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>feat(opencode): install OpenCode with global MCP [46]</title>
+  <style>
+/* ============================================================================
+   SAW planning artifacts — shared static styles (Tailwind v4).
+
+   Source of truth for scope.html, design.html, research.html. Tracks the
+   reference bundle in claude.ai/design exactly; do not deviate without
+   updating all three templates in lockstep.
+
+   **`@theme` does not live here.** Tailwind v4's `@tailwindcss/browser` CDN
+   compiles only inline `<style type="text/tailwindcss">` blocks — it never
+   processes external CSS linked via `<link rel="stylesheet">`. The design
+   tokens (`--color-*`, `--font-*`, `--radius-*`) therefore live inline in
+   each template; this file carries only the static rules (fonts, base
+   resets, `.pa-mark`, `.pa-rule`, scroll-spy hook) that don't need the
+   v4 compiler to see them.
+   ============================================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&display=swap");
+
+/* ============================================================================
+   Base resets / element styles. v4's preflight handles most of this when the
+   browser CDN loads, but these run regardless.
+   ============================================================================ */
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Marker-pen highlight (used inline within copy). The clay-wash colour is
+   intentionally hard-coded — the inline `@theme` block can't reach this file. */
+.pa-mark {
+  background: linear-gradient(180deg, transparent 58%, hsl(16 65% 88%) 58%);
+  padding: 0 0.1em;
+}
+
+::selection { background: hsl(16 65% 88%); color: hsl(30 18% 11%); }
+
+/* Hairline rule */
+.pa-rule { height: 1px; background: hsl(34 28% 84%); border: 0; }
+
+/* ============================================================================
+   Scroll-spy active-state hook. Templates ship a small script that toggles
+   `data-toc-active` on the matching contents link. Style lives here so the
+   templates stay declarative.
+   ============================================================================ */
+a[data-toc-active="true"] { color: hsl(30 18% 11%); font-weight: 500; }
+a[data-toc-active="true"] .toc-num { color: hsl(16 53% 53%); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-background:          hsl(38 35% 96%);
+      --color-foreground:          hsl(30 18% 11%);
+      --color-card:                hsl(38 35% 96%);
+      --color-card-foreground:     hsl(30 18% 11%);
+      --color-popover:             hsl(38 35% 96%);
+      --color-popover-foreground:  hsl(30 18% 11%);
+      --color-muted:               hsl(37 32% 92%);
+      --color-muted-foreground:    hsl(30 8% 47%);
+      --color-accent:              hsl(36 30% 88%);
+      --color-accent-foreground:   hsl(30 18% 11%);
+      --color-primary:             hsl(16 53% 53%);
+      --color-primary-foreground:  hsl(38 35% 96%);
+      --color-secondary:           hsl(37 32% 92%);
+      --color-secondary-foreground: hsl(30 18% 11%);
+      --color-destructive:         hsl(5 53% 47%);
+      --color-destructive-foreground: hsl(38 35% 96%);
+      --color-border:              hsl(34 28% 84%);
+      --color-input:               hsl(34 28% 84%);
+      --color-ring:                hsl(16 53% 53%);
+      --default-border-color:      var(--color-border);
+      --color-status-draft:        hsl(220 4% 44%);
+      --color-status-draft-bg:     hsl(40 11% 89%);
+      --color-status-review:       hsl(39 80% 30%);
+      --color-status-review-bg:    hsl(43 70% 87%);
+      --color-status-approved:     hsl(135 25% 33%);
+      --color-status-approved-bg:  hsl(105 25% 87%);
+      --color-status-blocked:      hsl(6 53% 40%);
+      --color-status-blocked-bg:   hsl(11 60% 88%);
+      --color-status-info:         hsl(205 45% 33%);
+      --color-status-info-bg:      hsl(206 32% 88%);
+      --color-clay-wash:           hsl(16 65% 88%);
+      --radius-sm: 0.125rem;
+      --radius-md: 0.25rem;
+      --radius-lg: 0.375rem;
+      --font-sans:  "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+      --font-mono:  "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-background">
+    <div class="mx-auto grid max-w-[1180px] grid-cols-1 gap-x-14 gap-y-8 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-[220px_780px] lg:gap-y-0 lg:px-16 lg:pt-14 lg:pb-20">
+
+      <header class="col-span-full flex flex-col gap-4 pb-6 mb-6 border-b sm:pb-8 sm:mb-10">
+        <div class="flex items-center gap-2 rounded-md border border-status-info/30 bg-status-info-bg/40 px-3 py-2 text-[12px] leading-[1.45] text-status-info lg:hidden">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="flex-none"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>Best viewed on a desktop. Mobile support is in progress.</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-current px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+            Scope
+          </span>
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] bg-status-review-bg text-status-review">
+            <span class="size-1.5 rounded-full bg-current"></span>
+            Ready for breakdown
+          </span>
+        </div>
+        <h1 class="font-serif text-[28px] leading-[1.15] tracking-[-0.012em] text-foreground sm:text-[34px] sm:leading-[1.13] lg:text-[40px] lg:leading-[1.12] lg:tracking-[-0.014em] font-normal">feat(opencode): install OpenCode with global MCP [46]</h1>
+        <p class="max-w-[720px] font-serif text-[17px] font-light italic leading-[1.45] text-muted-foreground sm:text-[19px]">Install OpenCode across both Ansible profiles and make Linear and Notion MCP available globally, while deferring account switching to a follow-up.</p>
+      </header>
+
+      <aside class="flex flex-col gap-5 self-start pr-2 lg:sticky lg:top-6" aria-label="Document meta and table of contents">
+        <div class="flex flex-col gap-1">
+          <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Source</div>
+          <div class="text-[13px] text-foreground"><a class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary" href="https://github.com/theseifhassan/dotfiles/issues/46">Work item #46</a></div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Owner</div>
+          <div class="text-[13px] text-foreground">Seif Hassan</div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Updated</div>
+          <div class="text-[13px] text-foreground">2026-06-23 19:45 EEST</div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Contents</div>
+          <ul data-artifact-toc class="m-0 flex list-none flex-col gap-0.5 p-0">
+            <li><a href="#sect-problem-and-outcome" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">01</span><span>Problem &amp; outcome</span></a></li>
+            <li><a href="#sect-context" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">02</span><span>Context</span></a></li>
+            <li><a href="#sect-decision-tree" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">03</span><span>Decision tree</span></a></li>
+            <li><a href="#sect-alternatives-considered" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">04</span><span>Alternatives</span></a></li>
+            <li><a href="#sect-requirements" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">05</span><span>Requirements</span></a></li>
+            <li><a href="#sect-acceptance-criteria" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">06</span><span>Acceptance criteria</span></a></li>
+            <li><a href="#sect-assumptions" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">07</span><span>Assumptions</span></a></li>
+            <li><a href="#sect-constraints-and-dependencies" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">08</span><span>Constraints</span></a></li>
+            <li><a href="#sect-out-of-scope" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">09</span><span>Out of scope</span></a></li>
+            <li><a href="#sect-open-questions" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">10</span><span>Open questions</span></a></li>
+            <li><a href="#sect-execution-notes" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">11</span><span>Execution notes</span></a></li>
+            <li><a href="#sect-references" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">12</span><span>References</span></a></li>
+            <li><a href="#sect-design-decisions" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">13</span><span>Design decisions</span></a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <main data-artifact-main class="flex flex-col">
+
+        <section id="sect-problem-and-outcome" class="flex flex-col gap-3.5 border-t py-8 first:border-t-0 first:pt-0">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">01</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Problem &amp; outcome</h2>
+          </div>
+          <div class="flex flex-col gap-4 [&>p]:m-0 [&>p]:text-[15.5px] [&>p]:leading-[1.6] [&>p]:text-foreground/85 [&_strong]:font-semibold [&_strong]:text-foreground">
+            <p>The dotfiles currently install Claude Code but do not install OpenCode or configure OpenCode MCP access. The requested outcome is a repo-owned Ansible implementation that installs OpenCode in the <span class="pa-mark">server</span> and <span class="pa-mark">thin client</span> profiles and configures Linear and Notion MCP servers in OpenCode's global user config.</p><p>The original work item also asked for personal/work OpenCode Zen account switching. During scope, that branch was intentionally deferred. This pass should leave provider authentication to OpenCode's native <code>/connect</code> flow and should not introduce Vault-managed Zen keys, wrapper scripts, or per-project account switching behavior.</p>
+          </div>
+        </section>
+
+        <section id="sect-context" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">02</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Context</h2>
+          </div>
+          <div class="flex flex-col gap-4 [&>p]:m-0 [&>p]:text-[15.5px] [&>p]:leading-[1.6] [&>p]:text-foreground/85 [&_strong]:font-semibold [&_strong]:text-foreground">
+            <p>The repo has separate <code>playbook-server.yml</code> and <code>playbook-thin.yml</code> profiles. Both already include the <code>claude</code> role, and the <code>claude</code> role demonstrates the local pattern for installing an AI coding CLI with a curl installer and deploying shell config under XDG-managed zsh configuration.</p><ul class="m-0 flex list-none flex-col gap-2 p-0"><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span><code>playbook-server.yml</code> runs the full developer toolchain and includes <code>claude</code>; it should also include <code>opencode</code>.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span><code>playbook-thin.yml</code> intentionally omits most developer tooling but includes Claude Code; OpenCode should follow that same AI-assistant exception.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>OpenCode docs confirm global config lives at <code>~/.config/opencode/opencode.json</code>, provider auth lives separately in <code>~/.local/share/opencode/auth.json</code>, and remote MCP servers can be configured under the <code>mcp</code> key.</li></ul>
+          </div>
+        </section>
+
+        <section id="sect-decision-tree" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">03</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Decision tree</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">One entry per resolved branch. Each cites the source that resolved it.</p>
+          <div class="flex flex-col">
+            <div class="grid gap-2 border-b py-4 sm:grid-cols-[160px_1fr]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Install surface</div><div class="text-[15px] leading-[1.6] text-foreground/85">Create a dedicated <code>opencode</code> role and include it from both <code>playbook-server.yml</code> and <code>playbook-thin.yml</code> with tag <code>opencode</code>. Resolved by work item text and existing profile structure.</div></div><div class="grid gap-2 border-b py-4 sm:grid-cols-[160px_1fr]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Installer</div><div class="text-[15px] leading-[1.6] text-foreground/85">Use the official installer requested by the work item: <code>curl -fsSL https://opencode.ai/install | bash</code>, passing <code>--no-modify-path</code> so Ansible, not the installer, owns shell config.</div></div><div class="grid gap-2 border-b py-4 sm:grid-cols-[160px_1fr]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">MCP scope</div><div class="text-[15px] leading-[1.6] text-foreground/85">Configure Linear and Notion as global user-scope OpenCode MCP servers in <code>~/.config/opencode/opencode.json</code>, with <code>enabled: true</code> for both.</div></div><div class="grid gap-2 border-b py-4 sm:grid-cols-[160px_1fr]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Auth</div><div class="text-[15px] leading-[1.6] text-foreground/85">Leave OpenCode provider auth manual through <code>/connect</code>; remote MCP OAuth is handled by OpenCode via <code>opencode mcp auth linear</code> and <code>opencode mcp auth notion</code> or first-use prompts.</div></div><div class="grid gap-2 border-b py-4 sm:grid-cols-[160px_1fr]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Deferred branch</div><div class="text-[15px] leading-[1.6] text-foreground/85">Do not implement personal/work Zen account switching in this pass. Capture it as a follow-up, noting that OpenCode supports <code>provider.opencode.options.apiKey</code> and <code>{file:...}</code> substitution for a future Vault-backed solution.</div></div>
+          </div>
+        </section>
+
+        <section id="sect-alternatives-considered" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">04</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Alternatives considered</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Why the chosen approach beat what was on the table.</p>
+          <div class="flex flex-col border-t">
+            <div class="grid gap-2 border-b py-4 sm:grid-cols-[180px_1fr_1fr]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Homebrew install</div><div class="text-[15px] leading-[1.6] text-foreground/85">OpenCode supports Homebrew via <code>anomalyco/tap/opencode</code>.</div><div class="text-[15px] leading-[1.6] text-foreground/85">Rejected because the work item explicitly requests the curl installer, and the existing Claude role uses a curl-install pattern.</div></div><div class="grid gap-2 border-b py-4 sm:grid-cols-[180px_1fr_1fr]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Local MCP bridge</div><div class="text-[15px] leading-[1.6] text-foreground/85">Use <code>npx -y mcp-remote</code> for Linear and Notion.</div><div class="text-[15px] leading-[1.6] text-foreground/85">Rejected because OpenCode supports remote MCP servers directly, and both vendors document Streamable HTTP endpoints.</div></div><div class="grid gap-2 border-b py-4 sm:grid-cols-[180px_1fr_1fr]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Vault Zen switching</div><div class="text-[15px] leading-[1.6] text-foreground/85">Store personal/work Zen API keys in Ansible Vault and select by project.</div><div class="text-[15px] leading-[1.6] text-foreground/85">Deferred by user direction. Viable later, but not part of this implementation pass.</div></div>
+          </div>
+        </section>
+
+        <section id="sect-requirements" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">05</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Requirements</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Behaviors — not implementation tasks. Each links to the acceptance criteria that verify it.</p>
+          <div class="flex flex-col border-t">
+            <div id="req-1" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_160px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">REQ-1</div><div class="text-[15px] leading-[1.6] text-foreground/85">OpenCode is installed using the official installer and available in interactive zsh sessions.</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-1, AC-2</div></div><div id="req-2" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_160px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">REQ-2</div><div class="text-[15px] leading-[1.6] text-foreground/85">The server and thin-client profiles both include the <code>opencode</code> role.</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-3</div></div><div id="req-3" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_160px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">REQ-3</div><div class="text-[15px] leading-[1.6] text-foreground/85">Linear and Notion MCP servers are configured globally for OpenCode in user scope and enabled by default.</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-4, AC-5</div></div><div id="req-4" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_160px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">REQ-4</div><div class="text-[15px] leading-[1.6] text-foreground/85">Provider authentication remains unmanaged by Ansible for now; account switching is not partially implemented.</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-6</div></div>
+          </div>
+        </section>
+
+        <section id="sect-acceptance-criteria" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">06</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Acceptance criteria</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Independently verifiable. Click an AC's <em>from</em> to jump to the source requirement.</p>
+          <div class="flex flex-col border-t">
+            <div id="ac-1" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_150px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">AC-1</div><div class="text-[15px] leading-[1.6] text-foreground/85">Running the role invokes the official OpenCode installer with <code>--no-modify-path</code>, and the installed binary path is <code>~/.opencode/bin/opencode</code>.</div><div class="text-[13px] text-muted-foreground">from <a class="text-primary underline decoration-primary/30 underline-offset-4" href="#req-1">REQ-1</a></div></div><div id="ac-2" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_150px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">AC-2</div><div class="text-[15px] leading-[1.6] text-foreground/85">The role adds <code>~/.opencode/bin</code> to interactive zsh <code>PATH</code> through the repo-managed XDG zsh config, not by letting the installer modify shell files.</div><div class="text-[13px] text-muted-foreground">from <a class="text-primary underline decoration-primary/30 underline-offset-4" href="#req-1">REQ-1</a></div></div><div id="ac-3" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_150px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">AC-3</div><div class="text-[15px] leading-[1.6] text-foreground/85"><code>playbook-server.yml</code> and <code>playbook-thin.yml</code> both include <code>role: opencode</code> with tag <code>opencode</code>.</div><div class="text-[13px] text-muted-foreground">from <a class="text-primary underline decoration-primary/30 underline-offset-4" href="#req-2">REQ-2</a></div></div><div id="ac-4" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_150px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">AC-4</div><div class="text-[15px] leading-[1.6] text-foreground/85"><code>~/.config/opencode/opencode.json</code> contains a global <code>mcp.linear</code> remote server with URL <code>https://mcp.linear.app/mcp</code> and <code>enabled: true</code>.</div><div class="text-[13px] text-muted-foreground">from <a class="text-primary underline decoration-primary/30 underline-offset-4" href="#req-3">REQ-3</a></div></div><div id="ac-5" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_150px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">AC-5</div><div class="text-[15px] leading-[1.6] text-foreground/85"><code>~/.config/opencode/opencode.json</code> contains a global <code>mcp.notion</code> remote server with URL <code>https://mcp.notion.com/mcp</code> and <code>enabled: true</code>.</div><div class="text-[13px] text-muted-foreground">from <a class="text-primary underline decoration-primary/30 underline-offset-4" href="#req-3">REQ-3</a></div></div><div id="ac-6" class="grid gap-2 border-b py-4 sm:grid-cols-[110px_1fr_150px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">AC-6</div><div class="text-[15px] leading-[1.6] text-foreground/85">The diff contains no Zen API keys, Vault Zen variables, account-switching wrapper, or project-detection logic.</div><div class="text-[13px] text-muted-foreground">from <a class="text-primary underline decoration-primary/30 underline-offset-4" href="#req-4">REQ-4</a></div></div>
+          </div>
+        </section>
+
+        <section id="sect-assumptions" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">07</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Assumptions</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Claims we depend on but haven't verified. Each has an owner and a next-check date.</p>
+          <div class="flex flex-col border-t">
+            <div class="grid gap-2 border-b py-4 sm:grid-cols-[1fr_130px_130px]"><div class="text-[15px] leading-[1.6] text-foreground/85">OpenCode continues to install into <code>~/.opencode/bin</code> via the official installer.</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Owner: implementer</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Check: during build</div></div><div class="grid gap-2 border-b py-4 sm:grid-cols-[1fr_130px_130px]"><div class="text-[15px] leading-[1.6] text-foreground/85">OpenCode's remote MCP OAuth flow is sufficient for Linear and Notion without additional local bridge packages.</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Owner: implementer</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Check: docs/source</div></div>
+          </div>
+        </section>
+
+        <section id="sect-constraints-and-dependencies" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">08</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Constraints &amp; dependencies</h2>
+          </div>
+          <div class="flex flex-col gap-4 [&>p]:m-0 [&>p]:text-[15.5px] [&>p]:leading-[1.6] [&>p]:text-foreground/85 [&_strong]:font-semibold [&_strong]:text-foreground">
+            <ul class="m-0 flex list-none flex-col gap-2 p-0"><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span><strong>Installer constraint:</strong> use <code>curl -fsSL https://opencode.ai/install | bash</code> as requested by the work item.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span><strong>XDG/zsh constraint:</strong> shell integration must go through <code>~/.config/zsh/conf.d/</code> because this repo owns zsh via XDG paths.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span><strong>Secret constraint:</strong> no API keys or provider credentials should be added while account switching is deferred.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span><strong>Profile constraint:</strong> the role must work in both profiles even though the thin profile omits most developer tooling.</li></ul>
+          </div>
+        </section>
+
+        <section id="sect-out-of-scope" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">09</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Out of scope</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Intentional non-goals for this work item.</p>
+          <div class="flex flex-col gap-4">
+            <div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Personal/work OpenCode Zen account switching.</div><div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Vault-managed Zen API keys or generated per-account OpenCode configs.</div><div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Any project-specific OpenCode config committed to application repositories.</div><div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Automating Linear or Notion OAuth token setup; users authenticate through OpenCode.</div>
+          </div>
+        </section>
+
+        <section id="sect-open-questions" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">10</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Open questions</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Implementation-affecting and not yet resolved. The first blocks sign-off.</p>
+          <div class="flex flex-col border-t">
+            <div class="grid gap-2 border-b py-4 sm:grid-cols-[130px_1fr_120px]"><div class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-status-approved">None</div><div class="text-[15px] leading-[1.6] text-foreground/85">No implementation-blocking open questions remain after deferring account switching.</div><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Unblocked</div></div>
+          </div>
+        </section>
+
+        <section id="sect-execution-notes" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">11</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Execution notes for breakdown</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Sequencing hints — not implementation. The breakdown will own task shape.</p>
+          <div class="flex flex-col gap-4">
+            <div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Add <code>roles/opencode/tasks/main.yml</code> and <code>roles/opencode/meta/main.yml</code>; make the role depend on <code>zsh</code> so <code>conf.d</code> exists.</div><div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Installer task should use the official curl command with <code>bash -s -- --no-modify-path</code> and should not rely on installer-managed shell mutations.</div><div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Deploy <code>~/.config/zsh/conf.d/opencode.zsh</code> to prepend <code>~/.opencode/bin</code> when present.</div><div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Deploy <code>~/.config/opencode/opencode.json</code> with schema plus <code>mcp.linear</code> and <code>mcp.notion</code> remote entries.</div><div class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 top-0 font-mono text-primary">—</span>Validate with <code>ansible-playbook --syntax-check playbook-server.yml</code> and <code>ansible-playbook --syntax-check playbook-thin.yml</code>.</div>
+          </div>
+        </section>
+
+        <section id="sect-references" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">12</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">References</h2>
+          </div>
+          <ul class="m-0 flex list-none flex-col gap-2 p-0">
+            <li class="grid gap-1 border-b pb-2 sm:grid-cols-[160px_1fr]"><span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Work item</span><a class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary" href="https://github.com/theseifhassan/dotfiles/issues/46">GitHub work item #46</a></li>
+            <li class="grid gap-1 border-b pb-2 sm:grid-cols-[160px_1fr]"><span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">OpenCode install</span><a class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary" href="https://opencode.ai/docs/">https://opencode.ai/docs/</a></li>
+            <li class="grid gap-1 border-b pb-2 sm:grid-cols-[160px_1fr]"><span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">OpenCode config</span><a class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary" href="https://opencode.ai/docs/config/">https://opencode.ai/docs/config/</a></li>
+            <li class="grid gap-1 border-b pb-2 sm:grid-cols-[160px_1fr]"><span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">OpenCode MCP</span><a class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary" href="https://opencode.ai/docs/mcp-servers/">https://opencode.ai/docs/mcp-servers/</a></li>
+            <li class="grid gap-1 border-b pb-2 sm:grid-cols-[160px_1fr]"><span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Linear MCP</span><a class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary" href="https://linear.app/docs/mcp">https://linear.app/docs/mcp</a></li>
+            <li class="grid gap-1 border-b pb-2 sm:grid-cols-[160px_1fr]"><span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Notion MCP</span><a class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary" href="https://developers.notion.com/guides/mcp/get-started-with-mcp">https://developers.notion.com/guides/mcp/get-started-with-mcp</a></li>
+            <li class="grid gap-1 border-b pb-2 sm:grid-cols-[160px_1fr]"><span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Superseded artifact</span><span class="text-[15px] leading-[1.6] text-foreground/85"><code>artifacts/46-opencode-install-mcp-scope.html</code> was superseded during pre-ship self-review because artifacts are write-once.</span></li>
+            <li class="grid gap-1 border-b pb-2 sm:grid-cols-[160px_1fr]"><span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Prior artifacts</span><span class="text-[15px] leading-[1.6] text-foreground/85">None found under <code>artifacts/</code> for work item 46 before this scoping session.</span></li>
+          </ul>
+        </section>
+
+        <section id="sect-design-decisions" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">13</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Design decisions</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Append-only — entries are never rewritten. Newer decisions reference older ones.</p>
+          <div class="flex flex-col">
+            <div class="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/><polyline points="12 7 12 12 15 14"/></svg>
+              Append-only · entries are never rewritten
+            </div>
+            <div class="relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <thead class="[&_tr]:border-b">
+                  <tr class="border-b transition-colors hover:bg-transparent">
+                    <th class="h-10 px-2 text-left align-middle font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground w-[90px]">When</th>
+                    <th class="h-10 px-2 text-left align-middle font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Decision</th>
+                  </tr>
+                </thead>
+                <tbody class="[&_tr:last-child]:border-0">
+                  <tr class="border-b transition-colors hover:bg-muted/40"><td class="p-2 align-top font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">2026-06-23</td><td class="p-2 align-top text-[15px] leading-[1.6] text-foreground/85">Use Git-remote auto-detection for future account switching if/when the deferred branch is picked up; not implemented in this pass.</td></tr><tr class="border-b transition-colors hover:bg-muted/40"><td class="p-2 align-top font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">2026-06-23</td><td class="p-2 align-top text-[15px] leading-[1.6] text-foreground/85">Defer account switching entirely for now and leave provider auth to OpenCode's native <code>/connect</code> flow.</td></tr><tr class="border-b transition-colors hover:bg-muted/40"><td class="p-2 align-top font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">2026-06-23</td><td class="p-2 align-top text-[15px] leading-[1.6] text-foreground/85">Enable Linear and Notion MCP globally in the user OpenCode config.</td></tr><tr class="border-b transition-colors hover:bg-muted/40"><td class="p-2 align-top font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">2026-06-23</td><td class="p-2 align-top text-[15px] leading-[1.6] text-foreground/85">Let the <code>opencode</code> role own <code>~/.config/opencode/opencode.json</code>; <code>/connect</code> auth is stored separately and will not be overwritten.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+  <script>
+/* scrollspy.js
+   Contents-list active-state highlighter. Tracks which <section[id^="sect-"]>
+   is most-recently scrolled past a 120px trigger line below the viewport top
+   and toggles <code>data-toc-active="true"</code> on the matching contents-list anchor.
+   Also hides contents items whose target section was dropped by the
+   empty-section render rule. */
+
+(function () {
+  const main = document.querySelector('[data-artifact-main]');
+  const toc  = document.querySelector('[data-artifact-toc]');
+  if (!main || !toc) return;
+
+  // Hide TOC items whose target section is missing (dropped by render rule).
+  const tocItems = Array.from(toc.querySelectorAll('li'));
+  const sectionsById = new Map();
+  const liveLinks = [];
+  for (const li of tocItems) {
+    const a = li.querySelector('a[href^="#sect-"]');
+    if (!a) { li.hidden = true; continue; }
+    const id = a.getAttribute('href').slice(1);
+    const target = document.getElementById(id);
+    if (!target) { li.hidden = true; continue; }
+    sectionsById.set(id, target);
+    liveLinks.push(a);
+  }
+  if (liveLinks.length === 0) return;
+
+  const TRIGGER_OFFSET = 120;
+  let scrollLockUntil = 0;
+
+  function setActive(id) {
+    for (const a of liveLinks) a.removeAttribute('data-toc-active');
+    const link = liveLinks.find(a => a.getAttribute('href') === '#' + id);
+    if (link) link.setAttribute('data-toc-active', 'true');
+  }
+
+  function computeActive() {
+    let activeId = null;
+    let bestDistance = -Infinity;
+    for (const [id, target] of sectionsById) {
+      const top = target.getBoundingClientRect().top;
+      const distance = top - TRIGGER_OFFSET;
+      if (distance <= 0 && distance > bestDistance) {
+        bestDistance = distance;
+        activeId = id;
+      }
+    }
+    if (activeId === null) activeId = sectionsById.keys().next().value;
+    setActive(activeId);
+  }
+
+  let scheduled = false;
+  function scheduleUpdate() {
+    if (scheduled || Date.now() < scrollLockUntil) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; computeActive(); });
+  }
+
+  for (const a of liveLinks) {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href').slice(1);
+      const target = document.getElementById(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', '#' + id);
+      }
+      setActive(id);
+      scrollLockUntil = Date.now() + 800;
+    });
+  }
+  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  window.addEventListener('resize', scheduleUpdate, { passive: true });
+  window.addEventListener('hashchange', () => {
+    const id = window.location.hash.slice(1);
+    if (sectionsById.has(id)) { setActive(id); scrollLockUntil = Date.now() + 800; }
+  });
+
+  const initialHash = window.location.hash.slice(1);
+  if (initialHash && sectionsById.has(initialHash)) setActive(initialHash);
+  else computeActive();
+})();
+  </script>
+</body>
+</html>
