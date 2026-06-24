@@ -41,3 +41,15 @@
     dmg_url: "{{ raycast_dmg_url }}"
     dmg_slug: "raycast"
   tags: [dmg, raycast]
+
+- name: Alcove
+  ansible.builtin.include_tasks:
+    file: install.yml
+    apply:
+      tags: [dmg, alcove]
+  vars:
+    dmg_name: "Alcove"
+    dmg_app: "/Applications/Alcove.app"
+    dmg_url: "https://download.tryalcove.com/Alcove.dmg"
+    dmg_slug: "alcove"
+  tags: [dmg, alcove]
