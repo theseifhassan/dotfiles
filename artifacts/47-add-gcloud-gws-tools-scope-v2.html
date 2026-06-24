@@ -1,0 +1,439 @@
+<!doctype html>
+<!--
+  SAW scope artifact template.
+
+  Locked design reference — tracks the claude.ai/design bundle 1:1. Do not
+  edit per-project. The plugin owns this file; render reads from
+  plugins/saw/defaults/templates/scope.html directly.
+
+  Slot contract:
+    feat(server): add gcloud gws tools [#47]         scope-artifact title (work-item name + class/domain)
+    Add the Google Cloud and Google Workspace CLIs to the server provisioning profile only, without adding authentication, shell, credential, or application config.          one-line summary, prose
+    Approved         status label visible in the pill (e.g. "Needs review")
+    approved   one of: draft | review | approved | blocked | info
+    <a class="underline decoration-border underline-offset-4 hover:text-primary" href="https://github.com/theseifhassan/dotfiles/issues/47">#47</a>   <a>…</a> to source PR / commit / branch (HTML)
+    Seif Hassan         owner display string
+    2026-06-24 09:35 EEST  human date + time
+    <p>The server profile should provision the <span class="pa-mark">gcloud</span> and <span class="pa-mark">gws</span> command-line tools so they are available on the always-on development server.</p><p>The outcome is limited to installing the Homebrew formulae for the two tools. No Google Cloud, Google Workspace, authentication, account, shell, credential, or configuration setup is part of this work item.</p>      HTML — paragraphs; use <span class="pa-mark"> to highlight
+    <p>The captured source names the required Homebrew formulae: <code class="font-mono text-[13px]">gcloud-cli</code> for Google Cloud CLI and <code class="font-mono text-[13px]">googleworkspace-cli</code> for Google Workspace CLI.</p><p>Repository exploration found an existing <code class="font-mono text-[13px]">roles/apps</code> role described as server-only developer CLI tools installed via Homebrew. <code class="font-mono text-[13px]">playbook-server.yml</code> includes that role; <code class="font-mono text-[13px]">playbook-thin.yml</code> does not.</p>                  HTML — paragraphs + DashList
+    <div class="grid grid-cols-[140px_1fr] gap-4 border-t py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Placement</div><div><strong>Use the existing <code class="font-mono text-[13px]">roles/apps</code> role.</strong><p class="mt-1 mb-0 text-muted-foreground">Resolved by repo pattern: the role is already the server-only Homebrew CLI bucket.</p></div></div><div class="grid grid-cols-[140px_1fr] gap-4 border-t py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Profile reach</div><div><strong>Server profile only.</strong><p class="mt-1 mb-0 text-muted-foreground">Resolved by user confirmation: the tools must be available to <code class="font-mono text-[13px]">playbook-server.yml</code> and not to the thin client.</p></div></div><div class="grid grid-cols-[140px_1fr] gap-4 border-t py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Config scope</div><div><strong>Install binaries only.</strong><p class="mt-1 mb-0 text-muted-foreground">Resolved by captured source and confirmation: do not add configs.</p></div></div>            HTML — DecisionTree row markup
+    <div class="grid grid-cols-[160px_1fr_1fr] gap-4 border-b py-4 text-[14px]"><div class="font-medium">Add a new role</div><div class="text-muted-foreground">Would isolate the two Google tools.</div><div>Rejected because the existing <code class="font-mono text-[13px]">apps</code> role is explicitly for loose server-only CLIs that do not warrant their own role.</div></div><div class="grid grid-cols-[160px_1fr_1fr] gap-4 border-b py-4 text-[14px]"><div class="font-medium">Add to thin profile too</div><div class="text-muted-foreground">Would make the tools available on all Macs.</div><div>Rejected because the user explicitly requires server-only availability.</div></div>             HTML — AlternativesTable row markup
+    <div id="req-1" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">REQ-1</div><div>The server provisioning profile installs the Google Cloud CLI using the Homebrew formula <code class="font-mono text-[13px]">gcloud-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#ac-1">AC-1</a></div></div><div id="req-2" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">REQ-2</div><div>The server provisioning profile installs the Google Workspace CLI using the Homebrew formula <code class="font-mono text-[13px]">googleworkspace-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#ac-2">AC-2</a></div></div><div id="req-3" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">REQ-3</div><div>The thin-client provisioning profile does not install either CLI through this change.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#ac-3">AC-3</a></div></div><div id="req-4" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">REQ-4</div><div>The change does not add Google Cloud, Google Workspace, authentication, credential, shell, or app configuration files.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#ac-4">AC-4</a></div></div>             HTML — TraceableRequirements row markup
+    <div id="ac-1" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-1</div><div><code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code> contains an idempotent Homebrew task for <code class="font-mono text-[13px]">gcloud-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#req-1">REQ-1</a></div></div><div id="ac-2" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-2</div><div><code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code> contains an idempotent Homebrew task for <code class="font-mono text-[13px]">googleworkspace-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#req-2">REQ-2</a></div></div><div id="ac-3" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-3</div><div><code class="font-mono text-[13px]">playbook-thin.yml</code> remains without the <code class="font-mono text-[13px]">apps</code> role and without direct installs for <code class="font-mono text-[13px]">gcloud-cli</code> or <code class="font-mono text-[13px]">googleworkspace-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#req-3">REQ-3</a></div></div><div id="ac-4" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-4</div><div>The diff is limited to tool installation plumbing and contains no Google config, credential, login, shell completion, rc file, or profile changes.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#req-4">REQ-4</a></div></div>      HTML — AcceptanceCriteria row markup
+    <div class="grid grid-cols-[150px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-medium">Formula availability</div><div>The named Homebrew formulae are available under the captured names.</div><div class="text-muted-foreground">Check during validation</div></div>              HTML — AssumptionsList row markup
+    <ul class="m-0 flex list-none flex-col gap-2 p-0"><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span><strong>Server-only:</strong> rely on the existing server-only <code class="font-mono text-[13px]">apps</code> role; do not include that role in <code class="font-mono text-[13px]">playbook-thin.yml</code>.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span><strong>Homebrew only:</strong> install with <code class="font-mono text-[13px]">community.general.homebrew</code>, matching nearby role style.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span><strong>No configuration:</strong> no files or tasks that configure cloud accounts, workspace accounts, credentials, shell startup, or defaults.</li></ul>              HTML — DashList items wrapping strong-labelled prose
+    <ul class="m-0 flex list-none flex-col gap-2 p-0"><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Installing either CLI on the thin-client profile.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Google Cloud authentication, components, accounts, projects, shell completion, or SDK config.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Google Workspace authentication, account defaults, API scopes, or config.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Creating a dedicated role for these CLIs.</li></ul>             HTML — DashList items
+    <div class="grid grid-cols-[160px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-medium">None</div><div>No implementation-affecting open questions remain.</div><div class="text-muted-foreground">Resolved</div></div>           HTML — OpenQuestions row markup
+    <ul class="m-0 flex list-none flex-col gap-2 p-0"><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Edit <code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code> following the existing Homebrew task pattern for Lazygit and ripgrep.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Verify <code class="font-mono text-[13px]">playbook-thin.yml</code> is unchanged and does not include the apps role.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Run the narrowest available Ansible syntax/check validation for the server playbook if project tooling supports it.</li></ul>          HTML — DashList items
+    <li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Source</span><a class="text-primary underline decoration-border underline-offset-4" href="https://github.com/theseifhassan/dotfiles/issues/47">GitHub work item #47</a></li><li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Code</span><span><code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code>, <code class="font-mono text-[13px]">playbook-server.yml</code>, <code class="font-mono text-[13px]">playbook-thin.yml</code></span></li><li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Prior render</span><span><code class="font-mono text-[13px]">artifacts/47-add-gcloud-gws-tools-scope.html</code></span></li>               HTML — ReferenceList row markup
+    <tr class="border-b transition-colors hover:bg-muted/40"><td class="p-2 align-top font-mono text-[12px] text-muted-foreground">2026-06-24</td><td class="p-2 align-top text-[14px]">Use the existing server-only <code class="font-mono text-[13px]">roles/apps</code> role for the two Homebrew CLI installs.</td></tr><tr class="border-b transition-colors hover:bg-muted/40"><td class="p-2 align-top font-mono text-[12px] text-muted-foreground">2026-06-24</td><td class="p-2 align-top text-[14px]">Do not add any Google Cloud, Google Workspace, authentication, credential, shell, or config setup.</td></tr>         HTML — AppendOnlyLog <tr> markup
+
+  Artifacts are write-once. There is no in-place update slot — revisions are
+  new artifact files at a new path that cite the prior artifact(s) in
+  <li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Source</span><a class="text-primary underline decoration-border underline-offset-4" href="https://github.com/theseifhassan/dotfiles/issues/47">GitHub work item #47</a></li><li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Code</span><span><code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code>, <code class="font-mono text-[13px]">playbook-server.yml</code>, <code class="font-mono text-[13px]">playbook-thin.yml</code></span></li><li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Prior render</span><span><code class="font-mono text-[13px]">artifacts/47-add-gcloud-gws-tools-scope.html</code></span></li>.
+
+  Render rule: drop any <section> whose body (excluding heading) is empty
+  or whitespace after substitution. The contents-list script auto-hides
+  links whose target section is dropped.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>feat(server): add gcloud gws tools [#47]</title>
+  <style>
+/* ============================================================================
+   SAW planning artifacts — shared static styles (Tailwind v4).
+
+   Source of truth for scope.html, design.html, research.html. Tracks the
+   reference bundle in claude.ai/design exactly; do not deviate without
+   updating all three templates in lockstep.
+
+   **`@theme` does not live here.** Tailwind v4's `@tailwindcss/browser` CDN
+   compiles only inline `<style type="text/tailwindcss">` blocks — it never
+   processes external CSS linked via `<link rel="stylesheet">`. The design
+   tokens (`--color-*`, `--font-*`, `--radius-*`) therefore live inline in
+   each template; this file carries only the static rules (fonts, base
+   resets, `.pa-mark`, `.pa-rule`, scroll-spy hook) that don't need the
+   v4 compiler to see them.
+   ============================================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&display=swap");
+
+/* ============================================================================
+   Base resets / element styles. v4's preflight handles most of this when the
+   browser CDN loads, but these run regardless.
+   ============================================================================ */
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Marker-pen highlight (used inline within copy). The clay-wash colour is
+   intentionally hard-coded — the inline `@theme` block can't reach this file. */
+.pa-mark {
+  background: linear-gradient(180deg, transparent 58%, hsl(16 65% 88%) 58%);
+  padding: 0 0.1em;
+}
+
+::selection { background: hsl(16 65% 88%); color: hsl(30 18% 11%); }
+
+/* Hairline rule */
+.pa-rule { height: 1px; background: hsl(34 28% 84%); border: 0; }
+
+/* ============================================================================
+   Scroll-spy active-state hook. Templates ship a small script that toggles
+   `data-toc-active` on the matching contents link. Style lives here so the
+   templates stay declarative.
+   ============================================================================ */
+a[data-toc-active="true"] { color: hsl(30 18% 11%); font-weight: 500; }
+a[data-toc-active="true"] .toc-num { color: hsl(16 53% 53%); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-background:          hsl(38 35% 96%);
+      --color-foreground:          hsl(30 18% 11%);
+      --color-card:                hsl(38 35% 96%);
+      --color-card-foreground:     hsl(30 18% 11%);
+      --color-popover:             hsl(38 35% 96%);
+      --color-popover-foreground:  hsl(30 18% 11%);
+      --color-muted:               hsl(37 32% 92%);
+      --color-muted-foreground:    hsl(30 8% 47%);
+      --color-accent:              hsl(36 30% 88%);
+      --color-accent-foreground:   hsl(30 18% 11%);
+      --color-primary:             hsl(16 53% 53%);
+      --color-primary-foreground:  hsl(38 35% 96%);
+      --color-secondary:           hsl(37 32% 92%);
+      --color-secondary-foreground: hsl(30 18% 11%);
+      --color-destructive:         hsl(5 53% 47%);
+      --color-destructive-foreground: hsl(38 35% 96%);
+      --color-border:              hsl(34 28% 84%);
+      --color-input:               hsl(34 28% 84%);
+      --color-ring:                hsl(16 53% 53%);
+      --default-border-color:      var(--color-border);
+      --color-status-draft:        hsl(220 4% 44%);
+      --color-status-draft-bg:     hsl(40 11% 89%);
+      --color-status-review:       hsl(39 80% 30%);
+      --color-status-review-bg:    hsl(43 70% 87%);
+      --color-status-approved:     hsl(135 25% 33%);
+      --color-status-approved-bg:  hsl(105 25% 87%);
+      --color-status-blocked:      hsl(6 53% 40%);
+      --color-status-blocked-bg:   hsl(11 60% 88%);
+      --color-status-info:         hsl(205 45% 33%);
+      --color-status-info-bg:      hsl(206 32% 88%);
+      --color-clay-wash:           hsl(16 65% 88%);
+      --radius-sm: 0.125rem;
+      --radius-md: 0.25rem;
+      --radius-lg: 0.375rem;
+      --font-sans:  "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+      --font-mono:  "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-background">
+    <div class="mx-auto grid max-w-[1180px] grid-cols-1 gap-x-14 gap-y-8 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-[220px_780px] lg:gap-y-0 lg:px-16 lg:pt-14 lg:pb-20">
+
+      <header class="col-span-full flex flex-col gap-4 pb-6 mb-6 border-b sm:pb-8 sm:mb-10">
+        <div class="flex items-center gap-2 rounded-md border border-status-info/30 bg-status-info-bg/40 px-3 py-2 text-[12px] leading-[1.45] text-status-info lg:hidden">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="flex-none"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>Best viewed on a desktop. Mobile support is in progress.</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-current px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+            Scope
+          </span>
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] bg-status-approved-bg text-status-approved">
+            <span class="size-1.5 rounded-full bg-current"></span>
+            Approved
+          </span>
+        </div>
+        <h1 class="font-serif text-[28px] leading-[1.15] tracking-[-0.012em] text-foreground sm:text-[34px] sm:leading-[1.13] lg:text-[40px] lg:leading-[1.12] lg:tracking-[-0.014em] font-normal">feat(server): add gcloud gws tools [#47]</h1>
+        <p class="max-w-[720px] font-serif text-[17px] font-light italic leading-[1.45] text-muted-foreground sm:text-[19px]">Add the Google Cloud and Google Workspace CLIs to the server provisioning profile only, without adding authentication, shell, credential, or application config.</p>
+      </header>
+
+      <aside class="flex flex-col gap-5 self-start pr-2 lg:sticky lg:top-6" aria-label="Document meta and table of contents">
+        <div class="flex flex-col gap-1">
+          <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Source</div>
+          <div class="text-[13px] text-foreground"><a class="underline decoration-border underline-offset-4 hover:text-primary" href="https://github.com/theseifhassan/dotfiles/issues/47">#47</a></div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Owner</div>
+          <div class="text-[13px] text-foreground">Seif Hassan</div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Updated</div>
+          <div class="text-[13px] text-foreground">2026-06-24 09:35 EEST</div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Contents</div>
+          <ul data-artifact-toc class="m-0 flex list-none flex-col gap-0.5 p-0">
+            <li><a href="#sect-problem-and-outcome" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">01</span><span>Problem &amp; outcome</span></a></li>
+            <li><a href="#sect-context" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">02</span><span>Context</span></a></li>
+            <li><a href="#sect-decision-tree" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">03</span><span>Decision tree</span></a></li>
+            <li><a href="#sect-alternatives-considered" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">04</span><span>Alternatives</span></a></li>
+            <li><a href="#sect-requirements" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">05</span><span>Requirements</span></a></li>
+            <li><a href="#sect-acceptance-criteria" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">06</span><span>Acceptance criteria</span></a></li>
+            <li><a href="#sect-assumptions" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">07</span><span>Assumptions</span></a></li>
+            <li><a href="#sect-constraints-and-dependencies" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">08</span><span>Constraints</span></a></li>
+            <li><a href="#sect-out-of-scope" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">09</span><span>Out of scope</span></a></li>
+            <li><a href="#sect-open-questions" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">10</span><span>Open questions</span></a></li>
+            <li><a href="#sect-execution-notes" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">11</span><span>Execution notes</span></a></li>
+            <li><a href="#sect-references" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">12</span><span>References</span></a></li>
+            <li><a href="#sect-design-decisions" class="grid grid-cols-[22px_1fr] items-baseline gap-1.5 py-1 text-[12.5px] no-underline text-muted-foreground transition-colors hover:text-foreground"><span class="toc-num font-mono text-[11px] text-muted-foreground">13</span><span>Design decisions</span></a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <main data-artifact-main class="flex flex-col">
+
+        <section id="sect-problem-and-outcome" class="flex flex-col gap-3.5 border-t py-8 first:border-t-0 first:pt-0">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">01</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Problem &amp; outcome</h2>
+          </div>
+          <div class="flex flex-col gap-4 [&>p]:m-0 [&>p]:text-[15.5px] [&>p]:leading-[1.6] [&>p]:text-foreground/85 [&_strong]:font-semibold [&_strong]:text-foreground">
+            <p>The server profile should provision the <span class="pa-mark">gcloud</span> and <span class="pa-mark">gws</span> command-line tools so they are available on the always-on development server.</p><p>The outcome is limited to installing the Homebrew formulae for the two tools. No Google Cloud, Google Workspace, authentication, account, shell, credential, or configuration setup is part of this work item.</p>
+          </div>
+        </section>
+
+        <section id="sect-context" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">02</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Context</h2>
+          </div>
+          <div class="flex flex-col gap-4 [&>p]:m-0 [&>p]:text-[15.5px] [&>p]:leading-[1.6] [&>p]:text-foreground/85 [&_strong]:font-semibold [&_strong]:text-foreground">
+            <p>The captured source names the required Homebrew formulae: <code class="font-mono text-[13px]">gcloud-cli</code> for Google Cloud CLI and <code class="font-mono text-[13px]">googleworkspace-cli</code> for Google Workspace CLI.</p><p>Repository exploration found an existing <code class="font-mono text-[13px]">roles/apps</code> role described as server-only developer CLI tools installed via Homebrew. <code class="font-mono text-[13px]">playbook-server.yml</code> includes that role; <code class="font-mono text-[13px]">playbook-thin.yml</code> does not.</p>
+          </div>
+        </section>
+
+        <section id="sect-decision-tree" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">03</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Decision tree</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">One entry per resolved branch. Each cites the source that resolved it.</p>
+          <div class="flex flex-col">
+            <div class="grid grid-cols-[140px_1fr] gap-4 border-t py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Placement</div><div><strong>Use the existing <code class="font-mono text-[13px]">roles/apps</code> role.</strong><p class="mt-1 mb-0 text-muted-foreground">Resolved by repo pattern: the role is already the server-only Homebrew CLI bucket.</p></div></div><div class="grid grid-cols-[140px_1fr] gap-4 border-t py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Profile reach</div><div><strong>Server profile only.</strong><p class="mt-1 mb-0 text-muted-foreground">Resolved by user confirmation: the tools must be available to <code class="font-mono text-[13px]">playbook-server.yml</code> and not to the thin client.</p></div></div><div class="grid grid-cols-[140px_1fr] gap-4 border-t py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Config scope</div><div><strong>Install binaries only.</strong><p class="mt-1 mb-0 text-muted-foreground">Resolved by captured source and confirmation: do not add configs.</p></div></div>
+          </div>
+        </section>
+
+        <section id="sect-alternatives-considered" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">04</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Alternatives considered</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Why the chosen approach beat what was on the table.</p>
+          <div class="flex flex-col border-t">
+            <div class="grid grid-cols-[160px_1fr_1fr] gap-4 border-b py-4 text-[14px]"><div class="font-medium">Add a new role</div><div class="text-muted-foreground">Would isolate the two Google tools.</div><div>Rejected because the existing <code class="font-mono text-[13px]">apps</code> role is explicitly for loose server-only CLIs that do not warrant their own role.</div></div><div class="grid grid-cols-[160px_1fr_1fr] gap-4 border-b py-4 text-[14px]"><div class="font-medium">Add to thin profile too</div><div class="text-muted-foreground">Would make the tools available on all Macs.</div><div>Rejected because the user explicitly requires server-only availability.</div></div>
+          </div>
+        </section>
+
+        <section id="sect-requirements" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">05</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Requirements</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Behaviors — not implementation tasks. Each links to the acceptance criteria that verify it.</p>
+          <div class="flex flex-col border-t">
+            <div id="req-1" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">REQ-1</div><div>The server provisioning profile installs the Google Cloud CLI using the Homebrew formula <code class="font-mono text-[13px]">gcloud-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#ac-1">AC-1</a></div></div><div id="req-2" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">REQ-2</div><div>The server provisioning profile installs the Google Workspace CLI using the Homebrew formula <code class="font-mono text-[13px]">googleworkspace-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#ac-2">AC-2</a></div></div><div id="req-3" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">REQ-3</div><div>The thin-client provisioning profile does not install either CLI through this change.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#ac-3">AC-3</a></div></div><div id="req-4" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">REQ-4</div><div>The change does not add Google Cloud, Google Workspace, authentication, credential, shell, or app configuration files.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#ac-4">AC-4</a></div></div>
+          </div>
+        </section>
+
+        <section id="sect-acceptance-criteria" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">06</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Acceptance criteria</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Independently verifiable. Click an AC's <em>from</em> to jump to the source requirement.</p>
+          <div class="flex flex-col border-t">
+            <div id="ac-1" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-1</div><div><code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code> contains an idempotent Homebrew task for <code class="font-mono text-[13px]">gcloud-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#req-1">REQ-1</a></div></div><div id="ac-2" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-2</div><div><code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code> contains an idempotent Homebrew task for <code class="font-mono text-[13px]">googleworkspace-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#req-2">REQ-2</a></div></div><div id="ac-3" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-3</div><div><code class="font-mono text-[13px]">playbook-thin.yml</code> remains without the <code class="font-mono text-[13px]">apps</code> role and without direct installs for <code class="font-mono text-[13px]">gcloud-cli</code> or <code class="font-mono text-[13px]">googleworkspace-cli</code>.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#req-3">REQ-3</a></div></div><div id="ac-4" class="grid grid-cols-[92px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">AC-4</div><div>The diff is limited to tool installation plumbing and contains no Google config, credential, login, shell completion, rc file, or profile changes.</div><div><a class="text-primary underline decoration-border underline-offset-4" href="#req-4">REQ-4</a></div></div>
+          </div>
+        </section>
+
+        <section id="sect-assumptions" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">07</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Assumptions</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Claims we depend on but haven't verified. Each has an owner and a next-check date.</p>
+          <div class="flex flex-col border-t">
+            <div class="grid grid-cols-[150px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-medium">Formula availability</div><div>The named Homebrew formulae are available under the captured names.</div><div class="text-muted-foreground">Check during validation</div></div>
+          </div>
+        </section>
+
+        <section id="sect-constraints-and-dependencies" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">08</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Constraints &amp; dependencies</h2>
+          </div>
+          <div class="flex flex-col gap-4 [&>p]:m-0 [&>p]:text-[15.5px] [&>p]:leading-[1.6] [&>p]:text-foreground/85 [&_strong]:font-semibold [&_strong]:text-foreground">
+            <ul class="m-0 flex list-none flex-col gap-2 p-0"><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span><strong>Server-only:</strong> rely on the existing server-only <code class="font-mono text-[13px]">apps</code> role; do not include that role in <code class="font-mono text-[13px]">playbook-thin.yml</code>.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span><strong>Homebrew only:</strong> install with <code class="font-mono text-[13px]">community.general.homebrew</code>, matching nearby role style.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span><strong>No configuration:</strong> no files or tasks that configure cloud accounts, workspace accounts, credentials, shell startup, or defaults.</li></ul>
+          </div>
+        </section>
+
+        <section id="sect-out-of-scope" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">09</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Out of scope</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Intentional non-goals for this work item.</p>
+          <div class="flex flex-col gap-4">
+            <ul class="m-0 flex list-none flex-col gap-2 p-0"><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Installing either CLI on the thin-client profile.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Google Cloud authentication, components, accounts, projects, shell completion, or SDK config.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Google Workspace authentication, account defaults, API scopes, or config.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Creating a dedicated role for these CLIs.</li></ul>
+          </div>
+        </section>
+
+        <section id="sect-open-questions" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">10</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Open questions</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Implementation-affecting and not yet resolved. The first blocks sign-off.</p>
+          <div class="flex flex-col border-t">
+            <div class="grid grid-cols-[160px_1fr_120px] gap-4 border-b py-4 text-[14px]"><div class="font-medium">None</div><div>No implementation-affecting open questions remain.</div><div class="text-muted-foreground">Resolved</div></div>
+          </div>
+        </section>
+
+        <section id="sect-execution-notes" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">11</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Execution notes for breakdown</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Sequencing hints — not implementation. The breakdown will own task shape.</p>
+          <div class="flex flex-col gap-4">
+            <ul class="m-0 flex list-none flex-col gap-2 p-0"><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Edit <code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code> following the existing Homebrew task pattern for Lazygit and ripgrep.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Verify <code class="font-mono text-[13px]">playbook-thin.yml</code> is unchanged and does not include the apps role.</li><li class="relative pl-6 text-[15.5px] leading-[1.6] text-foreground/85"><span class="absolute left-0 text-primary">—</span>Run the narrowest available Ansible syntax/check validation for the server playbook if project tooling supports it.</li></ul>
+          </div>
+        </section>
+
+        <section id="sect-references" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">12</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">References</h2>
+          </div>
+          <ul class="m-0 flex list-none flex-col gap-2 p-0">
+            <li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Source</span><a class="text-primary underline decoration-border underline-offset-4" href="https://github.com/theseifhassan/dotfiles/issues/47">GitHub work item #47</a></li><li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Code</span><span><code class="font-mono text-[13px]">roles/apps/tasks/main.yml</code>, <code class="font-mono text-[13px]">playbook-server.yml</code>, <code class="font-mono text-[13px]">playbook-thin.yml</code></span></li><li class="grid grid-cols-[90px_1fr] gap-3 text-[14px]"><span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Prior render</span><span><code class="font-mono text-[13px]">artifacts/47-add-gcloud-gws-tools-scope.html</code></span></li>
+          </ul>
+        </section>
+
+        <section id="sect-design-decisions" class="flex flex-col gap-3.5 border-t py-8">
+          <div class="flex items-baseline gap-3.5">
+            <span class="pt-2 font-mono text-[12.5px] tracking-[0.08em] text-primary">13</span>
+            <h2 class="font-serif text-[22px] font-medium leading-[1.2] tracking-[-0.008em] text-foreground sm:text-[26px] lg:text-[28px]">Design decisions</h2>
+          </div>
+          <p class="max-w-[640px] -mt-1 font-serif text-[17px] font-light italic leading-[1.5] text-muted-foreground">Append-only — entries are never rewritten. Newer decisions reference older ones.</p>
+          <div class="flex flex-col">
+            <div class="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/><polyline points="12 7 12 12 15 14"/></svg>
+              Append-only · entries are never rewritten
+            </div>
+            <div class="relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <thead class="[&_tr]:border-b">
+                  <tr class="border-b transition-colors hover:bg-transparent">
+                    <th class="h-10 px-2 text-left align-middle font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground w-[90px]">When</th>
+                    <th class="h-10 px-2 text-left align-middle font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Decision</th>
+                  </tr>
+                </thead>
+                <tbody class="[&_tr:last-child]:border-0">
+                  <tr class="border-b transition-colors hover:bg-muted/40"><td class="p-2 align-top font-mono text-[12px] text-muted-foreground">2026-06-24</td><td class="p-2 align-top text-[14px]">Use the existing server-only <code class="font-mono text-[13px]">roles/apps</code> role for the two Homebrew CLI installs.</td></tr><tr class="border-b transition-colors hover:bg-muted/40"><td class="p-2 align-top font-mono text-[12px] text-muted-foreground">2026-06-24</td><td class="p-2 align-top text-[14px]">Do not add any Google Cloud, Google Workspace, authentication, credential, shell, or config setup.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+  <script>
+/* scrollspy.js
+   Contents-list active-state highlighter. Tracks which <section[id^="sect-"]>
+   is most-recently scrolled past a 120px trigger line below the viewport top
+   and toggles `data-toc-active="true"` on the matching contents-list anchor.
+   Also hides contents items whose target section was dropped by the
+   empty-section render rule. */
+
+(function () {
+  const main = document.querySelector('[data-artifact-main]');
+  const toc  = document.querySelector('[data-artifact-toc]');
+  if (!main || !toc) return;
+
+  // Hide TOC items whose target section is missing (dropped by render rule).
+  const tocItems = Array.from(toc.querySelectorAll('li'));
+  const sectionsById = new Map();
+  const liveLinks = [];
+  for (const li of tocItems) {
+    const a = li.querySelector('a[href^="#sect-"]');
+    if (!a) { li.hidden = true; continue; }
+    const id = a.getAttribute('href').slice(1);
+    const target = document.getElementById(id);
+    if (!target) { li.hidden = true; continue; }
+    sectionsById.set(id, target);
+    liveLinks.push(a);
+  }
+  if (liveLinks.length === 0) return;
+
+  const TRIGGER_OFFSET = 120;
+  let scrollLockUntil = 0;
+
+  function setActive(id) {
+    for (const a of liveLinks) a.removeAttribute('data-toc-active');
+    const link = liveLinks.find(a => a.getAttribute('href') === '#' + id);
+    if (link) link.setAttribute('data-toc-active', 'true');
+  }
+
+  function computeActive() {
+    let activeId = null;
+    let bestDistance = -Infinity;
+    for (const [id, target] of sectionsById) {
+      const top = target.getBoundingClientRect().top;
+      const distance = top - TRIGGER_OFFSET;
+      if (distance <= 0 && distance > bestDistance) {
+        bestDistance = distance;
+        activeId = id;
+      }
+    }
+    if (activeId === null) activeId = sectionsById.keys().next().value;
+    setActive(activeId);
+  }
+
+  let scheduled = false;
+  function scheduleUpdate() {
+    if (scheduled || Date.now() < scrollLockUntil) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; computeActive(); });
+  }
+
+  for (const a of liveLinks) {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href').slice(1);
+      const target = document.getElementById(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', '#' + id);
+      }
+      setActive(id);
+      scrollLockUntil = Date.now() + 800;
+    });
+  }
+  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  window.addEventListener('resize', scheduleUpdate, { passive: true });
+  window.addEventListener('hashchange', () => {
+    const id = window.location.hash.slice(1);
+    if (sectionsById.has(id)) { setActive(id); scrollLockUntil = Date.now() + 800; }
+  });
+
+  const initialHash = window.location.hash.slice(1);
+  if (initialHash && sectionsById.has(initialHash)) setActive(initialHash);
+  else computeActive();
+})();
+  </script>
+</body>
+</html>
