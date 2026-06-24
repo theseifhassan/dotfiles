@@ -94,8 +94,9 @@
     - role: apps
       tags: [apps]
 
-    # GUI apps installed from official DMGs (gather, wisprflow, raycast). Each
-    # is tagged, so `-t raycast` targets one app; `-t dmg` runs them all.
+    # GUI apps installed from official DMGs (gather, wisprflow, raycast,
+    # alcove). Each is tagged, so `-t raycast` targets one app; `-t dmg` runs
+    # them all.
     - role: dmg
       tags: [dmg]
 

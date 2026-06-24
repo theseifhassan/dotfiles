@@ -60,8 +60,8 @@
     - role: casks
       tags: [casks]
 
-    # GUI apps from official DMGs (gather, wisprflow, raycast). `-t raycast`
-    # targets one; `-t dmg` runs all.
+    # GUI apps from official DMGs (gather, wisprflow, raycast, alcove).
+    # `-t raycast` targets one; `-t dmg` runs all.
     - role: dmg
       tags: [dmg]
 
