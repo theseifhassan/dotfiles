@@ -1,0 +1,23 @@
+// Zed keymap — XDG-native, deployed by roles/zed.
+//
+// Neovim-style window navigation: <ctrl-w> then h/j/k/l moves focus
+// spatially across the whole workspace — the left dock (project panel), the
+// main editor, the right dock, and the bottom dock (integrated terminal) —
+// not just between editor splits.
+//
+// Zed's default vim keymap binds <ctrl-w> h/j/k/l to ActivatePaneLeft/Down/
+// Up/Right, which only cycle editor panes and won't cross into the docks.
+// ActivatePaneInDirection *does* cross into docks/terminal, and binding it in
+// the "Dock || Terminal || VimControl" context makes the same keys work no
+// matter where focus currently is.
+[
+  {
+    "context": "Dock || Terminal || VimControl",
+    "bindings": {
+      "ctrl-w h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-w j": ["workspace::ActivatePaneInDirection", "Down"],
+      "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"]
+    }
+  }
+]
