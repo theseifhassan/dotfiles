@@ -19,5 +19,13 @@
       "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
       "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"]
     }
+  },
+  {
+    // Leader (space) maps, scoped to vim normal mode so they don't clash with
+    // typing. <leader>z toggles Zed's centered layout.
+    "context": "vim_mode == normal && !menu",
+    "bindings": {
+      "space z": "workspace::ToggleCenteredLayout"
+    }
   }
 ]
