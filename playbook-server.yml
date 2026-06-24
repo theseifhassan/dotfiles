@@ -71,6 +71,9 @@
     - role: claude
       tags: [claude]
 
+    - role: opencode
+      tags: [opencode]
+
     - role: zed
       tags: [zed]
 

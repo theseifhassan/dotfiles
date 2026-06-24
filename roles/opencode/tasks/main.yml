@@ -1,0 +1,46 @@
+---
+# roles/opencode/tasks/main.yml
+# Installs OpenCode and configures global user-scope MCP servers.
+
+- name: Install OpenCode
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
+  changed_when: true
+
+- name: Create OpenCode config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/opencode"
+    state: directory
+    mode: "0700"
+
+- name: Deploy OpenCode config
+  ansible.builtin.copy:
+    content: |
+      {
+        "$schema": "https://opencode.ai/config.json",
+        "mcp": {
+          "linear": {
+            "type": "remote",
+            "url": "https://mcp.linear.app/mcp",
+            "enabled": true
+          },
+          "notion": {
+            "type": "remote",
+            "url": "https://mcp.notion.com/mcp",
+            "enabled": true
+          }
+        }
+      }
+    dest: "{{ xdg_config_home }}/opencode/opencode.json"
+    mode: "0600"
+
+- name: Deploy OpenCode shell config
+  ansible.builtin.copy:
+    content: |
+      opencode_bin="$HOME/.opencode/bin"
+      if [ -d "$opencode_bin" ] && [[ ":$PATH:" != *":$opencode_bin:"* ]]; then
+        export PATH="$opencode_bin:$PATH"
+      fi
+      unset opencode_bin
+    dest: "{{ xdg_config_home }}/zsh/conf.d/opencode.zsh"
+    mode: "0644"
