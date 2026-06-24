@@ -51,6 +51,9 @@
     - role: claude
       tags: [claude]
 
+    - role: opencode
+      tags: [opencode]
+
     # GUI applications.
     # Trivial single-cask apps (chrome, notion, slack, figma, linear, discord,
     # datagrip). Per-task tags mean `-t slack` targets one app; `-t casks` all.
