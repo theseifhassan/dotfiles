@@ -13,3 +13,13 @@
   community.general.homebrew:
     name: ripgrep
     state: latest
+
+- name: Install Google Cloud CLI
+  community.general.homebrew_cask:
+    name: gcloud-cli
+    state: latest
+
+- name: Install Google Workspace CLI
+  community.general.homebrew:
+    name: googleworkspace-cli
+    state: latest
