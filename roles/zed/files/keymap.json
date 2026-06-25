@@ -12,17 +12,23 @@
 // matter where focus currently is.
 [
   {
+    // <ctrl-w> window prefix — works everywhere (editor, docks, terminal).
+    // h/j/k/l move focus across the docks; z toggles the centered layout.
+    // ctrl-w z is the terminal-capable counterpart to the <leader>z map below,
+    // since a space leader can't be used while focus is in the terminal.
     "context": "Dock || Terminal || VimControl",
     "bindings": {
       "ctrl-w h": ["workspace::ActivatePaneInDirection", "Left"],
       "ctrl-w j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
-      "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"]
+      "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-w z": "workspace::ToggleCenteredLayout"
     }
   },
   {
     // Leader (space) maps, scoped to vim normal mode so they don't clash with
-    // typing. <leader>z toggles Zed's centered layout.
+    // typing. <leader>z toggles Zed's centered layout (editor only; use
+    // ctrl-w z from the terminal/docks).
     "context": "vim_mode == normal && !menu",
     "bindings": {
       "space z": "workspace::ToggleCenteredLayout"
