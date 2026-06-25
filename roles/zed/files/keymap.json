@@ -14,23 +14,33 @@
   {
     // <ctrl-w> window prefix — works everywhere (editor, docks, terminal).
     // h/j/k/l move focus across the docks; z toggles the centered layout.
-    // ctrl-w z is the terminal-capable counterpart to the <leader>z map below,
-    // since a space leader can't be used while focus is in the terminal.
+    // p fuzzy-jumps between project workspaces; ] / [ cycle them. The ctrl-w
+    // variants are the terminal-capable counterparts to the <leader> maps
+    // below, since a space leader can't be used while focus is in the terminal.
     "context": "Dock || Terminal || VimControl",
     "bindings": {
       "ctrl-w h": ["workspace::ActivatePaneInDirection", "Left"],
       "ctrl-w j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
       "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"],
-      "ctrl-w z": "workspace::ToggleCenteredLayout"
+      "ctrl-w z": "workspace::ToggleCenteredLayout",
+      "ctrl-w p": "projects::OpenRecent",
+      "ctrl-w ]": "multi_workspace::NextProject",
+      "ctrl-w [": "multi_workspace::PreviousProject"
     }
   },
   {
     // Leader (space) maps, scoped to vim normal mode so they don't clash with
-    // typing. <leader>z toggles Zed's centered layout (editor only; use
-    // ctrl-w z from the terminal/docks).
+    // typing. These are editor-only; use the ctrl-w variants above from the
+    // terminal/docks.
+    //   <leader><leader> — fuzzy-jump to a project/worktree workspace
+    //   <leader>w        — focus the workspace switcher sidebar (visual list)
+    //   <leader>z        — toggle the centered layout
+    // (] p / [ p cycle workspaces by default in vim mode.)
     "context": "vim_mode == normal && !menu",
     "bindings": {
+      "space space": "projects::OpenRecent",
+      "space w": "multi_workspace::FocusWorkspaceSidebar",
       "space z": "workspace::ToggleCenteredLayout"
     }
   }

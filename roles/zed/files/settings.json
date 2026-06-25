@@ -13,6 +13,16 @@
   "scrollbar": {
     "show": "never"
   },
+  // Multi-workspace workflow: one Zed window holds each project/worktree as a
+  // workspace in the switcher sidebar (the tmux-sessions model), instead of a
+  // separate OS window per project. Both the UI and `zed <path>` from the CLI
+  // open into the current window's sidebar, and every workspace is restored on
+  // startup. Long-running processes still live in tmux — Zed terminals aren't
+  // detached and don't survive a quit. Switch with the keymap (space space /
+  // ctrl-w p to fuzzy-jump, ] p / [ p to cycle).
+  "default_open_behavior": "existing_window",
+  "cli_default_open_behavior": "existing_window",
+  "restore_on_startup": "last_session",
   // Declutter the status bar — hide toggle buttons we don't use so the chrome
   // stays minimal. The panels themselves remain reachable via the command
   // palette / keymap; only their status-bar buttons are hidden.
