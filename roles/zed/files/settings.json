@@ -1,4 +1,42 @@
 {
+  "icon_theme": {
+    "mode": "light",
+    "light": "Zed (Default)",
+    "dark": "Zed (Default)"
+  },
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "Vercel Dark"
+  },
+  // Near-vim UI: no editor scrollbar.
+  "scrollbar": {
+    "show": "never"
+  },
+  // Declutter the status bar — hide toggle buttons we don't use so the chrome
+  // stays minimal. The panels themselves remain reachable via the command
+  // palette / keymap; only their status-bar buttons are hidden.
+  "agent": {
+    "button": false
+  },
+  "collaboration_panel": {
+    "button": false
+  },
+  "git_panel": {
+    "button": false
+  },
+  "debugger": {
+    "button": false
+  },
+  "global_lsp_settings": {
+    "button": false
+  },
+  "search": {
+    "button": false
+  },
+  "outline_panel": {
+    "button": false
+  },
   "agent_servers": {
     "claude-acp": {
       "type": "registry"

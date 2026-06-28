@@ -21,3 +21,10 @@
     dest: "{{ xdg_config_home }}/zed/settings.json"
     state: link
     force: true
+
+- name: Deploy Zed keymap
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/keymap.json"
+    dest: "{{ xdg_config_home }}/zed/keymap.json"
+    state: link
+    force: true
