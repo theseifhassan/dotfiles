@@ -1,7 +1,8 @@
 ---
 # roles/mise/tasks/main.yml
-# Installs mise via Homebrew, deploys global config under XDG, and activates
-# it in zsh. mise natively respects XDG_CONFIG_HOME.
+# Installs mise via Homebrew, deploys global config under XDG, renders profile
+# secrets from the vault, and activates mise in zsh. mise natively respects
+# XDG_CONFIG_HOME.
 
 - name: Install mise via Homebrew
   community.general.homebrew:
@@ -21,12 +22,16 @@
     state: link
     force: true
 
-- name: Deploy mise project presets
+- name: Render personal profile secrets
+  ansible.builtin.template:
+    src: secrets.env.j2
+    dest: "{{ xdg_config_home }}/mise/secrets.env"
+    mode: "0600"
+
+- name: Remove retired presets link
   ansible.builtin.file:
-    src: "{{ role_path }}/files/presets"
-    dest: "{{ xdg_config_home }}/mise/presets"
-    state: link
-    force: true
+    path: "{{ xdg_config_home }}/mise/presets"
+    state: absent
 
 - name: Deploy mise activation to zsh
   ansible.builtin.copy:
