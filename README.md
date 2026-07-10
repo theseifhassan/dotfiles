@@ -96,35 +96,25 @@ The script is deployed to `~/.local/bin/tmux-sessionizer` and can also be called
 tmux-sessionizer ~/Desktop/my-app
 ```
 
-## mise presets
+## mise env (personal only)
 
-Project toolchains are managed with [mise](https://mise.jdx.dev). To avoid
-copying near-identical config into every repo, a project's `mise.toml` is
-scaffolded from a **preset** (the toolchain) plus a **profile** (work/personal
-env vars):
+Project toolchains are managed with [mise](https://mise.jdx.dev). The global
+config (`~/.config/mise/config.toml`, symlinked from the repo) carries the
+shared tools and the **personal** env: `GRAPHITE_PROFILE` inline, and the
+personal secrets (`GH_TOKEN`) loaded from `~/.config/mise/secrets.env` —
+rendered from the vault by the `mise` role, mode 0600. Personal is the default everywhere with zero per-project setup;
+rotating a secret means editing the vault and re-running the playbook.
 
-```bash
-mise run init node          # node toolchain; profile auto-detected from git remote
-mise run init node work     # force the work profile
-mise run init node personal # force the personal profile
-```
-
-The profile is auto-detected from the repo's git remote (work if it matches the
-`work.github.com` host, else personal), mirroring the `git` role. Scaffold
-before adding a remote and it defaults to personal — pass `work` to override.
-
-Presets live under `~/.config/mise/presets/`:
-
-- `node.toml` etc. — the toolchain (`node`, `pnpm`, common tasks), identical
-  across profiles.
-- `_env-work.toml` / `_env-personal.toml` — the profile-varying env vars
-  (`GH_TOKEN`, `GREPTILE_API_KEY`, `GRAPHITE_PROFILE`), with secrets pulled from
-  1Password via `op` at runtime. This mirrors the `git` role's work/personal
-  split (work = `~/Desktop/sky*`, personal by default).
+Work projects are deliberately **not** managed by these dotfiles — their env
+comes from the work project/machine itself. The only work-awareness here is
+Claude Code routing: the `claude` role's guardrail detects work repos by git
+remote and hands off to `claudius`, the isolated work instance.
 
 General CLIs (`gh`, `gt`, `lazygit`) are installed globally via Homebrew (the
 `git` and `apps` roles), so they're deliberately not managed by mise.
 
 ## Secrets
 
-Secrets are managed via Ansible Vault (`group_vars/all/vault.yml`). No plaintext secrets on disk.
+Secrets are encrypted in the repo via Ansible Vault (`group_vars/all/vault.yml`)
+and rendered at playbook time into a local, mode-0600 env file
+(`~/.config/mise/secrets.env`). Nothing plaintext is ever committed.

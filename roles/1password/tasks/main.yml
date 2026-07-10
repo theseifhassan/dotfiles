@@ -19,7 +19,8 @@
     state: present
 
 # Headless `op` access (server only). The service-account token lets `op read`
-# resolve secrets (e.g. the mise GH_TOKEN/GREPTILE_API_KEY) non-interactively.
+# resolve secrets non-interactively. NOTE: nothing in these dotfiles consumes
+# `op read` anymore (mise secrets moved to the vault) — candidate for removal.
 - name: Warn if headless op is enabled but the token is not set in vault
   ansible.builtin.debug:
     msg: >-

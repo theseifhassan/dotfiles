@@ -51,8 +51,6 @@
     - role: claude
       tags: [claude]
 
-    - role: opencode
-      tags: [opencode]
 
     # GUI applications.
     # Trivial single-cask apps (chrome, notion, slack, figma, linear, discord,
