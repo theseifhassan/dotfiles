@@ -33,5 +33,18 @@
     "bindings": {
       "space z": "workspace::ToggleCenteredLayout"
     }
+  },
+  {
+    // tmux-style thread navigation for the multi-workspace sidebar:
+    // <ctrl-b> n/p cycle threads, <ctrl-b> s opens the thread switcher
+    // (Zed has no activate-thread-by-index action, so no <ctrl-b> {n}).
+    // "&& !Terminal" keeps ctrl-b reaching tmux inside the integrated
+    // terminal — tmux remains the process layer and owns that prefix there.
+    "context": "Workspace && !Terminal",
+    "bindings": {
+      "ctrl-b n": "multi_workspace::NextThread",
+      "ctrl-b p": "multi_workspace::PreviousThread",
+      "ctrl-b s": "agents_sidebar::ToggleThreadSwitcher"
+    }
   }
 ]

@@ -13,6 +13,13 @@
   "scrollbar": {
     "show": "never"
   },
+  // Worktree convention pin (this is Zed's default, declared for the record):
+  // relative to each repo, so ~/Desktop/<repo> → ~/Desktop/worktrees/<repo>/…
+  // — the same root SAW uses via SAW_WORKTREE_ROOT (mise role). Zed rejects
+  // absolute paths here, which is why the shared root is expressed relatively.
+  "git": {
+    "worktree_directory": "../worktrees"
+  },
   // Declutter the status bar — hide toggle buttons we don't use so the chrome
   // stays minimal. The panels themselves remain reachable via the command
   // palette / keymap; only their status-bar buttons are hidden.
