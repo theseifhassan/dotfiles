@@ -33,25 +33,35 @@
 - name: Deploy worktree-open hook script
   ansible.builtin.copy:
     src: "{{ role_path }}/files/open-worktree-in-zed"
-    dest: "{{ xdg_config_home }}/claude/hooks/open-worktree-in-zed"
+    dest: "{{ claude_worktree_hook }}"
     mode: "0755"
 
 # settings.json is otherwise hand-managed (models, plugins, notification
 # prefs), so the hook is merged in rather than the file being templated:
 # only the hooks.PostToolUse entry this role owns is added, everything else
 # is preserved, and the write is skipped when the entry is already present.
+# The write is atomic (temp file + rename) so an interrupted run can't
+# truncate the live settings; an unparseable settings file fails loudly with
+# its path rather than being clobbered.
 - name: Register worktree-open hook in instance settings
   ansible.builtin.shell:
     cmd: |
       python3 - "{{ xdg_config_home }}/{{ item }}/settings.json" \
-                "{{ xdg_config_home }}/claude/hooks/open-worktree-in-zed" <<'PY'
-      import json, os, sys
+                "{{ claude_worktree_hook }}" <<'PY'
+      import json, os, sys, tempfile
 
       settings_path, hook_command = sys.argv[1], sys.argv[2]
       settings = {}
       if os.path.exists(settings_path):
-          with open(settings_path) as f:
-              settings = json.load(f)
+          try:
+              with open(settings_path) as f:
+                  settings = json.load(f)
+          except (json.JSONDecodeError, UnicodeDecodeError) as err:
+              sys.stderr.write(
+                  f"refusing to touch {settings_path}: not valid JSON ({err}); "
+                  "fix or remove the file, then re-run\n"
+              )
+              sys.exit(1)
 
       matchers = settings.setdefault("hooks", {}).setdefault("PostToolUse", [])
       entry = next((m for m in matchers if m.get("matcher") == "Bash"), None)
@@ -64,9 +74,13 @@
           print("OK")
       else:
           commands.append({"type": "command", "command": hook_command})
-          with open(settings_path, "w") as f:
+          fd, tmp_path = tempfile.mkstemp(
+              dir=os.path.dirname(settings_path) or ".", suffix=".tmp"
+          )
+          with os.fdopen(fd, "w") as f:
               json.dump(settings, f, indent=2)
               f.write("\n")
+          os.replace(tmp_path, settings_path)
           print("CHANGED")
       PY
   loop:

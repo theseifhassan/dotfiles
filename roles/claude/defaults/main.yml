@@ -1,0 +1,6 @@
+---
+# roles/claude/defaults/main.yml
+
+# Where the worktree-open hook script is deployed and what the instances'
+# settings.json invoke — single definition so the two can't drift.
+claude_worktree_hook: "{{ xdg_config_home }}/claude/hooks/open-worktree-in-zed"

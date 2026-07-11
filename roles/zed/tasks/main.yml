@@ -6,7 +6,10 @@
 #
 # Config files are deployed as copies, not symlinks: playbooks may run from
 # throwaway git worktrees, and a symlink into one leaves the live config
-# dangling once that worktree is reaped.
+# dangling once that worktree is reaped. The flip side: edits made through
+# Zed's own UI land in the live copy and are overwritten on the next playbook
+# run — config changes belong in these repo files. backup: true keeps a
+# timestamped copy of whatever gets overwritten, as a recovery net.
 
 - name: Install Zed
   community.general.homebrew_cask:
@@ -25,6 +28,7 @@
     dest: "{{ xdg_config_home }}/zed/settings.json"
     mode: "0644"
     force: true
+    backup: true
 
 - name: Deploy Zed keymap
   ansible.builtin.copy:
@@ -32,3 +36,4 @@
     dest: "{{ xdg_config_home }}/zed/keymap.json"
     mode: "0644"
     force: true
+    backup: true
