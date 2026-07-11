@@ -5,7 +5,7 @@ Project guidance for Claude Code. The workflow-managed blocks below are owned by
 <!-- workflow:managed:start kind=stack -->
 ## SAW Stack
 
-- tracker: github_issues
+- tracker: github_issues (post-scope label: todo)
 - vcs: graphite
 - review: none (self / Claude review)
 <!-- workflow:managed:end kind=stack -->

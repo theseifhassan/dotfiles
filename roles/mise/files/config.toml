@@ -8,6 +8,10 @@
 
 [env]
 GRAPHITE_PROFILE = "personal"
+# Where agent workflows (SAW) create git worktrees. Zed's per-repo default
+# ("../worktrees" relative to the repo) resolves to the same root for repos
+# living in ~/Desktop, so both tools share one worktree tree.
+SAW_WORKTREE_ROOT = "{{env.HOME}}/Desktop/worktrees"
 _.file = "~/.config/mise/secrets.env"
 
 # Global tools. The Node-based language servers + formatters here are consumed
