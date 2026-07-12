@@ -16,3 +16,11 @@ git_identity:
 
 gh_token: "{{ vault_gh_token.personal }}"
 graphite_token: "{{ vault_graphite_token.personal }}"
+
+# Peer machine (see ssh_hosts in group_vars/all): reachable at its tailnet
+# IP with this machine's personal key; inbound, the MacBook's work key is
+# authorized.
+ssh_peer:
+  host: "macbook"
+  ip: "100.66.53.73"
+ssh_peer_authorized_key: "{{ vault_ssh_key.work.public_key }}"

@@ -31,3 +31,27 @@
     dest: "{{ ansible_facts['user_dir'] }}/.ssh/config"
     mode: "0600"
     validate: "ssh -F %s -G localhost"
+
+# Inbound peer access: plain sshd + the peer profile's key, because the
+# Tailscale SSH server is broken in the macOS open-source build
+# (tailscale/tailscale#18957). The tailnet still provides the network.
+- name: Authorize peer machine's profile key
+  ansible.posix.authorized_key:
+    user: "{{ ansible_facts['user_dir'] | basename }}"
+    key: "{{ ssh_peer_authorized_key }}"
+    state: present
+
+- name: Read Remote Login state
+  ansible.builtin.command:
+    cmd: systemsetup -getremotelogin
+  become: true
+  register: ssh_remotelogin
+  changed_when: false
+  check_mode: false # read-only probe; must run even during --check
+
+- name: Enable Remote Login (sshd)
+  ansible.builtin.command:
+    cmd: systemsetup -setremotelogin on
+  become: true
+  when: "'On' not in ssh_remotelogin.stdout"
+  changed_when: true

@@ -13,7 +13,10 @@ Two machines, one profile each — both full development environments:
 Both machines run the same `site.yml` role list. Profile differences (git
 identity, tokens, app picks) live in `group_vars/personal/` and
 `group_vars/work/`; the inventory decides which machine is which. Both join
-the tailnet with Tailscale SSH enabled, so either can SSH to the other.
+the tailnet, and either can SSH to the other from anywhere: the tailnet is
+the encrypted network, auth is sshd + the peer profile's key (Tailscale SSH
+stays enabled but its macOS server is currently broken upstream —
+tailscale/tailscale#18957 — and takes over automatically once fixed).
 
 ## Quick Start
 
@@ -56,7 +59,7 @@ separate `--ask-become-pass`).
 
 | Role | What it does |
 |------|-------------|
-| ssh | Profile SSH key from the vault; SSH config (inter-machine SSH is Tailscale-authenticated — no machine keys) |
+| ssh | Profile SSH key from the vault; SSH config with the peer machine pinned to its tailnet IP; authorizes the peer profile's key and ensures Remote Login — no machine keys |
 | git | Git config with the machine's single profile identity; GitHub CLI + Graphite CLI |
 | zsh | Zsh config under `ZDOTDIR` (vi mode + native prompt) |
 | mise | Per-project tool/env management; renders profile secrets |
