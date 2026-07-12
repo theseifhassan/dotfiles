@@ -3,8 +3,9 @@
 # GUI apps installed from official DMG releases (not Homebrew casks). The shared
 # download/mount/copy/de-quarantine/unmount logic lives in install.yml; each app
 # below supplies its own data and tag, so a single app can be targeted, e.g.:
-#   ansible-playbook playbook-server.yml -t raycast   # just Raycast
-#   ansible-playbook playbook-server.yml -t dmg       # all of the below
+#   ansible-playbook site.yml -t raycast   # just Raycast
+#   ansible-playbook site.yml -t dmg       # all of the below
+# Profile-specific apps carry a `when` guard (gather work-only).
 
 - name: Gather Town
   ansible.builtin.include_tasks:
@@ -17,6 +18,7 @@
     dmg_url: "https://api.v2.gather.town/api/v2/releases/latest/macos/v2"
     dmg_slug: "gather"
   tags: [dmg, gather]
+  when: profile == "work"
 
 - name: Wispr Flow
   ansible.builtin.include_tasks:

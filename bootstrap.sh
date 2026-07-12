@@ -3,12 +3,16 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-# Optional playbook argument (defaults to the dev-server profile — the primary
-# workstation). Use the thin profile for thin clients, e.g.:
-#   ./bootstrap.sh playbook-thin.yml
-PLAYBOOK="${1:-playbook-server.yml}"
+# First-time setup of the machine this script runs ON (normally the mini, the
+# Ansible controller). Installs the toolchain, then provisions only this
+# machine — pass an inventory limit to override, e.g.:
+#   ./bootstrap.sh          # provision this machine
+#   ./bootstrap.sh all      # provision every machine (targets must be ready)
+# Fresh remote machines are prepared with ./bootstrap-target.sh <host> and
+# then provisioned with: ansible-playbook site.yml --limit work --ask-vault-pass
+LIMIT="${1:-$(scutil --get LocalHostName)}"
 
-echo "==> Starting dotfiles bootstrap ($PLAYBOOK)..."
+echo "==> Starting dotfiles bootstrap (site.yml --limit $LIMIT)..."
 
 # 1. Xcode Command Line Tools
 if ! xcode-select -p &>/dev/null; then
@@ -67,5 +71,5 @@ echo "==> Installing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
 
 # 5. Run the playbook
-echo "==> Running Ansible playbook ($PLAYBOOK)..."
-ansible-playbook "$PLAYBOOK" --ask-vault-pass
+echo "==> Running Ansible playbook (site.yml --limit $LIMIT)..."
+ansible-playbook site.yml --limit "$LIMIT" --ask-vault-pass

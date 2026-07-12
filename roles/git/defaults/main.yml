@@ -1,6 +1,0 @@
----
-# roles/git/defaults/main.yml
-
-# Install the dev-workflow CLIs (GitHub CLI + Graphite) alongside git.
-# Set to false on slim profiles (e.g. thin clients) that only need core git.
-git_install_extras: true

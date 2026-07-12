@@ -1,24 +1,13 @@
 ---
 # roles/git/tasks/main.yml
-# Installs Git via Homebrew and deploys git configs under XDG with includeIf
-# directives for work/personal identity. GitHub CLI + Graphite are installed
-# too unless git_install_extras is false (see defaults/main.yml).
+# Installs Git via Homebrew and deploys the git config under XDG with the
+# machine's single profile identity (one profile per machine — no includeIf
+# routing). GitHub CLI + Graphite are installed on every machine.
 
 - name: Install git via Homebrew
   community.general.homebrew:
     name: git
     state: latest
-
-- name: Assert git identity placeholders have been replaced
-  ansible.builtin.assert:
-    that:
-      - git_identity.work.name != "WORK_NAME_PLACEHOLDER"
-      - git_identity.work.email != "WORK_EMAIL_PLACEHOLDER"
-      - git_identity.personal.name != "PERSONAL_NAME_PLACEHOLDER"
-      - git_identity.personal.email != "PERSONAL_EMAIL_PLACEHOLDER"
-    fail_msg: >-
-      Replace the placeholder values in group_vars/all.yml before running
-      the git role.
 
 - name: Create git config directory
   ansible.builtin.file:
@@ -32,44 +21,29 @@
     dest: "{{ xdg_config_home }}/git/config"
     mode: "0600"
 
-- name: Deploy git work identity config
+- name: Install gh via Homebrew
+  community.general.homebrew:
+    name: gh
+    state: latest
+
+- name: Tap withgraphite/tap Homebrew repository
+  community.general.homebrew_tap:
+    name: withgraphite/tap
+    state: present
+
+- name: Install Graphite CLI via Homebrew
+  community.general.homebrew:
+    name: withgraphite/tap/graphite
+    state: latest
+
+- name: Create Graphite config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/graphite"
+    state: directory
+    mode: "0700"
+
+- name: Deploy Graphite user config
   ansible.builtin.template:
-    src: config-work.j2
-    dest: "{{ xdg_config_home }}/git/config-work"
+    src: graphite-user-config.json.j2
+    dest: "{{ xdg_config_home }}/graphite/user_config"
     mode: "0600"
-
-- name: Deploy git personal identity config
-  ansible.builtin.template:
-    src: config-personal.j2
-    dest: "{{ xdg_config_home }}/git/config-personal"
-    mode: "0600"
-
-- name: Install dev-workflow CLIs (GitHub CLI + Graphite)
-  when: git_install_extras | bool
-  block:
-    - name: Install gh via Homebrew
-      community.general.homebrew:
-        name: gh
-        state: latest
-
-    - name: Tap withgraphite/tap Homebrew repository
-      community.general.homebrew_tap:
-        name: withgraphite/tap
-        state: present
-
-    - name: Install Graphite CLI via Homebrew
-      community.general.homebrew:
-        name: withgraphite/tap/graphite
-        state: latest
-
-    - name: Create Graphite config directory
-      ansible.builtin.file:
-        path: "{{ xdg_config_home }}/graphite"
-        state: directory
-        mode: "0700"
-
-    - name: Deploy Graphite user config
-      ansible.builtin.template:
-        src: graphite-user-config.json.j2
-        dest: "{{ xdg_config_home }}/graphite/user_config"
-        mode: "0600"

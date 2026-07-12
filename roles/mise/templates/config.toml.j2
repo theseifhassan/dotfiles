@@ -1,17 +1,15 @@
-# mise configuration — global defaults (symlinked from the repo; no secrets).
+# {{ ansible_managed }}
+# mise configuration — global defaults, rendered per profile (no secrets).
 #
-# Personal env only: secrets.env is rendered from the vault by the mise role
-# (mode 0600, never committed). Work projects are deliberately NOT managed by
-# these dotfiles — work env is whatever the work project/machine provides, and
-# Claude Code routing to the work instance is handled by the claude role's
-# claudius guardrail (git-remote based), not by mise.
+# secrets.env is rendered from the vault by the mise role (mode 0600, never
+# committed) with this machine's profile secrets.
 
 [env]
-GRAPHITE_PROFILE = "personal"
+GRAPHITE_PROFILE = "{{ profile }}"
 # Where agent workflows (SAW) create git worktrees. Zed's per-repo default
 # ("../worktrees" relative to the repo) resolves to the same root for repos
 # living in ~/Desktop, so both tools share one worktree tree.
-SAW_WORKTREE_ROOT = "{{env.HOME}}/Desktop/worktrees"
+SAW_WORKTREE_ROOT = "{% raw %}{{env.HOME}}{% endraw %}/Desktop/worktrees"
 _.file = "~/.config/mise/secrets.env"
 
 # Global tools. The Node-based language servers + formatters here are consumed

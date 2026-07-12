@@ -1,46 +1,47 @@
 ---
 # roles/fonts/tasks/main.yml
-# Clones the private fonts repository via SSH and installs
-# font files (.ttf, .otf) to ~/Library/Fonts/ for system use.
+# The fonts repo is private under the personal account, so it is cloned on
+# the CONTROLLER (the mini) and the font files are pushed to each target.
+# No personal credential is ever needed on the work machine.
 
-- name: Create fonts data directory
+- name: Create fonts clone directory (controller)
   ansible.builtin.file:
     path: "{{ xdg_data_home }}/fonts"
     state: directory
     mode: "0700"
-
-- name: Create fonts install directory
-  ansible.builtin.file:
-    path: "{{ ansible_facts['user_dir'] }}/Library/Fonts"
-    state: directory
-    mode: "0755"
+  delegate_to: localhost
+  run_once: true
 
 # Key sourced from:
 # https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
-- name: Pin GitHub SSH host key
+- name: Pin GitHub SSH host key (controller)
   ansible.builtin.known_hosts:
     name: github.com
     key: "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
     state: present
+  delegate_to: localhost
+  run_once: true
 
-- name: Clone fonts repository
+- name: Clone fonts repository (controller)
   ansible.builtin.git:
     repo: "{{ fonts_repo }}"
     dest: "{{ xdg_data_home }}/fonts"
     version: "{{ fonts_repo_branch | default('master') }}"
     update: "{{ fonts_repo_force_update | default(false) }}"
     depth: 1
-  register: fonts_repo_clone
+  delegate_to: localhost
+  run_once: true
 
-- name: Find all font files in fonts repo
+- name: Find all font files in the controller clone
   ansible.builtin.find:
     paths: "{{ xdg_data_home }}/fonts"
     patterns:
       - "*.ttf"
       - "*.otf"
     recurse: true
+  delegate_to: localhost
+  run_once: true
   register: font_files
-  when: fonts_repo_clone is changed
 
 - name: Assert font files were found
   ansible.builtin.assert:
@@ -49,7 +50,7 @@
       No .ttf or .otf files found in
       {{ xdg_data_home }}/fonts —
       check that fonts_repo points to the correct repository.
-  when: fonts_repo_clone is changed
+  run_once: true
 
 - name: Assert no duplicate font basenames
   ansible.builtin.assert:
@@ -57,15 +58,21 @@
       font_files.files | map(attribute='path') | map('basename') | list | length ==
       font_files.files | map(attribute='path') | map('basename') | unique | list | length
     fail_msg: "Duplicate font basenames detected — copy would silently overwrite files"
-  when: fonts_repo_clone is changed
+  run_once: true
 
+- name: Create fonts install directory
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/Library/Fonts"
+    state: directory
+    mode: "0755"
+
+# Pushed from the controller clone (no remote_src) — a local copy on the
+# mini, a transfer over SSH to the MacBook. Checksum-idempotent either way.
 - name: Copy font files to ~/Library/Fonts
   ansible.builtin.copy:
     src: "{{ item.path }}"
     dest: "{{ ansible_facts['user_dir'] }}/Library/Fonts/{{ item.path | basename }}"
     mode: "0644"
-    remote_src: true
   loop: "{{ font_files.files | default([]) }}"
   loop_control:
     label: "{{ item.path | basename }}"
-  when: fonts_repo_clone is changed

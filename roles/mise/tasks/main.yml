@@ -15,18 +15,18 @@
     state: directory
     mode: "0700"
 
-# Deployed as a copy, not a symlink: playbooks may run from throwaway git
-# worktrees, and a symlink into one dangles once that worktree is reaped —
-# taking the global env (SAW_WORKTREE_ROOT, GRAPHITE_PROFILE, secrets.env
-# sourcing) and tool list with it.
+# Rendered per profile (GRAPHITE_PROFILE follows the machine's single
+# profile). Deployed as a file, not a symlink: playbooks may run from
+# throwaway git worktrees, and a symlink into one dangles once that worktree
+# is reaped — taking the global env and tool list with it.
 - name: Deploy mise config
-  ansible.builtin.copy:
-    src: "{{ role_path }}/files/config.toml"
+  ansible.builtin.template:
+    src: config.toml.j2
     dest: "{{ xdg_config_home }}/mise/config.toml"
     mode: "0644"
     force: true
 
-- name: Render personal profile secrets
+- name: Render profile secrets
   ansible.builtin.template:
     src: secrets.env.j2
     dest: "{{ xdg_config_home }}/mise/secrets.env"

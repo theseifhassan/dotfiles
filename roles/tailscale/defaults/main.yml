@@ -1,12 +1,12 @@
 ---
 # roles/tailscale/defaults/main.yml
-# Tailscale joins every machine to the tailnet. The server enables Tailscale
-# SSH and route acceptance so clients can reach it headless; clients just join.
+# Tailscale joins every machine to the tailnet. Every machine advertises
+# Tailscale SSH, so any machine can SSH to any other in either direction.
 
 # Enable Tailscale SSH (host acts as an SSH target authenticated by the
-# tailnet — no separate sshd key management needed). Off by default; the
-# server playbook turns it on.
-tailscale_ssh: false
+# tailnet — no separate sshd key management needed). On everywhere: free
+# SSH between the machines is the point of the shared tailnet.
+tailscale_ssh: true
 
 # Accept subnet routes advertised by other nodes.
 tailscale_accept_routes: true

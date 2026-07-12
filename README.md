@@ -2,79 +2,84 @@
 
 Ansible-based macOS dotfiles.
 
-Two machine profiles:
+Two machines, one profile each — both full development environments:
 
-- **Dev server** (`playbook-server.yml`) — the always-on Mac mini, the primary
-  workstation. Full developer toolchain + GUI apps + server infrastructure.
-- **Thin client** (`playbook-thin.yml`) — a MacBook that connects to the dev
-  server over Tailscale SSH. GUI apps and Claude Code only, no dev toolchain.
+- **Personal** — the Mac mini (`macmini`). Also the Ansible controller: it
+  provisions itself over the local connection and pushes to the MacBook over
+  Tailscale SSH.
+- **Work** — the MacBook (`macbook`). Provisioned by push from the mini; no
+  personal credential ever lands on it.
+
+Both machines run the same `site.yml` role list. Profile differences (git
+identity, tokens, app picks) live in `group_vars/personal/` and
+`group_vars/work/`; the inventory decides which machine is which. Both join
+the tailnet with Tailscale SSH enabled, so either can SSH to the other.
 
 ## Quick Start
 
+All commands run from the mini (the controller):
+
 ```bash
-# Dev server (default)
+# First-time controller setup (installs toolchain, provisions this machine)
 ./bootstrap.sh
 
-# Thin client
-./bootstrap.sh playbook-thin.yml
-
-# Re-run (all roles)
-ansible-playbook playbook-server.yml --ask-vault-pass
+# Re-run for this machine / the MacBook / both
+ansible-playbook site.yml --limit personal --ask-vault-pass
+ansible-playbook site.yml --limit work --ask-vault-pass
+ansible-playbook site.yml --ask-vault-pass
 
 # Single role
-ansible-playbook playbook-server.yml -t claude --ask-vault-pass
+ansible-playbook site.yml -t claude --ask-vault-pass
 ```
+
+### Provisioning a fresh MacBook
+
+1. Make it reachable over SSH: enable Remote Login (System Settings → General
+   → Sharing) on the LAN, or join it to the tailnet with Tailscale SSH.
+2. Prepare it from the mini (installs Xcode CLT + Homebrew over SSH):
+
+   ```bash
+   ./bootstrap-target.sh macbook
+   ```
+
+3. Add the work-profile vault keys if not present (see Secrets below), then:
+
+   ```bash
+   ansible-playbook site.yml --limit work --ask-vault-pass
+   ```
+
+The roles that touch system settings need sudo; `ansible_become_password` is
+wired per profile from the vault, so `--ask-vault-pass` alone is enough (no
+separate `--ask-become-pass`).
 
 ## Roles
 
 | Role | What it does |
 |------|-------------|
-| ssh | SSH keys + host aliases |
-| git | Git config with `includeIf`; GitHub CLI + Graphite CLI (skip via `git_install_extras: false`) |
+| ssh | Profile SSH key + machine key from the vault; SSH config |
+| git | Git config with the machine's single profile identity; GitHub CLI + Graphite CLI |
 | zsh | Zsh config under `ZDOTDIR` (vi mode + native prompt) |
-| mise | Per-project tool/env management |
+| mise | Per-project tool/env management; renders profile secrets + `GRAPHITE_PROFILE` |
 | fzf | Fuzzy finder, fzf-tab completions, history search |
 | ghostty | Terminal emulator |
 | tmux | Terminal multiplexer + tmux-sessionizer |
 | neovim | Neovim 0.12 + owned config (vim.pack, native LSP, native completion); installs language servers via brew + mise npm backend (no Mason) |
-| claude | Claude Code |
-| 1password | 1Password app + `op` CLI; on the server (`op_headless: true`) also deploys a service-account token for headless `op read` (tag `op`) |
+| claude | Claude Code (the machine's profile account) |
+| 1password | 1Password app + `op` CLI |
 | zed | Zed editor |
-| casks | Trivial single-cask GUI apps (Chrome, Notion, Slack, Figma, Linear, Discord, DataGrip); each task is tagged, so `-t slack` targets one and `-t casks` runs all |
-| apps | Loose developer CLIs with no role of their own (Lazygit, ripgrep) — server only |
-| dmg | GUI apps installed from official DMGs (Gather Town, Wispr Flow, Raycast Beta); shared install logic, each tagged — `-t raycast` targets one, `-t dmg` runs all |
-| obs | OBS Studio with DroidCam plugin |
-| fonts | Berkeley Mono from private repo |
-| tailscale | Headless `tailscaled` system daemon (joins the tailnet) |
-| server | Sleep prevention for an always-on host (server playbook only) |
-| colima | Headless Docker runtime via Colima (server playbook only) |
+| casks | Trivial single-cask GUI apps; each task is tagged, so `-t slack` targets one and `-t casks` runs all. Slack is work-only, Discord personal-only |
+| apps | Loose developer CLIs with no role of their own (Lazygit, ripgrep, gcloud, gws) |
+| dmg | GUI apps installed from official DMGs; shared install logic, each tagged — `-t raycast` targets one, `-t dmg` runs all. Gather is work-only |
+| obs | OBS Studio with DroidCam plugin (personal only) |
+| fonts | Berkeley Mono from a private personal repo — cloned on the controller, pushed to targets |
+| tailscale | Headless `tailscaled` system daemon; joins the tailnet with Tailscale SSH on every machine |
+| colima | Docker runtime via Colima |
 
 Foundation roles (`xdg`, `homebrew`) are pulled in automatically via role dependencies.
 
-## Playbooks
-
-Pick the playbook that matches the machine (pass it to `bootstrap.sh`, or run
-`ansible-playbook <file> --ask-vault-pass` directly):
-
-| Playbook | For | What it provisions |
-|----------|-----|--------------------|
-| `playbook-server.yml` | Always-on dev server (Mac mini), the primary workstation | Full developer toolchain (Claude Code, Ghostty, Lazygit, mise, Neovim, gh, Graphite, 1Password CLI, fzf, ripgrep, tmux, Colima) + GUI apps, **plus** server roles: Tailscale SSH, sleep prevention, Colima, headless `op` |
-| `playbook-thin.yml` | Thin clients (e.g. MacBook) | GUI apps + Claude Code only — no dev toolchain. Keeps `ssh`, core `git` (no gh/Graphite), and `tailscale` to reach the server |
-
-GUI apps on both profiles: Google Chrome, Raycast Beta, Slack, Gather, Figma,
-Linear, Notion, 1Password, Wispr Flow, Zed, DataGrip, Discord, OBS.
-
-```bash
-./bootstrap.sh                       # playbook-server.yml (default)
-./bootstrap.sh playbook-thin.yml     # thin client
-```
-
-The server playbook's roles touch system settings and need sudo;
-`ansible_become_password` is wired from the vault, so `--ask-vault-pass` alone
-is enough (no separate `--ask-become-pass`).
-
-See [docs/dev-server-migration.md](docs/dev-server-migration.md) for the full
-Mac-mini-as-dev-server runbook.
+App split: shared on both — Chrome, Notion, Figma, Linear, DataGrip, Raycast
+Beta, Wispr Flow, Alcove, 1Password, Zed. Work-only — Slack, Gather.
+Personal-only — Discord, OBS.
 
 ## Shell Keybindings
 
@@ -96,19 +101,14 @@ The script is deployed to `~/.local/bin/tmux-sessionizer` and can also be called
 tmux-sessionizer ~/Desktop/my-app
 ```
 
-## mise env (personal only)
+## mise env
 
 Project toolchains are managed with [mise](https://mise.jdx.dev). The global
-config (`~/.config/mise/config.toml`, symlinked from the repo) carries the
-shared tools and the **personal** env: `GRAPHITE_PROFILE` inline, and the
-personal secrets (`GH_TOKEN`) loaded from `~/.config/mise/secrets.env` —
-rendered from the vault by the `mise` role, mode 0600. Personal is the default everywhere with zero per-project setup;
-rotating a secret means editing the vault and re-running the playbook.
-
-Work projects are deliberately **not** managed by these dotfiles — their env
-comes from the work project/machine itself. The only work-awareness here is
-Claude Code routing: the `claude` role's guardrail detects work repos by git
-remote and hands off to `claudius`, the isolated work instance.
+config (`~/.config/mise/config.toml`, rendered per profile by the `mise`
+role) carries the shared tools, `GRAPHITE_PROFILE` for the machine's profile,
+and the profile secrets (`GH_TOKEN`) loaded from `~/.config/mise/secrets.env`
+— rendered from the vault, mode 0600. Rotating a secret means editing the
+vault and re-running the playbook.
 
 General CLIs (`gh`, `gt`, `lazygit`) are installed globally via Homebrew (the
 `git` and `apps` roles), so they're deliberately not managed by mise.
@@ -116,5 +116,18 @@ General CLIs (`gh`, `gt`, `lazygit`) are installed globally via Homebrew (the
 ## Secrets
 
 Secrets are encrypted in the repo via Ansible Vault (`group_vars/all/vault.yml`)
-and rendered at playbook time into a local, mode-0600 env file
-(`~/.config/mise/secrets.env`). Nothing plaintext is ever committed.
+and rendered at playbook time into local, mode-0600 files. Nothing plaintext
+is ever committed. The vault holds both profiles' secrets; each machine only
+ever receives its own profile's.
+
+Keys the vault must hold (add with `ansible-vault edit group_vars/all/vault.yml`):
+
+| Key | Used by |
+|-----|---------|
+| `vault_sudo_password` | personal become password (mini) |
+| `vault_sudo_password_work` | work become password (MacBook) |
+| `vault_gh_token_personal` / `vault_gh_token_work` | mise `secrets.env` per profile |
+| `vault_graphite_tokens.personal` / `.work` | Graphite user config per profile |
+| `vault_ssh_keys.personal` / `.work` | the profile SSH keypair per machine |
+| `vault_machine_ssh_keys.<hostname>` | per-machine SSH keypair (`macmini`, `macbook`) |
+| `vault_tailscale_authkey` | optional non-interactive `tailscale up` |

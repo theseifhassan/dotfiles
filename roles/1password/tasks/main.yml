@@ -1,12 +1,8 @@
 ---
 # roles/1password/tasks/main.yml
-# Installs the 1Password desktop app and the `op` CLI (both profiles), and —
-# when op_headless is true (the dev server) — deploys a service-account token so
-# `op read` resolves secrets over SSH with no desktop-app unlock.
-#
-# Headless prereqs (one-time, manual): create a service account in the 1Password
-# web UI, grant it read access to the vaults holding your dev secrets, and store
-# its token in group_vars/all/vault.yml as `vault_op_service_account_token`.
+# Installs the 1Password desktop app and the `op` CLI. Secrets consumed by
+# these dotfiles come from Ansible Vault, not `op read` — no headless
+# service-account machinery.
 
 - name: Install 1Password
   community.general.homebrew_cask:
@@ -17,48 +13,3 @@
   community.general.homebrew_cask:
     name: 1password-cli
     state: present
-
-# Headless `op` access (server only). The service-account token lets `op read`
-# resolve secrets non-interactively. NOTE: nothing in these dotfiles consumes
-# `op read` anymore (mise secrets moved to the vault) — candidate for removal.
-- name: Warn if headless op is enabled but the token is not set in vault
-  ansible.builtin.debug:
-    msg: >-
-      op_headless is true but vault_op_service_account_token is not defined —
-      skipping headless op setup. Add it to group_vars/all/vault.yml to enable
-      `op read` over SSH.
-  when:
-    - op_headless | bool
-    - vault_op_service_account_token is not defined or (vault_op_service_account_token | length == 0)
-  tags: [op]
-
-- name: Configure headless 1Password access
-  when:
-    - op_headless | bool
-    - vault_op_service_account_token is defined and (vault_op_service_account_token | length > 0)
-  tags: [op]
-  block:
-    - name: Create op config directory
-      ansible.builtin.file:
-        path: "{{ op_service_account_env | dirname }}"
-        state: directory
-        mode: "0700"
-
-    - name: Deploy service-account token env file
-      ansible.builtin.copy:
-        content: |
-          # Managed by the 1password role. Sourced by zsh and the agent.
-          export OP_SERVICE_ACCOUNT_TOKEN={{ vault_op_service_account_token }}
-        dest: "{{ op_service_account_env }}"
-        mode: "0600"
-      no_log: true
-
-    - name: Source the token in zsh (server only)
-      ansible.builtin.copy:
-        content: |
-          # 1Password service-account token for headless `op read`.
-          op_env="${XDG_CONFIG_HOME:-$HOME/.config}/op/service-account.env"
-          [ -f "$op_env" ] && source "$op_env"
-          unset op_env
-        dest: "{{ xdg_config_home }}/zsh/conf.d/onepassword.zsh"
-        mode: "0644"

@@ -1,7 +1,9 @@
 ---
 # roles/ssh/tasks/main.yml
-# Provisions SSH keys from Ansible Vault and deploys an SSH config with
-# host aliases for identity-based routing.
+# Provisions SSH keys from Ansible Vault and deploys the SSH config. Each
+# machine gets ONLY its profile's key (one profile per machine) plus its own
+# machine key — the vault may hold every profile's keys, but cross-profile
+# credentials never land on a machine.
 
 - name: Create SSH directory
   ansible.builtin.file:
@@ -9,20 +11,18 @@
     state: directory
     mode: "0700"
 
-- name: Provision SSH private keys
+- name: Provision profile SSH private key
   ansible.builtin.copy:
-    content: "{{ vault_ssh_keys[item].private_key }}\n"
-    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ item }}"
+    content: "{{ vault_ssh_keys[profile].private_key }}\n"
+    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ profile }}"
     mode: "0600"
-  loop: "{{ vault_ssh_keys | list }}"
   no_log: true
 
-- name: Provision SSH public keys
+- name: Provision profile SSH public key
   ansible.builtin.copy:
-    content: "{{ vault_ssh_keys[item].public_key }}\n"
-    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ item }}.pub"
+    content: "{{ vault_ssh_keys[profile].public_key }}\n"
+    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ profile }}.pub"
     mode: "0644"
-  loop: "{{ vault_ssh_keys | list }}"
 
 - name: Get machine hostname
   ansible.builtin.command:

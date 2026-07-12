@@ -2,10 +2,11 @@
 # roles/casks/tasks/main.yml
 # Trivial single-cask GUI apps that carry no config or install logic of their
 # own. Each gets its own tag so a single app can still be targeted, e.g.:
-#   ansible-playbook playbook-server.yml -t slack   # just Slack
-#   ansible-playbook playbook-server.yml -t casks   # all of the below
-# Apps with real logic or config (gather, wisprflow, raycast, obs, 1password,
-# zed, ...) keep their own dedicated roles.
+#   ansible-playbook site.yml -t slack   # just Slack
+#   ansible-playbook site.yml -t casks   # all of the below
+# Profile-specific apps carry a `when` guard (slack work-only, discord
+# personal-only). Apps with real logic or config (gather, wisprflow, raycast,
+# obs, 1password, zed, ...) keep their own dedicated roles.
 
 - name: Install Google Chrome
   community.general.homebrew_cask:
@@ -24,6 +25,7 @@
     name: slack
     state: latest
   tags: [casks, slack]
+  when: profile == "work"
 
 - name: Install Figma
   community.general.homebrew_cask:
@@ -42,6 +44,7 @@
     name: discord
     state: latest
   tags: [casks, discord]
+  when: profile == "personal"
 
 - name: Install DataGrip
   community.general.homebrew_cask:
