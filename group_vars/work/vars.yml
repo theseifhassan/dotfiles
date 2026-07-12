@@ -5,9 +5,8 @@
 #
 # One-time vault additions this profile depends on (ansible-vault edit
 # group_vars/all/vault.yml):
-#   vault_sudo_password_work        — the MacBook's sudo password
-#   vault_gh_token_work             — GitHub token for the work account
-#   vault_machine_ssh_keys.macbook  — the MacBook's machine SSH keypair
+#   vault_sudo_password_work  — the MacBook's sudo password
+#   vault_gh_token_work       — GitHub token for the work account
 # (vault_graphite_tokens.work and vault_ssh_keys.work already exist.)
 
 profile: work

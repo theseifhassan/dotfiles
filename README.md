@@ -56,7 +56,7 @@ separate `--ask-become-pass`).
 
 | Role | What it does |
 |------|-------------|
-| ssh | Profile SSH key + machine key from the vault; SSH config |
+| ssh | Profile SSH key from the vault; SSH config (inter-machine SSH is Tailscale-authenticated — no machine keys) |
 | git | Git config with the machine's single profile identity; GitHub CLI + Graphite CLI |
 | zsh | Zsh config under `ZDOTDIR` (vi mode + native prompt) |
 | mise | Per-project tool/env management; renders profile secrets |
@@ -133,5 +133,4 @@ Keys the vault must hold (add with `ansible-vault edit group_vars/all/vault.yml`
 | `vault_gh_token_personal` / `vault_gh_token_work` | mise config `[env]` per profile |
 | `vault_graphite_tokens.personal` / `.work` | Graphite user config per profile |
 | `vault_ssh_keys.personal` / `.work` | the profile SSH keypair per machine |
-| `vault_machine_ssh_keys.<hostname>` | per-machine SSH keypair (`macmini`, `macbook`) |
 | `vault_tailscale_authkey` | optional non-interactive `tailscale up` |

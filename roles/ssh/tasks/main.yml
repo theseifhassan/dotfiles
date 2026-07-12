@@ -1,9 +1,10 @@
 ---
 # roles/ssh/tasks/main.yml
 # Provisions SSH keys from Ansible Vault and deploys the SSH config. Each
-# machine gets ONLY its profile's key (one profile per machine) plus its own
-# machine key — the vault may hold every profile's keys, but cross-profile
-# credentials never land on a machine.
+# machine gets ONLY its profile's key (one profile per machine) — the vault
+# may hold every profile's keys, but cross-profile credentials never land on
+# a machine. Inter-machine SSH is authenticated by Tailscale SSH (tailnet
+# identity, no key files), so there are no per-machine keys.
 
 - name: Create SSH directory
   ansible.builtin.file:
@@ -23,32 +24,6 @@
     content: "{{ vault_ssh_keys[profile].public_key }}\n"
     dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ profile }}.pub"
     mode: "0644"
-
-- name: Get machine hostname
-  ansible.builtin.command:
-    cmd: scutil --get LocalHostName
-  register: hostname_result
-  changed_when: false
-  check_mode: false # read-only probe; must run even during --check
-
-- name: Set machine hostname fact
-  ansible.builtin.set_fact:
-    machine_hostname: "{{ hostname_result.stdout }}"
-
-- name: Provision machine SSH private key
-  ansible.builtin.copy:
-    content: "{{ vault_machine_ssh_keys[machine_hostname].private_key }}\n"
-    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ machine_hostname }}"
-    mode: "0600"
-  no_log: true
-  when: machine_hostname in vault_machine_ssh_keys
-
-- name: Provision machine SSH public key
-  ansible.builtin.copy:
-    content: "{{ vault_machine_ssh_keys[machine_hostname].public_key }}\n"
-    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ machine_hostname }}.pub"
-    mode: "0644"
-  when: machine_hostname in vault_machine_ssh_keys
 
 - name: Deploy SSH config
   ansible.builtin.template:
