@@ -1,15 +1,15 @@
 ---
 # roles/apps/tasks/main.yml
-# Plain per-app installs — GUI casks and loose developer CLIs alike — for
-# anything with no config or install logic of its own. Each app gets its own
-# tag so a single one can still be targeted, e.g.:
+# Per-app installs — GUI casks, loose developer CLIs, and apps shipped as
+# official DMG releases (via the shared dmg-install.yml routine). Each app
+# gets its own tag so a single one can still be targeted, e.g.:
 #   ansible-playbook site.yml -t slack   # just Slack
 #   ansible-playbook site.yml -t apps    # all of the below
-# Profile-specific apps carry a `when` guard (slack work-only, discord
-# personal-only). Apps with real logic (wisprflow, raycast, obs, zed, ...)
-# keep their own dedicated roles; non-Homebrew GUI installs live in `dmg`.
+# Profile-specific apps carry a `when` guard (slack + gather work-only,
+# discord personal-only). Apps with real config (obs, zed, ghostty, ...)
+# keep their own dedicated roles.
 
-# --- GUI applications -------------------------------------------------------
+# --- GUI applications (Homebrew casks) --------------------------------------
 
 - name: Install Google Chrome
   community.general.homebrew_cask:
@@ -60,6 +60,57 @@
     name: 1password
     state: present
   tags: [apps, 1password]
+
+# --- GUI applications (official DMG releases) -------------------------------
+
+- name: Gather Town
+  ansible.builtin.include_tasks:
+    file: dmg-install.yml
+    apply:
+      tags: [apps, gather]
+  vars:
+    dmg_name: "Gather Town"
+    dmg_app: "/Applications/GatherV2.app"
+    dmg_url: "https://api.v2.gather.town/api/v2/releases/latest/macos/v2"
+    dmg_slug: "gather"
+  tags: [apps, gather]
+  when: profile == "work"
+
+- name: Wispr Flow
+  ansible.builtin.include_tasks:
+    file: dmg-install.yml
+    apply:
+      tags: [apps, wisprflow]
+  vars:
+    dmg_name: "Wispr Flow"
+    dmg_app: "/Applications/Wispr Flow.app"
+    dmg_url: "https://dl.wisprflow.ai/mac-apple/latest"
+    dmg_slug: "wispr_flow"
+  tags: [apps, wisprflow]
+
+- name: Raycast Beta
+  ansible.builtin.include_tasks:
+    file: dmg-install.yml
+    apply:
+      tags: [apps, raycast]
+  vars:
+    dmg_name: "Raycast Beta"
+    dmg_app: "/Applications/Raycast Beta.app"
+    dmg_url: "{{ raycast_dmg_url }}"
+    dmg_slug: "raycast"
+  tags: [apps, raycast]
+
+- name: Alcove
+  ansible.builtin.include_tasks:
+    file: dmg-install.yml
+    apply:
+      tags: [apps, alcove]
+  vars:
+    dmg_name: "Alcove"
+    dmg_app: "/Applications/Alcove.app"
+    dmg_url: "https://download.tryalcove.com/Alcove.dmg"
+    dmg_slug: "alcove"
+  tags: [apps, alcove]
 
 # --- Developer CLIs ---------------------------------------------------------
 

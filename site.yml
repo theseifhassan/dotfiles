@@ -77,19 +77,13 @@
     - role: zed
       tags: [zed]
 
-    # Plain per-app installs — GUI casks (chrome, notion, figma, linear,
-    # datagrip, 1password on both; slack work-only, discord personal-only)
-    # and loose developer CLIs (lazygit, ripgrep, gcloud, gws). Each task is
-    # individually tagged, so `-t slack` still targets one app; `-t apps`
-    # runs them all.
+    # Per-app installs — GUI casks (chrome, notion, figma, linear, datagrip,
+    # 1password), official-DMG apps (wisprflow, raycast, alcove), and dev
+    # CLIs (lazygit, ripgrep, gcloud, gws) on both; slack + gather work-only,
+    # discord personal-only. Each task is individually tagged, so `-t slack`
+    # still targets one app; `-t apps` runs them all.
     - role: apps
       tags: [apps]
-
-    # GUI apps installed from official DMGs (wisprflow, raycast, alcove on
-    # both; gather work-only). Each is tagged, so `-t raycast` targets one
-    # app; `-t dmg` runs them all.
-    - role: dmg
-      tags: [dmg]
 
     # Personal-only: OBS + DroidCam plugin.
     - role: obs

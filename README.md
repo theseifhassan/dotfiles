@@ -66,8 +66,7 @@ separate `--ask-become-pass`).
 | neovim | Neovim 0.12 + owned config (vim.pack, native LSP, native completion); installs language servers via brew + mise npm backend (no Mason) |
 | claude | Claude Code (the machine's profile account) |
 | zed | Zed editor |
-| apps | Plain per-app installs — GUI casks (Chrome, Notion, Slack, Figma, Linear, Discord, DataGrip, 1Password) and dev CLIs (Lazygit, ripgrep, gcloud, gws); each task tagged, so `-t slack` targets one and `-t apps` runs all. Slack work-only, Discord personal-only |
-| dmg | GUI apps installed from official DMGs; shared install logic, each tagged — `-t raycast` targets one, `-t dmg` runs all. Gather is work-only |
+| apps | Per-app installs — GUI casks (Chrome, Notion, Slack, Figma, Linear, Discord, DataGrip, 1Password), official-DMG apps (Gather, Wispr Flow, Raycast Beta, Alcove; shared install routine), and dev CLIs (Lazygit, ripgrep, gcloud, gws); each task tagged, so `-t slack` targets one and `-t apps` runs all. Slack + Gather work-only, Discord personal-only |
 | obs | OBS Studio with DroidCam plugin (personal only) |
 | fonts | Berkeley Mono from a private personal repo — cloned on the controller, pushed to targets |
 | tailscale | Headless `tailscaled` system daemon; joins the tailnet with Tailscale SSH on every machine |
