@@ -15,8 +15,7 @@
     state: directory
     mode: "0700"
 
-# Rendered per profile (GRAPHITE_PROFILE follows the machine's single
-# profile). Deployed as a file, not a symlink: playbooks may run from
+# Deployed as a rendered file, not a symlink: playbooks may run from
 # throwaway git worktrees, and a symlink into one dangles once that worktree
 # is reaped — taking the global env and tool list with it.
 - name: Deploy mise config

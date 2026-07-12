@@ -24,16 +24,13 @@
     name: googleworkspace-cli
     state: latest
 
-- name: Deploy gws multi-account wrapper
+# The old gcloud/gws multi-account wrappers are gone — one profile per
+# machine means no account switching; the CLIs install plain. Remove the
+# dangling symlinks the wrappers left behind.
+- name: Remove retired gcloud/gws account wrappers
   ansible.builtin.file:
-    src: "{{ role_path }}/files/gws.zsh"
-    dest: "{{ xdg_config_home }}/zsh/conf.d/gws.zsh"
-    state: link
-    force: true
-
-- name: Deploy gcloud multi-account wrapper
-  ansible.builtin.file:
-    src: "{{ role_path }}/files/gcloud.zsh"
-    dest: "{{ xdg_config_home }}/zsh/conf.d/gcloud.zsh"
-    state: link
-    force: true
+    path: "{{ xdg_config_home }}/zsh/conf.d/{{ item }}"
+    state: absent
+  loop:
+    - gws.zsh
+    - gcloud.zsh

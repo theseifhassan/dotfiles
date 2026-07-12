@@ -59,16 +59,16 @@ separate `--ask-become-pass`).
 | ssh | Profile SSH key + machine key from the vault; SSH config |
 | git | Git config with the machine's single profile identity; GitHub CLI + Graphite CLI |
 | zsh | Zsh config under `ZDOTDIR` (vi mode + native prompt) |
-| mise | Per-project tool/env management; renders profile secrets + `GRAPHITE_PROFILE` |
+| mise | Per-project tool/env management; renders profile secrets |
 | fzf | Fuzzy finder, fzf-tab completions, history search |
 | ghostty | Terminal emulator |
 | tmux | Terminal multiplexer + tmux-sessionizer |
 | neovim | Neovim 0.12 + owned config (vim.pack, native LSP, native completion); installs language servers via brew + mise npm backend (no Mason) |
 | claude | Claude Code (the machine's profile account) |
-| 1password | 1Password app + `op` CLI |
+| 1password | 1Password app (no `op` CLI — secrets come from the vault) |
 | zed | Zed editor |
 | casks | Trivial single-cask GUI apps; each task is tagged, so `-t slack` targets one and `-t casks` runs all. Slack is work-only, Discord personal-only |
-| apps | Loose developer CLIs with no role of their own (Lazygit, ripgrep, gcloud, gws) |
+| apps | Loose developer CLIs with no role of their own (Lazygit, ripgrep, gcloud, gws) — plain installs, no account wrappers |
 | dmg | GUI apps installed from official DMGs; shared install logic, each tagged — `-t raycast` targets one, `-t dmg` runs all. Gather is work-only |
 | obs | OBS Studio with DroidCam plugin (personal only) |
 | fonts | Berkeley Mono from a private personal repo — cloned on the controller, pushed to targets |
@@ -104,11 +104,10 @@ tmux-sessionizer ~/Desktop/my-app
 ## mise env
 
 Project toolchains are managed with [mise](https://mise.jdx.dev). The global
-config (`~/.config/mise/config.toml`, rendered per profile by the `mise`
-role) carries the shared tools, `GRAPHITE_PROFILE` for the machine's profile,
-and the profile secrets (`GH_TOKEN`) loaded from `~/.config/mise/secrets.env`
-— rendered from the vault, mode 0600. Rotating a secret means editing the
-vault and re-running the playbook.
+config (`~/.config/mise/config.toml`, deployed by the `mise` role) carries
+the shared tools and the profile secrets (`GH_TOKEN`) loaded from
+`~/.config/mise/secrets.env` — rendered from the vault, mode 0600. Rotating a
+secret means editing the vault and re-running the playbook.
 
 General CLIs (`gh`, `gt`, `lazygit`) are installed globally via Homebrew (the
 `git` and `apps` roles), so they're deliberately not managed by mise.

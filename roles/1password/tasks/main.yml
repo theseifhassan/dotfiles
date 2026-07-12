@@ -1,15 +1,9 @@
 ---
 # roles/1password/tasks/main.yml
-# Installs the 1Password desktop app and the `op` CLI. Secrets consumed by
-# these dotfiles come from Ansible Vault, not `op read` — no headless
-# service-account machinery.
+# Installs the 1Password desktop app — nothing else. Secrets consumed by
+# these dotfiles come from Ansible Vault; no `op` CLI, no headless machinery.
 
 - name: Install 1Password
   community.general.homebrew_cask:
     name: 1password
-    state: present
-
-- name: Install 1Password CLI
-  community.general.homebrew_cask:
-    name: 1password-cli
     state: present
