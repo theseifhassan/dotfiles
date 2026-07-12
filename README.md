@@ -100,11 +100,18 @@ tmux-sessionizer ~/Desktop/my-app
 
 ## mise env
 
-Project toolchains are managed with [mise](https://mise.jdx.dev). The global
-config (`~/.config/mise/config.toml`, deployed by the `mise` role) carries
-the shared tools and the profile secrets (`GH_TOKEN`) loaded from
-`~/.config/mise/secrets.env` — rendered from the vault, mode 0600. Rotating a
-secret means editing the vault and re-running the playbook.
+[mise](https://mise.jdx.dev) is the single global owner of env vars, secrets,
+and tool versions. The global config (`~/.config/mise/config.toml`, rendered
+per profile by the `mise` role, mode 0600) carries everything in one place:
+`[env]` (EDITOR/VISUAL, `CLAUDE_CONFIG_DIR`, `FZF_DEFAULT_OPTS`,
+`SAW_WORKTREE_ROOT`, and the profile secrets like `GH_TOKEN` inline from the
+vault) and `[tools]` (node, pnpm, bun). Rotating a secret means editing the
+vault and re-running the playbook.
+
+The only env vars set outside mise are the bootstrap ones mise itself depends
+on: the XDG paths and `ZDOTDIR`, exported from `~/.zshenv` before mise
+activates. Everything else — including new API keys — goes in the mise
+config, never in zsh files.
 
 General CLIs (`gh`, `gt`, `lazygit`) are installed globally via Homebrew (the
 `git` and `apps` roles), so they're deliberately not managed by mise.
@@ -112,9 +119,10 @@ General CLIs (`gh`, `gt`, `lazygit`) are installed globally via Homebrew (the
 ## Secrets
 
 Secrets are encrypted in the repo via Ansible Vault (`group_vars/all/vault.yml`)
-and rendered at playbook time into local, mode-0600 files. Nothing plaintext
-is ever committed. The vault holds both profiles' secrets; each machine only
-ever receives its own profile's.
+and rendered at playbook time into the machine's mise config
+(`~/.config/mise/config.toml`, mode 0600). Nothing plaintext is ever
+committed. The vault holds both profiles' secrets; each machine only ever
+receives its own profile's.
 
 Keys the vault must hold (add with `ansible-vault edit group_vars/all/vault.yml`):
 
@@ -122,7 +130,7 @@ Keys the vault must hold (add with `ansible-vault edit group_vars/all/vault.yml`
 |-----|---------|
 | `vault_sudo_password` | personal become password (mini) |
 | `vault_sudo_password_work` | work become password (MacBook) |
-| `vault_gh_token_personal` / `vault_gh_token_work` | mise `secrets.env` per profile |
+| `vault_gh_token_personal` / `vault_gh_token_work` | mise config `[env]` per profile |
 | `vault_graphite_tokens.personal` / `.work` | Graphite user config per profile |
 | `vault_ssh_keys.personal` / `.work` | the profile SSH keypair per machine |
 | `vault_machine_ssh_keys.<hostname>` | per-machine SSH keypair (`macmini`, `macbook`) |

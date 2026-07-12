@@ -78,9 +78,8 @@
   register: claude_hook_registration
   changed_when: "'CHANGED' in claude_hook_registration.stdout"
 
-- name: Deploy Claude Code shell config
-  ansible.builtin.copy:
-    content: |
-      export CLAUDE_CONFIG_DIR="{{ xdg_config_home }}/claude"
-    dest: "{{ xdg_config_home }}/zsh/conf.d/claude-code.zsh"
-    mode: "0644"
+# CLAUDE_CONFIG_DIR moved to the global mise [env] — mise owns all env vars.
+- name: Remove retired Claude Code shell config
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/zsh/conf.d/claude-code.zsh"
+    state: absent
