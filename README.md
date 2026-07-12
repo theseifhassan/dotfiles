@@ -65,10 +65,8 @@ separate `--ask-become-pass`).
 | tmux | Terminal multiplexer + tmux-sessionizer |
 | neovim | Neovim 0.12 + owned config (vim.pack, native LSP, native completion); installs language servers via brew + mise npm backend (no Mason) |
 | claude | Claude Code (the machine's profile account) |
-| 1password | 1Password app (no `op` CLI — secrets come from the vault) |
 | zed | Zed editor |
-| casks | Trivial single-cask GUI apps; each task is tagged, so `-t slack` targets one and `-t casks` runs all. Slack is work-only, Discord personal-only |
-| apps | Loose developer CLIs with no role of their own (Lazygit, ripgrep, gcloud, gws) — plain installs, no account wrappers |
+| apps | Plain per-app installs — GUI casks (Chrome, Notion, Slack, Figma, Linear, Discord, DataGrip, 1Password) and dev CLIs (Lazygit, ripgrep, gcloud, gws); each task tagged, so `-t slack` targets one and `-t apps` runs all. Slack work-only, Discord personal-only |
 | dmg | GUI apps installed from official DMGs; shared install logic, each tagged — `-t raycast` targets one, `-t dmg` runs all. Gather is work-only |
 | obs | OBS Studio with DroidCam plugin (personal only) |
 | fonts | Berkeley Mono from a private personal repo — cloned on the controller, pushed to targets |

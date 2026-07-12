@@ -77,18 +77,11 @@
     - role: zed
       tags: [zed]
 
-    - role: 1password
-      tags: [1password]
-
-    # Trivial single-cask GUI apps (chrome, notion, figma, linear, datagrip on
-    # both; slack work-only, discord personal-only — guarded per task). Each
-    # task is individually tagged, so `-t slack` still targets one app;
-    # `-t casks` runs them all.
-    - role: casks
-      tags: [casks]
-
-    # Loose developer CLIs (lazygit, ripgrep, gcloud, gws) with no role of
-    # their own.
+    # Plain per-app installs — GUI casks (chrome, notion, figma, linear,
+    # datagrip, 1password on both; slack work-only, discord personal-only)
+    # and loose developer CLIs (lazygit, ripgrep, gcloud, gws). Each task is
+    # individually tagged, so `-t slack` still targets one app; `-t apps`
+    # runs them all.
     - role: apps
       tags: [apps]
 
