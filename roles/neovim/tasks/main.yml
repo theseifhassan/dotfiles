@@ -33,9 +33,23 @@
   environment:
     PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
 
-- name: Symlink Neovim config into place
+# Copies, not a symlink: push targets have no repo checkout to link into.
+# The legacy symlink must go first — rsync into a symlinked dest would write
+# through it into the repo (and delete: true could eat repo files).
+- name: Check for legacy nvim config symlink
+  ansible.builtin.stat:
+    path: "{{ xdg_config_home }}/nvim"
+  register: nvim_conf_stat
+
+- name: Remove legacy nvim config symlink
   ansible.builtin.file:
-    src: "{{ role_path }}/files/nvim"
-    dest: "{{ xdg_config_home }}/nvim"
-    state: link
-    force: true
+    path: "{{ xdg_config_home }}/nvim"
+    state: absent
+  when: nvim_conf_stat.stat.islnk | default(false)
+
+- name: Deploy Neovim config
+  ansible.posix.synchronize:
+    src: "{{ role_path }}/files/nvim/"
+    dest: "{{ xdg_config_home }}/nvim/"
+    delete: true
+    recursive: true
