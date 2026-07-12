@@ -9,8 +9,9 @@ Host {{ entry.host }}
     IdentitiesOnly yes
 
 {% endfor %}
+# No default IdentityFile: inter-machine SSH is authenticated by Tailscale
+# SSH (tailnet identity), not key files.
 Host *
     AddKeysToAgent yes
     UseKeychain yes
     HashKnownHosts yes
-    IdentityFile {{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ machine_hostname }}
