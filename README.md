@@ -128,9 +128,8 @@ Keys the vault must hold (add with `ansible-vault edit group_vars/all/vault.yml`
 
 | Key | Used by |
 |-----|---------|
-| `vault_sudo_password` | personal become password (mini) |
-| `vault_sudo_password_work` | work become password (MacBook) |
-| `vault_gh_token_personal` / `vault_gh_token_work` | mise config `[env]` per profile |
-| `vault_graphite_tokens.personal` / `.work` | Graphite user config per profile |
-| `vault_ssh_keys.personal` / `.work` | the profile SSH keypair per machine |
+| `vault_sudo_password.personal` / `.work` | become password per machine |
+| `vault_gh_token.personal` / `.work` | mise config `[env]` per profile |
+| `vault_graphite_token.personal` / `.work` | Graphite user config per profile |
+| `vault_ssh_key.personal` / `.work` | the profile SSH keypair per machine |
 | `vault_tailscale_authkey` | optional non-interactive `tailscale up` |

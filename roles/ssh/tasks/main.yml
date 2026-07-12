@@ -14,14 +14,14 @@
 
 - name: Provision profile SSH private key
   ansible.builtin.copy:
-    content: "{{ vault_ssh_keys[profile].private_key }}\n"
+    content: "{{ vault_ssh_key[profile].private_key }}\n"
     dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ profile }}"
     mode: "0600"
   no_log: true
 
 - name: Provision profile SSH public key
   ansible.builtin.copy:
-    content: "{{ vault_ssh_keys[profile].public_key }}\n"
+    content: "{{ vault_ssh_key[profile].public_key }}\n"
     dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ profile }}.pub"
     mode: "0644"
 
