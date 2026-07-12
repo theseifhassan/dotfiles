@@ -18,11 +18,13 @@
 - name: "Install {{ dmg_name }} from DMG"
   when: not dmg_installed.stat.exists
   block:
+    # macOS curl, not get_url: Ansible's urllib runs on the system Python,
+    # whose bundled LibreSSL can't speak TLS 1.3 — some release hosts
+    # (Raycast R2) require it and reject the handshake.
     - name: "Download {{ dmg_name }} DMG"
-      ansible.builtin.get_url:
-        url: "{{ dmg_url }}"
-        dest: "/tmp/{{ dmg_slug }}.dmg"
-        mode: "0644"
+      ansible.builtin.command:
+        cmd: 'curl -fsSL -o "/tmp/{{ dmg_slug }}.dmg" "{{ dmg_url }}"'
+      changed_when: true
 
     - name: "Mount {{ dmg_name }} DMG"
       ansible.builtin.command:
