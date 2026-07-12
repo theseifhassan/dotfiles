@@ -15,8 +15,11 @@ HOST="${1:?usage: ./bootstrap-target.sh <ssh-host>}"
 
 echo "==> Preparing $HOST for Ansible push..."
 
-# -t: the CLT and Homebrew installs need sudo, so keep a TTY for the password.
-ssh -t "$HOST" 'bash -s' <<'EOF'
+# Ship the script to the target first, then execute it with `ssh -t` and
+# stdin left alone — piping the script over stdin (`bash -s <<EOF`) would
+# leave no terminal for the remote sudo prompts.
+REMOTE_SCRIPT="/tmp/bootstrap-target-remote.sh"
+ssh "$HOST" "cat > $REMOTE_SCRIPT" <<'EOF'
 set -euo pipefail
 
 # 1. Xcode Command Line Tools (non-interactive via softwareupdate)
@@ -24,9 +27,12 @@ if ! xcode-select -p &>/dev/null; then
   echo "==> Installing Xcode Command Line Tools..."
   sudo -v
   touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+  # Label formats vary by macOS release ("...for Xcode-16.4", "...for Xcode
+  # 27.0 beta 3-27.0"); match anything after "Command Line Tools". sed exits 0
+  # on no match, so set -e can't kill the script before the guard below.
   PROD="$(softwareupdate -l 2>/dev/null \
-    | grep -o 'Label: Command Line Tools for Xcode-[0-9.]*' \
-    | tail -1 | sed 's/^Label: //')"
+    | sed -n 's/^\* Label: \(Command Line Tools.*\)$/\1/p' \
+    | tail -1)"
   if [[ -z "$PROD" ]]; then
     rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
     echo "ERROR: no Command Line Tools package found via softwareupdate." >&2
@@ -52,5 +58,8 @@ fi
 
 echo "==> Target ready."
 EOF
+
+# -t: real TTY so the CLT and Homebrew installs can prompt for sudo.
+ssh -t "$HOST" "bash $REMOTE_SCRIPT; rc=\$?; rm -f $REMOTE_SCRIPT; exit \$rc"
 
 echo "==> Done. Provision with: ansible-playbook site.yml --limit work --ask-vault-pass"
