@@ -1,39 +1,151 @@
 ---
 # roles/apps/tasks/main.yml
-# Server-only developer CLI tools installed via Homebrew. GUI apps live in
-# their own roles (chrome, zed, slack, ...); this role is just the loose CLIs
-# that don't warrant a role of their own.
+# Per-app installs — GUI casks, loose developer CLIs, and apps shipped as
+# official DMG releases (via the shared dmg-install.yml routine). Each app
+# gets its own tag so a single one can still be targeted, e.g.:
+#   ansible-playbook site.yml -t slack   # just Slack
+#   ansible-playbook site.yml -t apps    # all of the below
+# Profile-specific apps carry a `when` guard (slack + gather work-only,
+# discord personal-only). Apps with real config (obs, zed, ghostty, ...)
+# keep their own dedicated roles.
+
+# --- GUI applications (Homebrew casks) --------------------------------------
+
+- name: Install Google Chrome
+  community.general.homebrew_cask:
+    name: google-chrome
+    state: latest
+  tags: [apps, chrome]
+
+- name: Install Notion
+  community.general.homebrew_cask:
+    name: notion
+    state: latest
+  tags: [apps, notion]
+
+- name: Install Slack
+  community.general.homebrew_cask:
+    name: slack
+    state: latest
+  tags: [apps, slack]
+  when: profile == "work"
+
+- name: Install Figma
+  community.general.homebrew_cask:
+    name: figma
+    state: latest
+  tags: [apps, figma]
+
+- name: Install Linear
+  community.general.homebrew_cask:
+    name: linear-linear
+    state: latest
+  tags: [apps, linear]
+
+- name: Install Discord
+  community.general.homebrew_cask:
+    name: discord
+    state: latest
+  tags: [apps, discord]
+  when: profile == "personal"
+
+- name: Install DataGrip
+  community.general.homebrew_cask:
+    name: datagrip
+    state: latest
+  tags: [apps, datagrip]
+
+- name: Install 1Password
+  community.general.homebrew_cask:
+    name: 1password
+    state: present
+  tags: [apps, 1password]
+
+# --- GUI applications (official DMG releases) -------------------------------
+
+- name: Gather Town
+  ansible.builtin.include_tasks:
+    file: dmg-install.yml
+    apply:
+      tags: [apps, gather]
+  vars:
+    dmg_name: "Gather Town"
+    dmg_app: "/Applications/GatherV2.app"
+    dmg_url: "https://api.v2.gather.town/api/v2/releases/latest/macos/v2"
+    dmg_slug: "gather"
+  tags: [apps, gather]
+  when: profile == "work"
+
+- name: Wispr Flow
+  ansible.builtin.include_tasks:
+    file: dmg-install.yml
+    apply:
+      tags: [apps, wisprflow]
+  vars:
+    dmg_name: "Wispr Flow"
+    dmg_app: "/Applications/Wispr Flow.app"
+    dmg_url: "https://dl.wisprflow.ai/mac-apple/latest"
+    dmg_slug: "wispr_flow"
+  tags: [apps, wisprflow]
+
+- name: Raycast Beta
+  ansible.builtin.include_tasks:
+    file: dmg-install.yml
+    apply:
+      tags: [apps, raycast]
+  vars:
+    dmg_name: "Raycast Beta"
+    dmg_app: "/Applications/Raycast Beta.app"
+    dmg_url: "{{ raycast_dmg_url }}"
+    dmg_slug: "raycast"
+  tags: [apps, raycast]
+
+- name: Alcove
+  ansible.builtin.include_tasks:
+    file: dmg-install.yml
+    apply:
+      tags: [apps, alcove]
+  vars:
+    dmg_name: "Alcove"
+    dmg_app: "/Applications/Alcove.app"
+    dmg_url: "https://download.tryalcove.com/Alcove.dmg"
+    dmg_slug: "alcove"
+  tags: [apps, alcove]
+
+# --- Developer CLIs ---------------------------------------------------------
 
 - name: Install Lazygit
   community.general.homebrew:
     name: lazygit
     state: latest
+  tags: [apps, lazygit]
 
 - name: Install ripgrep
   community.general.homebrew:
     name: ripgrep
     state: latest
+  tags: [apps, ripgrep]
 
 - name: Install Google Cloud CLI
   community.general.homebrew_cask:
     name: gcloud-cli
     state: latest
+  tags: [apps, gcloud]
 
 - name: Install Google Workspace CLI
   community.general.homebrew:
     name: googleworkspace-cli
     state: latest
+  tags: [apps, gws]
 
-- name: Deploy gws multi-account wrapper
+# The old gcloud/gws multi-account wrappers are gone — one profile per
+# machine means no account switching; the CLIs install plain. Remove the
+# dangling conf.d symlinks the wrappers left behind.
+- name: Remove retired gcloud/gws account wrappers
   ansible.builtin.file:
-    src: "{{ role_path }}/files/gws.zsh"
-    dest: "{{ xdg_config_home }}/zsh/conf.d/gws.zsh"
-    state: link
-    force: true
-
-- name: Deploy gcloud multi-account wrapper
-  ansible.builtin.file:
-    src: "{{ role_path }}/files/gcloud.zsh"
-    dest: "{{ xdg_config_home }}/zsh/conf.d/gcloud.zsh"
-    state: link
-    force: true
+    path: "{{ xdg_config_home }}/zsh/conf.d/{{ item }}"
+    state: absent
+  loop:
+    - gws.zsh
+    - gcloud.zsh
+  tags: [apps]

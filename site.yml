@@ -1,0 +1,105 @@
+---
+# site.yml
+# Provisions both workstations — one profile per machine, both full
+# development environments. The inventory decides who gets what:
+#   [personal] macmini  — local connection (the Ansible controller)
+#   [work]     macbook  — pushed to over Tailscale SSH
+#
+# Profile differences (git identity, tokens, app picks) live in
+# group_vars/personal and group_vars/work; the role list is identical for
+# every machine except the per-profile apps (slack/gather work-only,
+# discord/obs personal-only — guarded inside the roles).
+#
+# Run from the mini:
+#   ansible-playbook site.yml --ask-vault-pass                 # both machines
+#   ansible-playbook site.yml --limit personal --ask-vault-pass
+#   ansible-playbook site.yml --limit work --ask-vault-pass
+#   ansible-playbook site.yml -t claude --ask-vault-pass       # one role
+# Or: ./bootstrap.sh (first-time controller setup, limits to this machine).
+#
+# Roles that touch system settings need sudo; ansible_become_password is wired
+# per profile from the vault, so --ask-vault-pass is enough.
+- name: Modular Dotfiles System
+  hosts: all
+  gather_facts: true
+  gather_subset:
+    - "!all"
+    - user_dir
+    - env
+
+  module_defaults:
+    community.general.homebrew:
+      path: /opt/homebrew/bin:/usr/local/bin
+    community.general.homebrew_cask:
+      path: /opt/homebrew/bin:/usr/local/bin
+    community.general.homebrew_tap:
+      path: /opt/homebrew/bin:/usr/local/bin
+
+  pre_tasks:
+    - name: Run xdg role
+      ansible.builtin.include_role:
+        name: xdg
+      tags: [always]
+
+    - name: Run homebrew role
+      ansible.builtin.include_role:
+        name: homebrew
+      tags: [always]
+
+  roles:
+    - role: ssh
+      tags: [ssh]
+
+    - role: git
+      tags: [git]
+
+    - role: zsh
+      tags: [zsh]
+
+    - role: mise
+      tags: [mise]
+
+    - role: fzf
+      tags: [fzf]
+
+    - role: ghostty
+      tags: [ghostty]
+
+    - role: tmux
+      tags: [tmux]
+
+    - role: neovim
+      tags: [neovim]
+
+    - role: claude
+      tags: [claude]
+
+    - role: zed
+      tags: [zed]
+
+    # Per-app installs — GUI casks (chrome, notion, figma, linear, datagrip,
+    # 1password), official-DMG apps (wisprflow, raycast, alcove), and dev
+    # CLIs (lazygit, ripgrep, gcloud, gws) on both; slack + gather work-only,
+    # discord personal-only. Each task is individually tagged, so `-t slack`
+    # still targets one app; `-t apps` runs them all.
+    - role: apps
+      tags: [apps]
+
+    # Personal-only: OBS + DroidCam plugin.
+    - role: obs
+      tags: [obs]
+      when: profile == "personal"
+
+    # Cloned on the controller, pushed to every machine — the repo is private
+    # under the personal account and the work machine has no access to it.
+    - role: fonts
+      tags: [fonts]
+
+    # Networking — join the tailnet and advertise Tailscale SSH on every
+    # machine, so any machine can SSH to any other.
+    - role: tailscale
+      tags: [tailscale]
+
+    # Docker runtime (Colima).
+    - role: colima
+      tags: [colima]

@@ -1,18 +1,23 @@
-# mise configuration — global defaults (symlinked from the repo; no secrets).
+# {{ ansible_managed }}
+# mise configuration — the single global owner of env vars, secrets, and
+# tool versions. Rendered per profile from the vault (deployed mode 0600 —
+# it carries secrets; never committed rendered).
 #
-# Personal env only: secrets.env is rendered from the vault by the mise role
-# (mode 0600, never committed). Work projects are deliberately NOT managed by
-# these dotfiles — work env is whatever the work project/machine provides, and
-# Claude Code routing to the work instance is handled by the claude role's
-# claudius guardrail (git-remote based), not by mise.
+# The only env vars NOT set here are the bootstrap ones mise itself depends
+# on (XDG_*, ZDOTDIR in ~/.zshenv) — everything else belongs in [env].
 
 [env]
-GRAPHITE_PROFILE = "personal"
+EDITOR = "nvim"
+VISUAL = "nvim"
+CLAUDE_CONFIG_DIR = "{% raw %}{{env.HOME}}{% endraw %}/.config/claude"
+FZF_DEFAULT_OPTS = "--height=40%"
 # Where agent workflows (SAW) create git worktrees. Zed's per-repo default
 # ("../worktrees" relative to the repo) resolves to the same root for repos
 # living in ~/Desktop, so both tools share one worktree tree.
-SAW_WORKTREE_ROOT = "{{env.HOME}}/Desktop/worktrees"
-_.file = "~/.config/mise/secrets.env"
+SAW_WORKTREE_ROOT = "{% raw %}{{env.HOME}}{% endraw %}/Desktop/worktrees"
+
+# {{ profile | capitalize }} profile secrets, from the vault.
+GH_TOKEN = "{{ gh_token }}"
 
 # Global tools. The Node-based language servers + formatters here are consumed
 # by Neovim (the `neovim` role enables them via the native vim.lsp API and

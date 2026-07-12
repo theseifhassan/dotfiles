@@ -1,5 +1,5 @@
 ---
-# roles/dmg/tasks/install.yml
+# roles/apps/tasks/dmg-install.yml
 # Generic "install a .app from an official DMG" routine. Included once per app
 # by main.yml with these vars:
 #   dmg_name  : human-readable app name (used in task names + temp paths)

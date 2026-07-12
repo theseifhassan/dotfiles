@@ -16,20 +16,12 @@
     - "{{ xdg_config_home }}/claude"
     - "{{ xdg_config_home }}/claude/skills"
     - "{{ xdg_config_home }}/claude/hooks"
-    - "{{ xdg_config_home }}/claudius"
-
-- name: Share global skills with claudius (work instance)
-  ansible.builtin.file:
-    src: "{{ xdg_config_home }}/claude/skills"
-    dest: "{{ xdg_config_home }}/claudius/skills"
-    state: link
-    force: true
 
 # Opens freshly created git worktrees in Zed so they register as workspaces
-# (Zed's threads UI only offers open workspaces). One script, shared by both
-# instances; it guards for Zed/GUI availability itself, so deploying it on
-# machines without Zed is harmless. Deployed as a copy — playbooks may run
-# from throwaway worktrees, and a symlink into one would dangle after reap.
+# (Zed's threads UI only offers open workspaces). It guards for Zed/GUI
+# availability itself, so deploying it on machines without Zed is harmless.
+# Deployed as a copy — playbooks may run from throwaway worktrees, and a
+# symlink into one would dangle after reap.
 - name: Deploy worktree-open hook script
   ansible.builtin.copy:
     src: "{{ role_path }}/files/open-worktree-in-zed"
@@ -43,10 +35,10 @@
 # The write is atomic (temp file + rename) so an interrupted run can't
 # truncate the live settings; an unparseable settings file fails loudly with
 # its path rather than being clobbered.
-- name: Register worktree-open hook in instance settings
+- name: Register worktree-open hook in settings
   ansible.builtin.shell:
     cmd: |
-      python3 - "{{ xdg_config_home }}/{{ item }}/settings.json" \
+      python3 - "{{ xdg_config_home }}/claude/settings.json" \
                 "{{ claude_worktree_hook }}" <<'PY'
       import json, os, sys, tempfile
 
@@ -83,39 +75,11 @@
           os.replace(tmp_path, settings_path)
           print("CHANGED")
       PY
-  loop:
-    - claude
-    - claudius
   register: claude_hook_registration
   changed_when: "'CHANGED' in claude_hook_registration.stdout"
 
-- name: Deploy Claude Code shell config
-  ansible.builtin.copy:
-    content: |
-      export CLAUDE_CONFIG_DIR="{{ xdg_config_home }}/claude"
-
-      # Corporate persona: Claude Code against the isolated work (Team plan) config.
-      claudius() { CLAUDE_CONFIG_DIR="{{ xdg_config_home }}/claudius" command claude "$@" }
-
-      # Guardrail: personal claude summoned in a work repo (project not yet
-      # stamped with the work CLAUDE_CONFIG_DIR) offers to hand off to claudius.
-      # Work detection mirrors `mise run init`: the work.github.com remote alias.
-      claude() {
-        if [[ -t 0 && -t 1 && "$CLAUDE_CONFIG_DIR" != "{{ xdg_config_home }}/claudius" ]]; then
-          local url="$(git remote get-url origin 2>/dev/null)"
-          [[ -z "$url" ]] && url="$(git config --get-regexp 'remote\..*\.url' 2>/dev/null | head -n1 | awk '{print $2}')"
-          if [[ "$url" == *work.github.com* ]]; then
-            print -n "You're running claude in a work project, did you mean to run claudius? [Y/n] "
-            local key=""
-            read -k 1 key
-            [[ "$key" == $'\n' ]] || print
-            if [[ "$key" != [nN] ]]; then
-              claudius "$@"
-              return
-            fi
-          fi
-        fi
-        command claude "$@"
-      }
-    dest: "{{ xdg_config_home }}/zsh/conf.d/claude-code.zsh"
-    mode: "0644"
+# CLAUDE_CONFIG_DIR moved to the global mise [env] — mise owns all env vars.
+- name: Remove retired Claude Code shell config
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/zsh/conf.d/claude-code.zsh"
+    state: absent

@@ -1,6 +1,7 @@
 ---
-# group_vars/all.yml
-# Shared variables for all roles in the Modular Dotfiles System.
+# group_vars/all/vars.yml
+# Shared variables for all machines. Profile-specific values (identity,
+# tokens, become password) live in group_vars/personal and group_vars/work.
 # This file contains ONLY references and configuration — no secrets or tokens.
 
 xdg_config_home: "{{ ansible_facts['user_dir'] }}/.config"
@@ -8,42 +9,17 @@ xdg_data_home: "{{ ansible_facts['user_dir'] }}/.local/share"
 xdg_cache_home: "{{ ansible_facts['user_dir'] }}/.cache"
 xdg_state_home: "{{ ansible_facts['user_dir'] }}/.local/state"
 
-# Privilege escalation for become tasks (the tailscale/server roles run some
-# steps as root). Pulled from the vault so a single --ask-vault-pass run also
-# satisfies sudo — no separate --ask-become-pass prompt needed.
-ansible_become_password: "{{ vault_sudo_password }}"
-
-git_identity:
-  work:
-    name: "Seif Hassan"
-    email: "seif@skydeo.com"
-    signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILWCQt7l1XK5FGHMWPa1wpu9OjHUBYTg/NAJYggHLsXT"
-    signing_format: "ssh"
-  personal:
-    name: "Seif Hassan"
-    email: "theseifhassan@gmail.com"
-    signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPalbjJuNDXybI6YhqhYTbXT4Jc+wLUH2PYoTIJ8YPH5"
-    signing_format: "ssh"
-
-# Git applies the work identity to any repo whose remote URL matches one of
-# these globs (via `includeIf "hasconfig:remote.*.url:..."`). This keys off the
-# work SSH host alias, so work repos are detected regardless of folder or name.
-# Add more patterns here if work repos use other hosts/orgs (e.g. an https org
-# remote like "https://github.com/skydeo/**").
-git_work_remote_globs:
-  - "git@work.github.com:**"
-
+# Private repo under the personal account. Cloned on the controller (the mini)
+# and pushed to targets by the fonts role, so no personal credential is ever
+# needed on the work machine.
 fonts_repo: "git@github.com:theseifhassan/fonts.git"
 # Optional overrides (defaults shown):
 # fonts_repo_branch: "master"
 # fonts_repo_force_update: false
 
+# Each machine talks to GitHub with its own profile's key — no host aliases.
 ssh_hosts:
-  - host: "work.github.com"
-    hostname: "github.com"
-    user: "git"
-    identity_key: "work"
   - host: "github.com"
     hostname: "github.com"
     user: "git"
-    identity_key: "personal"
+    identity_key: "{{ profile }}"
