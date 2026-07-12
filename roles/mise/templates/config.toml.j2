@@ -7,6 +7,10 @@
 # on (XDG_*, ZDOTDIR in ~/.zshenv) — everything else belongs in [env].
 
 [env]
+# User-installed binaries (claude, tmux-sessionizer). PATH entries are env
+# too — mise owns them; nothing else on these machines manages ~/.local/bin.
+_.path = ["{% raw %}{{env.HOME}}{% endraw %}/.local/bin"]
+
 EDITOR = "nvim"
 VISUAL = "nvim"
 CLAUDE_CONFIG_DIR = "{% raw %}{{env.HOME}}{% endraw %}/.config/claude"
