@@ -6,7 +6,7 @@ profile: personal
 
 # Pulled from the vault so a single --ask-vault-pass run also satisfies sudo
 # (the tailscale role runs some steps as root).
-ansible_become_password: "{{ vault_sudo_password }}"
+ansible_become_password: "{{ vault_sudo_password.personal }}"
 
 git_identity:
   name: "Seif Hassan"
@@ -14,5 +14,5 @@ git_identity:
   signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPalbjJuNDXybI6YhqhYTbXT4Jc+wLUH2PYoTIJ8YPH5"
   signing_format: "ssh"
 
-gh_token: "{{ vault_gh_token_personal }}"
-graphite_token: "{{ vault_graphite_tokens.personal }}"
+gh_token: "{{ vault_gh_token.personal }}"
+graphite_token: "{{ vault_graphite_token.personal }}"

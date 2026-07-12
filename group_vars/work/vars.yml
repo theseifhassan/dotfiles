@@ -5,13 +5,13 @@
 #
 # One-time vault additions this profile depends on (ansible-vault edit
 # group_vars/all/vault.yml):
-#   vault_sudo_password_work  — the MacBook's sudo password
-#   vault_gh_token_work       — GitHub token for the work account
-# (vault_graphite_tokens.work and vault_ssh_keys.work already exist.)
+#   vault_sudo_password.work  — the MacBook's sudo password
+#   vault_gh_token.work       — GitHub token for the work account
+# (vault_graphite_token.work and vault_ssh_key.work already exist.)
 
 profile: work
 
-ansible_become_password: "{{ vault_sudo_password_work }}"
+ansible_become_password: "{{ vault_sudo_password.work }}"
 
 git_identity:
   name: "Seif Hassan"
@@ -19,5 +19,5 @@ git_identity:
   signing_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILWCQt7l1XK5FGHMWPa1wpu9OjHUBYTg/NAJYggHLsXT"
   signing_format: "ssh"
 
-gh_token: "{{ vault_gh_token_work }}"
-graphite_token: "{{ vault_graphite_tokens.work }}"
+gh_token: "{{ vault_gh_token.work }}"
+graphite_token: "{{ vault_graphite_token.work }}"
