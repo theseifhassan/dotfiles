@@ -60,7 +60,7 @@ separate `--ask-become-pass`).
 
 | Role | What it does |
 |------|-------------|
-| ssh | Profile SSH key from the vault; SSH config with the peer machine pinned to its tailnet IP; authorizes the peer profile's key and ensures Remote Login — no machine keys |
+| ssh | The machine's GitHub key (`~/.ssh/id_ed25519_github`, material per profile from the vault); SSH config with the peer machine pinned to its tailnet IP; authorizes the peer profile's key and ensures Remote Login — no machine keys |
 | git | Git config with the machine's single profile identity; GitHub CLI + Graphite CLI |
 | zsh | Zsh config under `ZDOTDIR` (vi mode + native prompt) |
 | mise | Per-project tool/env management; renders profile secrets |
