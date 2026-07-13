@@ -1,9 +1,9 @@
 ---
 # roles/ssh/tasks/main.yml
 # Provisions SSH keys from Ansible Vault and deploys the SSH config. Each
-# machine gets ONLY its profile's key (one profile per machine) — the vault
-# may hold every profile's keys, but cross-profile credentials never land on
-# a machine. Inter-machine SSH is authenticated by Tailscale SSH (tailnet
+# machine gets ONLY its profile's key material, deployed as id_ed25519_github
+# (one profile per machine — the vault holds both profiles' keys, but
+# cross-profile credentials never land on a machine). Inter-machine SSH is authenticated by Tailscale SSH (tailnet
 # identity, no key files), so there are no per-machine keys.
 
 - name: Create SSH directory
@@ -12,18 +12,32 @@
     state: directory
     mode: "0700"
 
-- name: Provision profile SSH private key
+# One key file per machine, named for its job — the profile only selects
+# which vault material lands in it.
+- name: Provision GitHub SSH private key
   ansible.builtin.copy:
     content: "{{ vault_ssh_key[profile].private_key }}\n"
-    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ profile }}"
+    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_github"
     mode: "0600"
   no_log: true
 
-- name: Provision profile SSH public key
+- name: Provision GitHub SSH public key
   ansible.builtin.copy:
     content: "{{ vault_ssh_key[profile].public_key }}\n"
-    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_{{ profile }}.pub"
+    dest: "{{ ansible_facts['user_dir'] }}/.ssh/id_ed25519_github.pub"
     mode: "0644"
+
+# Dual-profile-era filenames (the profile qualifier disambiguated two keys
+# on one machine; obsolete since #71/#88).
+- name: Remove retired per-profile key files
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.ssh/{{ item }}"
+    state: absent
+  loop:
+    - id_ed25519_personal
+    - id_ed25519_personal.pub
+    - id_ed25519_work
+    - id_ed25519_work.pub
 
 - name: Deploy SSH config
   ansible.builtin.template:
