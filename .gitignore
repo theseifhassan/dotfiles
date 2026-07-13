@@ -1,6 +1,2 @@
 .mise.toml
 .ansible_fact_cache/
-
-# vim.pack writes this lockfile into the (symlinked) nvim config dir at runtime;
-# tracking it would dirty the repo on every plugin update.
-roles/neovim/files/nvim/nvim-pack-lock.json

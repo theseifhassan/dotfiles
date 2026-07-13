@@ -23,12 +23,11 @@ SAW_WORKTREE_ROOT = "{% raw %}{{env.HOME}}{% endraw %}/Desktop/worktrees"
 # {{ profile | capitalize }} profile secrets, from the vault.
 GH_TOKEN = "{{ gh_token }}"
 
-# Global tools. The Node-based language servers + formatters here are consumed
-# by Neovim (the `neovim` role enables them via the native vim.lsp API and
-# conform.nvim). They live in the global mise config — rather than being
-# installed imperatively — so the declaration is version-controlled and `mise
-# install` realizes them without rewriting this file. `node` provides the
-# runtime for mise's npm backend.
+# Global tools. `node` also provides the runtime for the npm-backed language
+# servers Neovim's Mason installs (see the `neovim` role). Declared here —
+# rather than installed imperatively — so the declaration is
+# version-controlled and `mise install` realizes it without rewriting the
+# deployed file.
 [tools]
 node = "lts"
 pnpm = "latest"
