@@ -14,9 +14,10 @@ Both machines run the same `site.yml` role list. Profile differences (git
 identity, tokens, app picks) live in `group_vars/personal/` and
 `group_vars/work/`; the inventory decides which machine is which. Both join
 the tailnet, and either can SSH to the other from anywhere: the tailnet is
-the encrypted network, auth is sshd + the peer profile's key (Tailscale SSH
-stays enabled but its macOS server is currently broken upstream —
-tailscale/tailscale#18957 — and takes over automatically once fixed).
+the encrypted network, auth is sshd + the peer profile's key. Tailscale SSH
+is deliberately OFF — its macOS server is broken upstream
+(tailscale/tailscale#18957), and with the pref on, tailscaled claims tailnet
+port 22 and blackholes it. Re-enable via `tailscale_ssh` once fixed.
 
 ## Quick Start
 

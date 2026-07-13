@@ -1,12 +1,16 @@
 ---
 # roles/tailscale/defaults/main.yml
-# Tailscale joins every machine to the tailnet. Every machine advertises
-# Tailscale SSH, so any machine can SSH to any other in either direction.
+# Tailscale joins every machine to the tailnet — the encrypted network for
+# inter-machine SSH. Auth is plain sshd + profile keys (see the ssh role):
+# Tailscale SSH stays OFF.
 
-# Enable Tailscale SSH (host acts as an SSH target authenticated by the
-# tailnet — no separate sshd key management needed). On everywhere: free
-# SSH between the machines is the point of the shared tailnet.
-tailscale_ssh: true
+# Tailscale SSH is broken in the macOS Homebrew build
+# (tailscale/tailscale#18957) — and worse than useless: with the pref on,
+# tailscaled claims port 22 on the tailnet interface and the dead server
+# refuses everything, so sshd never sees tailnet traffic. Keep this false
+# until the upstream fix ships AND verifiably serves; the role converges
+# the pref on running nodes either way.
+tailscale_ssh: false
 
 # Accept subnet routes advertised by other nodes.
 tailscale_accept_routes: true
