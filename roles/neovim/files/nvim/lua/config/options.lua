@@ -1,6 +1,11 @@
 -- Options — loaded before lazy.nvim startup, on top of LazyVim's defaults
 -- (which already cover relativenumber, 2-space indent, ignorecase/smartcase,
 -- undofile, system clipboard, splits right/below, termguicolors, ...).
+
+-- Telescope as the picker (LazyVim auto-imports the editor.telescope extra
+-- for it) instead of the snacks picker default.
+vim.g.lazyvim_picker = "telescope"
+
 local o = vim.opt
 
 o.colorcolumn = "80"

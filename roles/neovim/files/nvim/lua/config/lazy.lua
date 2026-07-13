@@ -25,7 +25,8 @@ require("lazy").setup({
 		{ import = "lazyvim.plugins.extras.lang.markdown" }, -- marksman
 		{ import = "lazyvim.plugins.extras.linting.eslint" },
 		{ import = "lazyvim.plugins.extras.editor.harpoon2" },
-		{ import = "lazyvim.plugins.extras.coding.mini-surround" }, -- gsa/gsd/gsr
+		-- The picker (telescope) is auto-imported via vim.g.lazyvim_picker in
+		-- config/options.lua; surround is tpope/vim-surround in plugins/editor.lua.
 		-- Our overrides and additions.
 		{ import = "plugins" },
 	},

@@ -1,6 +1,26 @@
 -- Editor additions LazyVim doesn't ship: oil (file management as an editable
--- buffer) and undotree (visual undo history, pairs with persistent undofile).
+-- buffer), undotree (visual undo history, pairs with persistent undofile),
+-- and vim-surround (cs/ds/ys muscle memory over the mini-surround extra).
 return {
+	{
+		-- Surround edits: cs"' change, ds" delete, ysiw) add, S in visual.
+		-- ds/cs/ys are full normal-mode maps, so flash's operator-pending `s`
+		-- doesn't shadow them.
+		"tpope/vim-surround",
+	},
+	{
+		-- vim-surround owns S in visual mode; keep flash's treesitter jump on
+		-- S in normal/operator-pending only so the two don't collide.
+		"folke/flash.nvim",
+		keys = function(_, keys)
+			for _, k in ipairs(keys) do
+				if k[1] == "S" then
+					k.mode = { "n", "o" }
+				end
+			end
+			return keys
+		end,
+	},
 	{
 		-- Snacks explorer also hijacks directory opens (replace_netrw); turn
 		-- that off so oil is the only claimant. <leader>e still opens snacks
