@@ -21,3 +21,11 @@ git_identity:
 
 gh_token: "{{ vault_gh_token.work }}"
 graphite_token: "{{ vault_graphite_token.work }}"
+
+# Peer machine (see ssh_hosts in group_vars/all): reachable at its tailnet
+# IP with this machine's work key; inbound, the mini's personal key is
+# authorized.
+ssh_peer:
+  host: "macmini"
+  ip: "100.82.114.33"
+ssh_peer_authorized_key: "{{ vault_ssh_key.personal.public_key }}"

@@ -18,8 +18,17 @@ fonts_repo: "git@github.com:theseifhassan/fonts.git"
 # fonts_repo_force_update: false
 
 # Each machine talks to GitHub with its own profile's key — no host aliases.
+# The peer machine is pinned to its stable tailnet IP (ssh_peer, per profile):
+# Tailscale SSH and MagicDNS are both broken in the macOS open-source build
+# (tailscale/tailscale#18957), so the tailnet is the encrypted network and
+# plain sshd + profile keys do the auth. Tailscale SSH prefs stay on — the
+# upstream fix will simply take over port 22 when it ships.
 ssh_hosts:
   - host: "github.com"
     hostname: "github.com"
     user: "git"
+    identity_key: "{{ profile }}"
+  - host: "{{ ssh_peer.host }}"
+    hostname: "{{ ssh_peer.ip }}"
+    user: "seifhassan"
     identity_key: "{{ profile }}"
