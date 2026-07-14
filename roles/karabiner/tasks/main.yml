@@ -1,0 +1,27 @@
+---
+# roles/karabiner/tasks/main.yml
+# Installs Karabiner-Elements keyboard customizer and deploys its
+# configuration. First install on a fresh machine requires approving the
+# driver extension and granting Input Monitoring in System Settings by
+# hand — Ansible can't do that.
+
+- name: Install Karabiner-Elements
+  community.general.homebrew_cask:
+    name: karabiner-elements
+    state: present
+
+- name: Create Karabiner config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/karabiner"
+    state: directory
+    mode: "0700"
+
+# No reload handler — karabiner_console_user_server watches karabiner.json
+# and reloads on change by itself.
+- name: Deploy Karabiner config
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/karabiner.json"
+    dest: "{{ xdg_config_home }}/karabiner/karabiner.json"
+    mode: "0644"
+    force: true
+    backup: true
