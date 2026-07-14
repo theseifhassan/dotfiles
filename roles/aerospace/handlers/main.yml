@@ -1,0 +1,15 @@
+---
+# roles/aerospace/handlers/main.yml
+# AeroSpace only re-reads its config at startup or via `reload-config`, so a
+# deployed config change must be pushed to the running instance. Skips when
+# AeroSpace isn't running (fresh install: the app can't run until the
+# accessibility permission is granted by hand); fails loudly if a running
+# instance rejects the new config.
+
+- name: Reload AeroSpace config
+  ansible.builtin.shell: |
+    if pgrep -xq AeroSpace; then
+      exec aerospace reload-config
+    fi
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
