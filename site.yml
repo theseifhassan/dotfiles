@@ -77,6 +77,11 @@
     - role: zed
       tags: [zed]
 
+    # Tiling window manager. First launch on a fresh machine needs the
+    # macOS accessibility permission granted by hand.
+    - role: aerospace
+      tags: [aerospace]
+
     # Per-app installs — GUI casks (chrome, notion, figma, linear, datagrip,
     # 1password), official-DMG apps (wisprflow, raycast, alcove), and dev
     # CLIs (lazygit, ripgrep, gcloud, gws) on both; slack + gather work-only,

@@ -1,0 +1,89 @@
+# AeroSpace — i3-style tiling window manager for macOS.
+# Reference: https://nikitabobko.github.io/AeroSpace/guide
+# Adapted from https://github.com/omerxx/dotfiles/blob/master/aerospace/aerospace.toml
+# with the sketchybar/borders callbacks, app launchers, floating rules, and
+# monitor assignments stripped (single monitor, no companion tools).
+
+start-at-login = true
+
+# Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+# Padding of the collapsed windows on either side of the accordion layout.
+accordion-padding = 30
+
+default-root-container-layout = 'tiles'
+
+# 'auto': wide monitor gets horizontal orientation, tall gets vertical.
+default-root-container-orientation = 'auto'
+
+automatically-unhide-macos-hidden-apps = false
+
+[key-mapping]
+preset = 'qwerty'
+
+[gaps]
+inner.horizontal = 8
+inner.vertical = 8
+outer.left = 8
+outer.bottom = 8
+outer.top = 8
+outer.right = 8
+
+[mode.main.binding]
+
+alt-ctrl-shift-f = 'fullscreen'
+alt-ctrl-f = 'layout floating tiling'
+
+alt-shift-left = 'join-with left'
+alt-shift-down = 'join-with down'
+alt-shift-up = 'join-with up'
+alt-shift-right = 'join-with right'
+
+alt-slash = 'layout tiles horizontal vertical'
+alt-comma = 'layout accordion horizontal vertical'
+
+alt-h = 'focus left'
+alt-j = 'focus down'
+alt-k = 'focus up'
+alt-l = 'focus right'
+
+alt-shift-h = 'move left'
+alt-shift-j = 'move down'
+alt-shift-k = 'move up'
+alt-shift-l = 'move right'
+
+alt-shift-minus = 'resize smart -50'
+alt-shift-equal = 'resize smart +50'
+
+alt-1 = 'workspace 1'
+alt-2 = 'workspace 2'
+alt-3 = 'workspace 3'
+alt-4 = 'workspace 4'
+alt-5 = 'workspace 5'
+alt-6 = 'workspace 6'
+alt-7 = 'workspace 7'
+alt-8 = 'workspace 8'
+alt-9 = 'workspace 9'
+
+alt-shift-1 = 'move-node-to-workspace 1 --focus-follows-window'
+alt-shift-2 = 'move-node-to-workspace 2 --focus-follows-window'
+alt-shift-3 = 'move-node-to-workspace 3 --focus-follows-window'
+alt-shift-4 = 'move-node-to-workspace 4 --focus-follows-window'
+alt-shift-5 = 'move-node-to-workspace 5 --focus-follows-window'
+alt-shift-6 = 'move-node-to-workspace 6 --focus-follows-window'
+alt-shift-7 = 'move-node-to-workspace 7 --focus-follows-window'
+alt-shift-8 = 'move-node-to-workspace 8 --focus-follows-window'
+alt-shift-9 = 'move-node-to-workspace 9 --focus-follows-window'
+
+alt-tab = 'workspace-back-and-forth'
+
+alt-shift-semicolon = 'mode service'
+
+# Service mode — occasional operations kept off the main layer.
+[mode.service.binding]
+esc = ['reload-config', 'mode main']
+r = ['flatten-workspace-tree', 'mode main'] # reset layout
+f = ['layout floating tiling', 'mode main'] # toggle floating/tiling
+backspace = ['close-all-windows-but-current', 'mode main']
