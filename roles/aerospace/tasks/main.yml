@@ -1,0 +1,30 @@
+---
+# roles/aerospace/tasks/main.yml
+# Installs AeroSpace tiling window manager and deploys its configuration.
+# First launch on a fresh machine requires granting the macOS accessibility
+# permission by hand — Ansible can't do that.
+
+- name: Tap nikitabobko/tap Homebrew repository
+  community.general.homebrew_tap:
+    name: nikitabobko/tap
+    state: present
+
+- name: Install AeroSpace
+  community.general.homebrew_cask:
+    name: nikitabobko/tap/aerospace
+    state: present
+
+- name: Create AeroSpace config directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/aerospace"
+    state: directory
+    mode: "0700"
+
+- name: Deploy AeroSpace config
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/aerospace.toml"
+    dest: "{{ xdg_config_home }}/aerospace/aerospace.toml"
+    mode: "0644"
+    force: true
+    backup: true
+  notify: Reload AeroSpace config
