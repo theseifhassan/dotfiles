@@ -20,7 +20,9 @@
     mode: "0700"
 
 # No reload handler — karabiner_console_user_server watches karabiner.json
-# and reloads on change by itself.
+# and reloads on change by itself. The devices section opts the Adv360 Pro
+# in explicitly: it declares itself keyboard+pointing device (ZMK mouse
+# keys), and Karabiner ignores pointing devices by default.
 - name: Deploy Karabiner config
   ansible.builtin.copy:
     src: "{{ role_path }}/files/karabiner.json"
