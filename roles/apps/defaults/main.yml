@@ -4,3 +4,7 @@
 # cask). Unlike Gather/Wispr Flow (which fetch a "latest" URL), this is pinned
 # to a specific build — bump it to upgrade, then delete the old app and re-run.
 raycast_dmg_url: "https://x-r2.raycast-releases.com/Raycast_Beta_0.65.1.0_66eacbc22e_arm64.dmg"
+
+# Retired Claude Code hook script path — kept so the removal task can strip
+# the exact command it used to register in settings.json.
+claude_worktree_hook: "{{ xdg_config_home }}/claude/hooks/open-worktree-in-zed"
