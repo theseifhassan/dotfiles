@@ -1,31 +1,26 @@
 ---
 # roles/neovim/tasks/main.yml
-# Installs Neovim (0.12+) and our owned config, plus the language servers and
-# formatters the config enables. We deliberately do NOT use Mason — standalone
-# binaries come from Homebrew, and the Node-based servers are declared in the
-# mise global config (see the `mise` role's config.toml) and realized here with
-# `mise install`. Neovim wires them up with the native vim.lsp API. Server
-# profile only.
+# Installs Neovim and the LazyVim-based config, then does LazyVim's first-launch
+# work (plugin restore + Mason installs) headlessly so a completed run yields a
+# working editor without an interactive, networked first launch. Server profile
+# only.
 
 - name: Install Neovim
   community.general.homebrew:
     name: neovim
     state: latest
 
-- name: Install Neovim toolchain + standalone language servers (brew)
+- name: Install Neovim external tools (brew)
   community.general.homebrew:
     name:
       - tree-sitter-cli # `tree-sitter` CLI to compile parsers (nvim-treesitter main); NOT the lib-only `tree-sitter` formula
-      - lua-language-server # lua_ls
-      - marksman # markdown LSP
-      - stylua # lua formatter
+      - fd # file-finder backend for LazyVim's pickers (ripgrep comes from the apps role)
     state: present
 
-# Realize the global mise tools (node + the Node-based language servers and
-# formatters declared in the mise role's config.toml). `mise install` is
-# idempotent and, unlike `mise use`, does NOT rewrite the (symlinked, tracked)
-# config file.
-- name: Install global mise tools (Node language servers + formatters)
+# Node runtime for Mason's npm-backed servers (vtsls, yamlls, ...), declared
+# in the mise role's config template and realized here. `mise install` is
+# idempotent and does NOT rewrite the deployed config file.
+- name: Install global mise tools (Node runtime for Mason)
   ansible.builtin.command:
     cmd: mise install
   register: mise_install
@@ -53,3 +48,30 @@
     dest: "{{ xdg_config_home }}/nvim/"
     delete: true
     recursive: true
+
+# Converges the plugin tree on the committed lazy-lock.json; no-op when
+# already in sync, hence changed_when false. Needs network on first run.
+- name: Restore LazyVim plugins to the committed lockfile
+  ansible.builtin.command:
+    cmd: nvim --headless "+Lazy! restore" +qa
+  changed_when: false
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+# Mason installs synchronously when Neovim is headless. The package list
+# mirrors what the config expects: LazyVim core (stylua, shfmt), the extras in
+# lua/config/lazy.lua (vtsls, json-lsp, yaml-language-server, marksman,
+# markdownlint-cli2, markdown-toc, eslint-lsp), lua_ls, and the formatters in
+# lua/plugins/formatting.lua (biome, prettierd). Guarded by a sentinel binary
+# so it runs once — delete ~/.local/share/nvim/mason to force a reinstall.
+- name: Install Mason tools (language servers + formatters)
+  ansible.builtin.command:
+    cmd: >-
+      nvim --headless
+      "+MasonInstall lua-language-server vtsls json-lsp yaml-language-server
+      marksman eslint-lsp stylua shfmt biome prettierd markdownlint-cli2
+      markdown-toc"
+      +qa
+    creates: "{{ xdg_data_home }}/nvim/mason/bin/vtsls"
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"

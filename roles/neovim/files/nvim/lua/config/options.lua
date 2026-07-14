@@ -1,42 +1,18 @@
--- Editor options.
+-- Options — loaded before lazy.nvim startup, on top of LazyVim's defaults
+-- (which already cover relativenumber, 2-space indent, ignorecase/smartcase,
+-- undofile, system clipboard, splits right/below, termguicolors, ...).
+
+-- Telescope as the picker (LazyVim auto-imports the editor.telescope extra
+-- for it) instead of the snacks picker default.
+vim.g.lazyvim_picker = "telescope"
+
 local o = vim.opt
 
-o.number = true
-o.relativenumber = true
-o.signcolumn = "yes"
-o.cursorline = true
 o.colorcolumn = "80"
-o.scrolloff = 8
-o.wrap = false
+o.scrolloff = 8 -- LazyVim defaults to 4
+o.swapfile = false -- undofile (on by default) covers recovery
 
--- Indentation: 2 spaces (ts/js/yaml/md/lua).
-o.expandtab = true
-o.shiftwidth = 2
-o.tabstop = 2
-o.softtabstop = 2
-o.smartindent = true
-
--- Search.
-o.ignorecase = true
-o.smartcase = true
-o.hlsearch = true
-o.incsearch = true
-
--- Behaviour.
-o.undofile = true
-o.swapfile = false
+-- LazyVim disables clipboard sync in SSH sessions (SSH_CONNECTION check), but
+-- this config runs on the server over SSH — force it; Neovim's built-in OSC52
+-- support carries yanks back to the client's clipboard.
 o.clipboard = "unnamedplus"
-o.mouse = "a"
-o.splitright = true
-o.splitbelow = true
-o.termguicolors = true
-o.updatetime = 250
-o.timeoutlen = 400
-o.confirm = true
-
--- Floating-window borders for hover / signature / diagnostics (0.11+).
-o.winborder = "rounded"
-
--- Native completion (Neovim 0.12) — driven by the LSP, no completion plugin.
-o.completeopt = "menu,menuone,noselect,fuzzy,popup"
-o.pumheight = 12

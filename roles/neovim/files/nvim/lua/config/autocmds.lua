@@ -1,0 +1,2 @@
+-- Autocmds — loaded on VeryLazy, on top of LazyVim's defaults
+-- (https://www.lazyvim.org/configuration/general#auto-commands).
