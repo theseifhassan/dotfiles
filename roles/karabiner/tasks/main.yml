@@ -5,10 +5,13 @@
 # driver extension and granting Input Monitoring in System Settings by
 # hand — Ansible can't do that.
 
+# Ships as a .pkg, so brew shells out to `sudo installer` — feed it the
+# become password (same as droidcam-obs in the obs role).
 - name: Install Karabiner-Elements
   community.general.homebrew_cask:
     name: karabiner-elements
     state: present
+    sudo_password: "{{ ansible_become_password }}"
 
 - name: Create Karabiner config directory
   ansible.builtin.file:
