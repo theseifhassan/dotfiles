@@ -14,7 +14,7 @@
 #   ansible-playbook site.yml --ask-vault-pass                 # both machines
 #   ansible-playbook site.yml --limit personal --ask-vault-pass
 #   ansible-playbook site.yml --limit work --ask-vault-pass
-#   ansible-playbook site.yml -t claude --ask-vault-pass       # one role
+#   ansible-playbook site.yml -t tmux --ask-vault-pass         # one role
 # Or: ./bootstrap.sh (first-time controller setup, limits to this machine).
 #
 # Roles that touch system settings need sudo; ansible_become_password is wired
@@ -71,17 +71,14 @@
     - role: neovim
       tags: [neovim]
 
-    - role: claude
-      tags: [claude]
-
     - role: zed
       tags: [zed]
 
     # Per-app installs — GUI casks (chrome, notion, figma, linear, datagrip,
     # 1password), official-DMG apps (wisprflow, raycast, alcove), and dev
-    # CLIs (lazygit, ripgrep, gcloud, gws) on both; slack + gather work-only,
-    # discord personal-only. Each task is individually tagged, so `-t slack`
-    # still targets one app; `-t apps` runs them all.
+    # CLIs (claude, lazygit, ripgrep, gcloud, gws) on both; slack + gather
+    # work-only, discord personal-only. Each task is individually tagged, so
+    # `-t slack` still targets one app; `-t apps` runs them all.
     - role: apps
       tags: [apps]
 

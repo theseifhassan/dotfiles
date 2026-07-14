@@ -114,6 +114,25 @@
 
 # --- Developer CLIs ---------------------------------------------------------
 
+# Claude Code ships via its own curl installer (no cask/DMG). settings.json
+# is hand-managed (models, plugins, notification prefs) and CLAUDE_CONFIG_DIR
+# lives in the global mise [env], so install + config dirs is all there is.
+- name: Install Claude Code
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://claude.ai/install.sh | bash
+  changed_when: true
+  tags: [apps, claude]
+
+- name: Create Claude Code directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - "{{ xdg_config_home }}/claude"
+    - "{{ xdg_config_home }}/claude/skills"
+  tags: [apps, claude]
+
 - name: Install Lazygit
   community.general.homebrew:
     name: lazygit
@@ -149,3 +168,76 @@
     - gws.zsh
     - gcloud.zsh
   tags: [apps]
+
+# The Claude Code worktree-open hook is retired: hooks are no longer attached
+# to Claude. settings.json is otherwise hand-managed, so the entry the old
+# claude role used to own is stripped rather than the file being templated:
+# only hook commands pointing at the retired script are removed, everything
+# else is preserved, and empty hook containers left behind are pruned. The
+# write is atomic (temp file + rename) so an interrupted run can't truncate
+# the live settings; an unparseable settings file fails loudly with its path
+# rather than being clobbered.
+- name: Remove retired Claude Code worktree-open hook from settings
+  ansible.builtin.shell:
+    cmd: |
+      python3 - "{{ xdg_config_home }}/claude/settings.json" \
+                "{{ claude_worktree_hook }}" <<'PY'
+      import json, os, sys, tempfile
+
+      settings_path, hook_command = sys.argv[1], sys.argv[2]
+      if not os.path.exists(settings_path):
+          print("OK")
+          sys.exit(0)
+      try:
+          with open(settings_path) as f:
+              settings = json.load(f)
+      except (json.JSONDecodeError, UnicodeDecodeError) as err:
+          sys.stderr.write(
+              f"refusing to touch {settings_path}: not valid JSON ({err}); "
+              "fix or remove the file, then re-run\n"
+          )
+          sys.exit(1)
+
+      changed = False
+      matchers = settings.get("hooks", {}).get("PostToolUse", [])
+      for entry in matchers:
+          commands = entry.get("hooks", [])
+          kept = [h for h in commands if h.get("command") != hook_command]
+          if len(kept) != len(commands):
+              entry["hooks"] = kept
+              changed = True
+      if changed:
+          matchers = [m for m in matchers if m.get("hooks")]
+          if matchers:
+              settings["hooks"]["PostToolUse"] = matchers
+          else:
+              settings["hooks"].pop("PostToolUse", None)
+          if not settings["hooks"]:
+              settings.pop("hooks")
+          fd, tmp_path = tempfile.mkstemp(
+              dir=os.path.dirname(settings_path) or ".", suffix=".tmp"
+          )
+          with os.fdopen(fd, "w") as f:
+              json.dump(settings, f, indent=2)
+              f.write("\n")
+          os.replace(tmp_path, settings_path)
+          print("CHANGED")
+      else:
+          print("OK")
+      PY
+  register: claude_hook_removal
+  changed_when: "'CHANGED' in claude_hook_removal.stdout"
+  tags: [apps, claude]
+
+- name: Remove retired Claude Code hooks directory
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/claude/hooks"
+    state: absent
+  tags: [apps, claude]
+
+# CLAUDE_CONFIG_DIR moved to the global mise [env] — mise owns all env vars.
+- name: Remove retired Claude Code shell config
+  ansible.builtin.file:
+    path: "{{ xdg_config_home }}/zsh/conf.d/claude-code.zsh"
+    state: absent
+  tags: [apps, claude]
