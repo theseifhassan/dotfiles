@@ -2,10 +2,19 @@
 # tmux-sessionizer — based on ThePrimeagen's script
 # Opens or switches to a tmux session rooted at the selected project directory.
 
+# Directories fzf searches for projects; each entry is listed one level deep.
+# The worktrees glob expands to each project's worktree dir, so individual
+# worktree checkouts (~/Desktop/worktrees/{project}/{branch}) are offered.
+search_paths=(
+    "$HOME/Desktop"
+    "$HOME/Desktop/worktrees"/*
+)
+
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(find ~/Desktop/worktrees -mindepth 2 -maxdepth 2 -type d 2>/dev/null | fzf)
+    selected=$(find "${search_paths[@]}" -mindepth 1 -maxdepth 1 -type d \
+        -not -path "$HOME/Desktop/worktrees" 2>/dev/null | fzf)
 fi
 
 if [[ -z $selected ]]; then
