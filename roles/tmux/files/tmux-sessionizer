@@ -5,10 +5,14 @@
 # Directories fzf searches for projects; each entry is listed one level deep.
 # The worktrees glob expands to each project's worktree dir, so individual
 # worktree checkouts (~/Desktop/worktrees/{project}/{branch}) are offered.
+# nullglob keeps a missing/empty worktrees dir from passing a literal glob
+# to find; dotglob keeps dot-prefixed projects visible.
+shopt -s nullglob dotglob
 search_paths=(
     "$HOME/Desktop"
     "$HOME/Desktop/worktrees"/*
 )
+shopt -u nullglob dotglob
 
 if [[ $# -eq 1 ]]; then
     selected=$1
@@ -21,9 +25,14 @@ if [[ -z $selected ]]; then
     exit 0
 fi
 
-# Name the session "{project}/{worktree}" so worktrees of different projects
-# (e.g. two "main" worktrees) don't collide.
-selected_name=$(basename "$(dirname "$selected")")/$(basename "$selected")
+# Worktree checkouts are named "{project}/{worktree}" so worktrees of
+# different projects (e.g. two "main" worktrees) don't collide; anything
+# else gets its bare directory name.
+if [[ $selected == "$HOME/Desktop/worktrees/"* ]]; then
+    selected_name=$(basename "$(dirname "$selected")")/$(basename "$selected")
+else
+    selected_name=$(basename "$selected")
+fi
 selected_name=$(echo "$selected_name" | tr . _)
 tmux_running=$(pgrep -x tmux)
 

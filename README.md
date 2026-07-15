@@ -94,7 +94,7 @@ Personal-only — Discord, OBS.
 
 ## tmux-sessionizer
 
-Based on [ThePrimeagen's script](https://github.com/ThePrimeagen/.dotfiles). Searches `~/Desktop` and `~/Documents` for project directories, then creates or switches to a named tmux session rooted at the selected directory.
+Based on [ThePrimeagen's script](https://github.com/ThePrimeagen/.dotfiles). Searches `~/Desktop` for project directories and `~/Desktop/worktrees/{project}` for individual worktree checkouts (the `search_paths` array in the script), then creates or switches to a named tmux session rooted at the selected directory. Worktree sessions are named `{project}/{worktree}`; everything else uses the bare directory name.
 
 The script is deployed to `~/.local/bin/tmux-sessionizer` and can also be called directly with a path argument:
 
