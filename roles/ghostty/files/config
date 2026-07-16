@@ -1,6 +1,11 @@
 font-family = Berkeley Mono
-font-size = 16
-
-theme = light:Atom One Light, dark:Atom One Dark
+font-size = 19
 
 macos-option-as-alt = true
+mouse-hide-while-typing = true
+
+window-decoration = false
+background-blur = true
+background-opacity = 0.8
+
+theme = light:Catppuccin Latte,dark:Catppuccin Mocha
