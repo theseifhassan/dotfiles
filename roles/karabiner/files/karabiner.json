@@ -8,6 +8,13 @@
             "devices": [
                 {
                     "identifiers": {
+                        "is_built_in_keyboard": true,
+                        "is_keyboard": true
+                    },
+                    "ignore": true
+                },
+                {
+                    "identifiers": {
                         "is_keyboard": true,
                         "is_pointing_device": true,
                         "vendor_id": 10730,
@@ -28,10 +35,21 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Option+Space also opens Spotlight (sends Cmd+Space)",
+                        "description": "Option+Space also opens Spotlight (sends Cmd+Space) — Kinesis only",
                         "manipulators": [
                             {
                                 "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "vendor_id": 10730,
+                                                "product_id": 866
+                                            }
+                                        ]
+                                    }
+                                ],
                                 "from": {
                                     "key_code": "spacebar",
                                     "modifiers": { "mandatory": ["option"] }
