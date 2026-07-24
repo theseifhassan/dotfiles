@@ -20,9 +20,13 @@
     state: directory
     mode: "0755"
 
+# Delegated to the target so the rsync runs machine-locally — otherwise the
+# controller's copy of the plugin would be pushed over SSH instead of the one
+# the cask just installed on this machine.
 - name: Copy DroidCam plugin to user plugins directory
   ansible.posix.synchronize:
     src: /Library/Application Support/obs-studio/plugins/droidcamobs.plugin/
     dest: ~/Library/Application Support/obs-studio/plugins/droidcamobs.plugin/
     delete: true
+  delegate_to: "{{ inventory_hostname }}"
   become: false
