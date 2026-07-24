@@ -8,7 +8,7 @@
 # Profile differences (git identity, tokens, app picks) live in
 # group_vars/personal and group_vars/work; the role list is identical for
 # every machine except the per-profile apps (slack/gather work-only,
-# discord/obs personal-only — guarded inside the roles).
+# discord personal-only — guarded inside the roles).
 #
 # Run from the mini:
 #   ansible-playbook site.yml --ask-vault-pass                 # both machines
@@ -93,10 +93,9 @@
     - role: apps
       tags: [apps]
 
-    # Personal-only: OBS + DroidCam plugin.
+    # OBS + DroidCam plugin.
     - role: obs
       tags: [obs]
-      when: profile == "personal"
 
     # Cloned on the controller, pushed to every machine — the repo is private
     # under the personal account and the work machine has no access to it.
